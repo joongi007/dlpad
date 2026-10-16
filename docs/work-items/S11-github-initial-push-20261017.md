@@ -1,6 +1,6 @@
 # S11: dlpad GitHub 초기 연결과 CI 실행
 
-- 상태: in-progress
+- 상태: done-scoped / hosted CI 최종 결과 대기
 - 분류: maintenance
 - 우선순위: P0
 - 요구사항: R10, R11
@@ -46,3 +46,12 @@ Git 제외 정책 적용 후 예비 목록2142파일/25,112,504바이트, 최대
 Windows Git으로 준비한 index2142파일/25,113,997바이트를 읽어 모든 blob의 원본 bytes/SHA1과100644 regular mode를 대조했다. 빌드 resource 5개·Cargo/lock/toolchain/.gitattributes 포함을 확인했다. git checkout-index로 새 /tmp 폴더에 소스만 추출했고 그 checkout에서 workflow docs job의19개 Python 명령이 실제 모두 exit0이었다. 로컬 증거·도구·계정 상태를 복사하지 않았다. 원 작업 폴더의 strict `python3 scripts/check_docs.py`도1210documents/133hash-matched notices PASS다. 최종 이 문단 추가로 파일 bytes 합은 소폭 증가하며 새 source checkout 정책·제품 runtime 변경은 없다.
 
 이제 초기 commit/push와 원격 Actions 수신을 확인한다. 원격 실행 성공을 로컬19명령 성공으로 대체하지 않으며 서명·CD·app updater는 미완료다.
+
+
+## 실제 원격 연결 결과
+
+초기 source commit `9955a95f3cbc80d5b922d73fc3414276bf7bbd2d`를 main에 만들고 Windows Git 기존 인증으로 `git push -u origin main` 실제0을 확인했다. force/tag/Release 게시0. `git status --short --branch`는 main...origin/main·변경0, remote fetch/push URL은 모두 https://github.com/joongi007/dlpad.git 이다. 공개 API의 main SHA도 같은 원 commit이었다.
+
+첫 [GitHub Actions](https://github.com/joongi007/dlpad/actions/runs/38942190611)는 event push/head9955a95/status in_progress·conclusion null로 관측했다. hosted CI의 성공은 아직 확인하지 않았다. 이 실행 기록을 남기는 docs 후속 commit은 최초 run을 대체할 수 있으며 최신 실행은 [workflow](https://github.com/joongi007/dlpad/actions/workflows/ci.yml)에서 확인한다. 원격 조회는 공개 API를 인증 없이 사용했고 credential 원문을 읽거나 출력하지 않았다.
+
+제품 source675/lock/native bytes는 whole37과 같다. 현재 작업 범위는 Git 연결·검토 source 업로드·CI 수신 확인까지 완료했으며 hosted native 최종성공·서명/CD·app updater·전체 P0 완료로 표시하지 않는다. 로컬 및 clean source checkout19명령과 기본 strict문서1210/133 PASS를 보존한다. 실제CI 실패가 확인되면 실패 stage를 기준으로 후속 수정한다.

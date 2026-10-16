@@ -4,7 +4,7 @@
 
 `.github/workflows/ci.yml`은 PR/push/수동 실행에서 문서 링크·필수 문서·Rust 도입 계약을 검사한다. manifest가 없으면 native 검증이 skip임을 요약에 남긴다. manifest 도입 시 정확한 toolchain과 lockfile을 요구하고 Windows에서 fmt/clippy/test/release build를 실행한다. Linux/macOS는 `workflow_dispatch`의 `include_other_platforms` 선택으로만 실행하며 현재 Windows 우선 개발 범위와 구분한다. 각 OS build log는 artifact로 보존한다.
 
-2026-10-17 사용자 요청으로 실제 dlpad의 빈 .git을 삭제 없이 초기화하고 origin을 https://github.com/joongi007/dlpad.git 으로 연결했다. Windows Git 기존 인증의 ls-remote는0/refs없음이었다. 초기 소스 push와 첫 hosted Actions 결과를 확인 중이다. 기존 Windows 로컬 whole37은1,685 PASS이며 원격 Actions 성공으로 대체하지 않는다. workflow 파일 존재와 실제 CI 운영 성공, 공개 CD를 구분한다.
+2026-10-17 사용자 요청으로 실제 dlpad의 빈 .git을 삭제 없이 초기화하고 origin을 https://github.com/joongi007/dlpad.git 으로 연결했다. Windows Git 기존 인증의 ls-remote는0/refs없음이었다. 초기 소스 commit `9955a95f3cbc80d5b922d73fc3414276bf7bbd2d`의 main push가 실제0으로 완료됐고 origin/main tracking·clean status와 원격 동일SHA를 확인했다. [첫 hosted Actions](https://github.com/joongi007/dlpad/actions/runs/38942190611)는 push 이벤트로 시작됐으며 이 기록 시점 in_progress/결론미정이다. 결과 기록을 위한 docs 후속 commit은 새 실행으로 갱신될 수 있으므로 [현재 Actions](https://github.com/joongi007/dlpad/actions/workflows/ci.yml)에서 최신 head를 확인한다. 기존 Windows 로컬 whole37은1,685 PASS이며 원격 Actions 성공으로 대체하지 않는다. workflow 파일 존재와 실제 CI 운영 성공, 공개 CD를 구분한다.
 
 Git에는 소스·문서·native assets·vendor·lock을 넣고 로컬 증거/ZIP/도구/cache/계정 설정을 제외한다. CI 문서 검사는 `python3 scripts/check_docs.py --source-only`를 명시한다. 이 모드는 source export의 제외 정책에 해당하는 링크만 따로 집계하며 원격에서 runtime 증거를 검증했다고 표시하지 않는다. 기본 로컬 검사는 그대로 엄격하다. [소스 checkout 계약](SOURCE-CHECKOUT.md), [초기 연결 작업](work-items/S11-github-initial-push-20261017.md).
 
