@@ -10,6 +10,10 @@ Git에는 소스·문서·native assets·vendor·lock을 넣고 로컬 증거/ZI
 
 문서 검증은 Python stdlib만 사용한다. Rust 도입 후 실행 명령은 AGENTS와 같다. 처음에는 선택된 기본 feature 구성만 테스트하고, renderer 등 feature 조합은 S00 결과에 따라 명시적 matrix로 추가한다. 무조건 `--all-features`를 사용해 상호 배타적 backend를 동시에 켜지 않는다.
 
+## 최초 hosted 실행의 실패와 수정 검증
+
+첫 docs job19명령과 Windows source/format은 실제 통과했으나 run38942396783의 Lint는125로 실패했다. 원 artifact는 Clippy 자체0·두 로그reader종료·원Job자손5초내자연종료미확인/강제정리를 기록했다. Cargo 오류로 바꾸어 설명하지 않는다. 기존 통과 로컬 CI와 같은 dev/test debug0·incremental0 설정과 상세 실패/잔류프로세스/로그 tail 출력을 추가하고 실제 새 hosted 실행에서 검증한다. 테스트 assertions·overflow·release 프로필과 자연Job종료 게이트는 유지한다. [실패 작업](work-items/S11-hosted-ci-lint-125-20261017.md).
+
 ## 목표 파이프라인
 
 | 시점 | 수행 | 결과/게이트 |

@@ -2,7 +2,7 @@
 A gated worker is bound to a kill-on-close Job before it launches cargo.
 No GUI, installation, remote authentication or clean-descendant receipt claim.
 """
-import argparse,ctypes,json,os,subprocess,sys,time,threading
+import argparse,ctypes,json,ntpath,os,subprocess,sys,time,threading
 from pathlib import Path
 from ci_whole_receipt import REQUIRED,path,publish,no_reparse,reject
 
@@ -43,6 +43,57 @@ def job_active(k,job):
         raise OSError(ctypes.get_last_error(),'original Job accounting query failed')
     return value.active
 
+def job_processes(k,job):
+    """Bounded diagnostic names from the original Job, never host-wide enumeration."""
+    from ctypes import wintypes as w
+    class PIDS(ctypes.Structure):
+        _fields_=[('assigned',w.DWORD),('listed',w.DWORD),('pids',ctypes.c_size_t*64)]
+    ids=PIDS()
+    if not k.QueryInformationJobObject(job,3,ctypes.byref(ids),ctypes.sizeof(ids),None):
+        error=ctypes.get_last_error()
+        return [{'query_error':error,'truncated':error==234}]
+    reject(ids.listed<=64,'Job diagnostic process bound')
+    k.OpenProcess.argtypes=[w.DWORD,w.BOOL,w.DWORD];k.OpenProcess.restype=w.HANDLE
+    k.IsProcessInJob.argtypes=[w.HANDLE,w.HANDLE,ctypes.POINTER(w.BOOL)];k.IsProcessInJob.restype=w.BOOL
+    k.QueryFullProcessImageNameW.argtypes=[w.HANDLE,w.DWORD,w.LPWSTR,ctypes.POINTER(w.DWORD)];k.QueryFullProcessImageNameW.restype=w.BOOL
+    result=[]
+    for pid in list(ids.pids)[:ids.listed]:
+        row={'pid':pid,'membership_confirmed':False};result.append(row)
+        process=k.OpenProcess(0x1000,False,pid)
+        if not process:
+            row['query_error']=ctypes.get_last_error();continue
+        try:
+            member=w.BOOL()
+            if not k.IsProcessInJob(process,job,ctypes.byref(member))or not member.value:
+                continue
+            row['membership_confirmed']=True
+            image=ctypes.create_unicode_buffer(4096);length=w.DWORD(len(image))
+            if k.QueryFullProcessImageNameW(process,0,image,ctypes.byref(length)):
+                row['image']=ntpath.basename(image.value)
+            else:row['query_error']=ctypes.get_last_error()
+        finally:k.CloseHandle(process)
+    return result
+
+def report(name,facts,failure,stdout,stderr):
+    print(f"CI {name}: worker_exit={facts.get('worker_exit_code')}; natural_job_empty={facts['natural_job_empty']}; reader_drained={facts['reader_drained']}; forced_cleanup={facts['forced_cleanup']}",flush=True)
+    if failure is None and facts.get('worker_exit_code')==0:return
+    if failure is not None:
+        message=str(failure)[:1024].replace('\r','\\r').replace('\n','\\n').replace('\x00','\ufffd')
+        print(f"CI {name} capture failure: {type(failure).__name__}: {message}",flush=True)
+    if 'remaining_job_processes'in facts:
+        print('Original Job remaining processes: '+json.dumps(facts['remaining_job_processes']),flush=True)
+    for label,file in [('stdout',stdout),('stderr',stderr)]:
+        try:
+            with file.open('rb')as source:
+                source.seek(0,2);source.seek(max(0,source.tell()-16384));raw=source.read(16384)
+            if raw:
+                print(f'CI {name} {label}: last at most 16384 bytes (full raw stream retained in artifact)',flush=True)
+                for line in raw.decode('utf-8',errors='replace').splitlines():
+                    # Prefix every line so captured tool output cannot inject Actions commands.
+                    print(f'CI {name} {label} | '+line.replace('\x00','\ufffd'),flush=True)
+        except OSError as error:
+            print(f'CI {name} {label} tail unavailable: {type(error).__name__}',flush=True)
+
 def wait_natural_empty(query,deadline,now=time.monotonic,pause=time.sleep):
     count=0
     while True:
@@ -79,6 +130,7 @@ def main():
     failure=None
     # Files are retained on every failure; no path-derived deletion authority.
     out=stdout.open('xb');err=stderr.open('xb')
+    print('CI '+a.name+' starting: '+json.dumps(REQUIRED[a.name]),flush=True)
     try:
         process=subprocess.Popen([sys.executable,str(Path(__file__).absolute()),'--worker'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=False,cwd=root)
         k,job=job_for(process);facts['original_worker_job_assigned']=True
@@ -95,6 +147,10 @@ def main():
         facts.update(natural_job_empty=True,final_active=ack['active'],accounting_queries=ack['queries'])
     except BaseException as error:
         failure=error;facts['failure_kind']=type(error).__name__
+        facts['failure_message']=str(error)[:1024]
+        if job:
+            try:facts['remaining_job_processes']=job_processes(k,job)
+            except BaseException as diagnostic: facts['job_diagnostics_error']=type(diagnostic).__name__
     finally:
         if job:
             if not facts['natural_job_empty']:facts['forced_cleanup']=True
@@ -114,7 +170,11 @@ def main():
     else:
         RETAINED.extend([out,err,process,*threads]);facts['streams']={'terminal_unconfirmed':True}
     facts['passed']=failure is None and exit_code==0 and facts['natural_job_empty'] and facts['job_closed'] and facts['reader_drained'] and not facts['forced_cleanup']
+    if failure is not None:
+        facts.setdefault('failure_kind',type(failure).__name__)
+        facts.setdefault('failure_message',str(failure)[:1024])
     publish(lifecycle,facts)
+    report(a.name,facts,failure,stdout,stderr)
     if failure is not None:return 125
     # Preserve legacy format binding; this record alone is NOT a Job cleanup proof.
     publish(record,dict(name=a.name,argv=REQUIRED[a.name],exit_code=exit_code,stdout=a.directory+'/'+a.name+'.stdout',stderr=a.directory+'/'+a.name+'.stderr'))

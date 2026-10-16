@@ -81,6 +81,11 @@ jobs:
         os: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.include_other_platforms && '["windows-2022", "ubuntu-24.04", "macos-14"]' || '["windows-2022"]') }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    env:
+      # Match validated local CI: keep assertions/checks, omit dev/test symbols and incremental storage.
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+      CARGO_INCREMENTAL: '0'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -93,6 +98,9 @@ jobs:
         run: |
           rustup show active-toolchain
           rustup component add rustfmt clippy
+      - name: Validate Windows capture process ownership and diagnostics
+        if: runner.os == 'Windows'
+        run: python scripts/test_ci_capture_operation.py
       - name: Fetch exact lock dependencies
         run: cargo fetch --locked
       - name: Snapshot Windows tracked source before compilation
