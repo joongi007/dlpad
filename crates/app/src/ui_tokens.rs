@@ -1,0 +1,35 @@
+//! Shared native UI measurements. GTMUX roles, with Korean body text at 13 logical px.
+#![allow(dead_code)]
+pub const CONTROL_HEIGHT: f32 = 32.0;
+pub const CONTROL_MIN_WIDTH: f32 = 64.0;
+pub const COMPACT_HEIGHT: f32 = 24.0;
+pub const COMPACT_MIN_WIDTH: f32 = 44.0;
+pub const CONTROL_PADDING_X: f32 = 12.0;
+pub const COMPACT_PADDING_X: f32 = 8.0;
+pub const RADIUS: u8 = 6;
+pub const FONT_FACE_PRIMARY: &str = "Segoe UI";
+pub const FONT_FACE_KOREAN: &str = "Malgun Gothic";
+pub const FONT_WEIGHT_NORMAL: i32 = 400;
+pub const BODY_FONT_SIZE: f32 = 13.0;
+pub const SMALL_FONT_SIZE: f32 = 12.0;
+pub const HEADING_FONT_SIZE: f32 = 16.0;
+pub const TITLE_FONT_SIZE: f32 = 20.0;
+pub const PAGE_MARGIN: f32 = 24.0;
+pub const SECTION_GAP: f32 = 24.0;
+pub const CONTROL_GAP: f32 = 8.0;
+pub const LABEL_GAP: f32 = 6.0;
+pub const LIGHT_BACKGROUND: [u8; 3] = [255, 255, 255];
+pub const LIGHT_SURFACE: [u8; 3] = [255, 255, 255];
+pub const LIGHT_SECONDARY: [u8; 3] = [245, 245, 245];
+pub const LIGHT_FOREGROUND: [u8; 3] = [0, 0, 0];
+pub const LIGHT_MUTED: [u8; 3] = [107, 107, 107];
+pub const DARK_BACKGROUND: [u8; 3] = [30, 30, 30];
+pub const DARK_SURFACE: [u8; 3] = [44, 44, 44];
+pub const DARK_SECONDARY: [u8; 3] = [56, 56, 56];
+pub const DARK_FOREGROUND: [u8; 3] = [245, 245, 245];
+pub const DARK_MUTED: [u8; 3] = [154, 154, 154];
+pub const ACCENT: [u8; 3] = [13, 153, 255];
+pub const PRIMARY: [u8; 3] = [0, 111, 190];
+pub const PRIMARY_HOVER: [u8; 3] = [0, 119, 204];
+pub const PRIMARY_PRESSED: [u8; 3] = [0, 87, 150];
+pub const DANGER: [u8; 3] = [184, 40, 45];

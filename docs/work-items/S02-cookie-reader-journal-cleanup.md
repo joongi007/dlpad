@@ -1,0 +1,24 @@
+# S02: journal의 exact owned 파일 정리
+
+- 상태: in-progress
+- 분류: feature
+- 우선순위: P0
+- 요구사항: R04, R08, R11, R13
+- 담당/수정 범위: metrics_recovery — cookies/reader_journal.rs 및 이 문서
+- 선행 작업: journal reopen/proof; root26Cargo/native1/clippyPASS
+
+## 계약과 인수
+
+validate_owned_entries는현재record와실제slotreceipt의nativeidentity및Resolvedproof를재검증한다. owned_names는검증후recordstate.json과실제소유receipt고정이름만반환한다. 기존cookie/recovery.json/owner.marker와전체ownerentryallowlist는rootcaller가별도로검증한다. unusedfixedreceipt/unknownentry는이API가삭제하지않는다.
+
+remove_owned_files(self)는모든slot이Empty/Resolved이며proof가실제유효한경우에만receipt→record순서로exactunlinkat하고directorysync한다. pending/replaced/tampered는삭제시작전거절한다. 각삭제전남은ownedID/proof를재검증하며부분실패원자성을주장하지않는다. rmdir/recursivecleanup/foreignfile삭제는없다. caller는실패시cookie및외부recoverymarker를보존한다.
+
+actualTempDir의empty/resolved삭제, pending/replaced/tampered bytes보존 및foreignsentinel유지를시험한다. Cargo는root전담이며sourcefreeze후실행한다. schema/model/protocol기존필드를수정하지않는다.
+
+## 구현 동결 handoff
+
+validate_owned_entries()는record/actualreceiptnativeID와Resolvedproof를기존validate로재검증하고stateactive slot과receiptsSome의일치를확인한다. owned_names()->Result<Vec<&'static CStr>,JournalError>는검증후recordstate.json과실제소유Some slot의reader0.receipt/reader1.receipt만반환한다. root는이exactlist를기존cookie/recovery.json/owner.marker목록과합쳐전체directoryentries와비교해야한다. unusedfixedreceipt/unknownentry는이API가삭제하지않는다.
+
+remove_owned_files(self)는cleanup_eligible인Empty/Resolved만허용한다. 삭제시작전에전부검증하고각receiptunlink전남은ownednativeID/actualResolvedproof/recordbytes를재확인한다. receiptunlink가끝난뒤record의exactoriginalID를다시검증해unlink하고parentdirectorysync한다. 삭제한receipt는이호출안의localremovedmask로만재검증에서제외하고기존schema/statefield를바꾸지않는다. foreignpath/PID/recursive/rmdir는없다. unlink중부분실패는원자적rollback이아니므로root는cookie와외부recoverymarker를보존해야한다.
+
+2개actualTempDir시험을작성했다. emptyjournal과actualResolvedproofjournal의exactfiles삭제 및foreignsentinel/directory유지,Intentpending/replacedrecord/sameinodeproofzero변조의오류와기존bytes보존을확인한다. source SHA256 `ec4f9eb23b41681774262c619caab1e0c8b0da2dcd6a98551ce7a4eb0e239a74`,rustfmt exit0/Cargo미실행. rootfullownerbridge/marker/제품기동복구는아직별도연결이며이삭제API만으로P0nextstartup복구완료를주장하지않는다.

@@ -1,0 +1,17 @@
+{
+  "status": "BASELINE_FOR_VISUAL_COMPARISON_ONLY",
+  "source_evidence": "docs/validation/evidence/current-ui-real-viewport-keyboard-layout-v2-20261012",
+  "captures": {
+    "docs/validation/evidence/current-ui-real-viewport-keyboard-layout-v2-20261012/gui/first/initial-download-full-800.png": "322e4915bff9443c415f04bdd9af9ce1130ede79981f42e54b9f79a6fa0edfe9",
+    "docs/validation/evidence/current-ui-real-viewport-keyboard-layout-v2-20261012/gui/first/initial-download-full-960.png": "55bbdf967483bf1e4ce6417b698abebe08c9c820f5b6f9f3abee796640db4972",
+    "docs/validation/evidence/current-ui-real-viewport-keyboard-layout-v2-20261012/gui/first/selected-download-full-800.png": "ceff8c9cccfcd0124500de6aa83fb9e3c63cea4ffbd6ce84a024678f1f157d75",
+    "docs/validation/evidence/current-ui-real-viewport-keyboard-layout-v2-20261012/gui/first/selected-download-full-960.png": "8ccd2d1f882f920e6fc87de0598bfd350a04324572ccc372e7beddea6f648563"
+  },
+  "root_direct_review": [
+    "initial-download-full-800.png",
+    "selected-download-full-800.png",
+    "initial-download-full-960.png"
+  ],
+  "finding": "800px old layout shows long preview-tools message and about50px preview-to-separator gap; folder visible but quality below viewport at retained scroll state. New implementation awaits fresh capture.",
+  "new_ui_verified": false
+}

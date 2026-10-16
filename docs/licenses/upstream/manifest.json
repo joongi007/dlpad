@@ -1,0 +1,602 @@
+{
+  "schema": 1,
+  "sources": {
+    "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-MIT": {
+      "repository": "emilk/egui",
+      "commit": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+      "leaf": "LICENSE-MIT",
+      "file": "docs/licenses/upstream/emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-MIT",
+      "bytes": 1092,
+      "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c",
+      "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-MIT"
+    },
+    "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-APACHE": {
+      "repository": "emilk/egui",
+      "commit": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+      "leaf": "LICENSE-APACHE",
+      "file": "docs/licenses/upstream/emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-APACHE",
+      "bytes": 10850,
+      "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90",
+      "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-APACHE"
+    },
+    "AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE-MIT": {
+      "repository": "AccessKit/accesskit",
+      "commit": "5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3",
+      "leaf": "LICENSE-MIT",
+      "file": "docs/licenses/upstream/AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "url": "https://raw.githubusercontent.com/AccessKit/accesskit/5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3/LICENSE-MIT"
+    },
+    "AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE-APACHE": {
+      "repository": "AccessKit/accesskit",
+      "commit": "5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3",
+      "leaf": "LICENSE-APACHE",
+      "file": "docs/licenses/upstream/AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "url": "https://raw.githubusercontent.com/AccessKit/accesskit/5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3/LICENSE-APACHE"
+    },
+    "AccessKit-accesskit-0b6901a8c8e6fb1cb5a2dc7c19dc7bee1cc5ad09-LICENSE-MIT": {
+      "repository": "AccessKit/accesskit",
+      "commit": "0b6901a8c8e6fb1cb5a2dc7c19dc7bee1cc5ad09",
+      "leaf": "LICENSE-MIT",
+      "file": "docs/licenses/upstream/AccessKit-accesskit-0b6901a8c8e6fb1cb5a2dc7c19dc7bee1cc5ad09-LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "url": "https://raw.githubusercontent.com/AccessKit/accesskit/0b6901a8c8e6fb1cb5a2dc7c19dc7bee1cc5ad09/LICENSE-MIT"
+    },
+    "AccessKit-accesskit-0b6901a8c8e6fb1cb5a2dc7c19dc7bee1cc5ad09-LICENSE-APACHE": {
+      "repository": "AccessKit/accesskit",
+      "commit": "0b6901a8c8e6fb1cb5a2dc7c19dc7bee1cc5ad09",
+      "leaf": "LICENSE-APACHE",
+      "file": "docs/licenses/upstream/AccessKit-accesskit-0b6901a8c8e6fb1cb5a2dc7c19dc7bee1cc5ad09-LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "url": "https://raw.githubusercontent.com/AccessKit/accesskit/0b6901a8c8e6fb1cb5a2dc7c19dc7bee1cc5ad09/LICENSE-APACHE"
+    },
+    "iced-rs-iced-3997291f318a8bc06fa522f5579836fb3feb94df-LICENSE": {
+      "repository": "iced-rs/iced",
+      "commit": "3997291f318a8bc06fa522f5579836fb3feb94df",
+      "leaf": "LICENSE",
+      "file": "docs/licenses/upstream/iced-rs-iced-3997291f318a8bc06fa522f5579836fb3feb94df-LICENSE",
+      "bytes": 1073,
+      "sha256": "fc9086ba4eba4b77e4c603906362742bc3715ffa2c7810c6074fe7780d3a0398",
+      "url": "https://raw.githubusercontent.com/iced-rs/iced/3997291f318a8bc06fa522f5579836fb3feb94df/LICENSE",
+      "cache_binding": {
+        "package_path": ".local-tools/windows/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/iced-0.14.0",
+        "manifest_sha256": "22643883d0955af9243d3357ac7c572061e17e7b2f30e5c3b6132ce44e846efb",
+        "vcs_sha256": "ff5c087f82b5148c0bf99c8c23c583e7b725d99ee72af59ac8afb40c1c129caf",
+        "grant_sha256": "fc9086ba4eba4b77e4c603906362742bc3715ffa2c7810c6074fe7780d3a0398"
+      }
+    },
+    "DoumanAsh-clipboard-win-3b27cf2bfd1adcfa6e0264eb51c1025ddaf0f342-LICENSE": {
+      "repository": "DoumanAsh/clipboard-win",
+      "commit": "3b27cf2bfd1adcfa6e0264eb51c1025ddaf0f342",
+      "leaf": "LICENSE",
+      "file": "docs/licenses/upstream/DoumanAsh-clipboard-win-3b27cf2bfd1adcfa6e0264eb51c1025ddaf0f342-LICENSE",
+      "bytes": 1338,
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "url": "https://raw.githubusercontent.com/DoumanAsh/clipboard-win/3b27cf2bfd1adcfa6e0264eb51c1025ddaf0f342/LICENSE"
+    },
+    "DGriffin91-egui_software_backend-d17cbcdb2bf4e853543c4c7db61c9d4e2f2233a4-LICENSE-MIT": {
+      "repository": "DGriffin91/egui_software_backend",
+      "commit": "d17cbcdb2bf4e853543c4c7db61c9d4e2f2233a4",
+      "leaf": "LICENSE-MIT",
+      "bytes": 1036,
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+      "url": "https://raw.githubusercontent.com/DGriffin91/egui_software_backend/d17cbcdb2bf4e853543c4c7db61c9d4e2f2233a4/LICENSE-MIT",
+      "file": "docs/licenses/upstream/DGriffin91-egui_software_backend-d17cbcdb2bf4e853543c4c7db61c9d4e2f2233a4-LICENSE-MIT"
+    },
+    "DGriffin91-egui_software_backend-d17cbcdb2bf4e853543c4c7db61c9d4e2f2233a4-LICENSE-APACHE": {
+      "repository": "DGriffin91/egui_software_backend",
+      "commit": "d17cbcdb2bf4e853543c4c7db61c9d4e2f2233a4",
+      "leaf": "LICENSE-APACHE",
+      "bytes": 10173,
+      "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+      "url": "https://raw.githubusercontent.com/DGriffin91/egui_software_backend/d17cbcdb2bf4e853543c4c7db61c9d4e2f2233a4/LICENSE-APACHE",
+      "file": "docs/licenses/upstream/DGriffin91-egui_software_backend-d17cbcdb2bf4e853543c4c7db61c9d4e2f2233a4-LICENSE-APACHE"
+    },
+    "aclysma-profiling-8271551172eb6fa4cba47369aedd93790c623df9-LICENSE-MIT": {
+      "repository": "aclysma/profiling",
+      "commit": "8271551172eb6fa4cba47369aedd93790c623df9",
+      "leaf": "LICENSE-MIT",
+      "bytes": 1093,
+      "sha256": "c8167fdeeed46d3f244d3f85c5bf998ce889343691c32be2c61a8bc4b5c08333",
+      "url": "https://raw.githubusercontent.com/aclysma/profiling/8271551172eb6fa4cba47369aedd93790c623df9/LICENSE-MIT",
+      "file": "docs/licenses/upstream/aclysma-profiling-8271551172eb6fa4cba47369aedd93790c623df9-LICENSE-MIT"
+    },
+    "aclysma-profiling-8271551172eb6fa4cba47369aedd93790c623df9-LICENSE-APACHE": {
+      "repository": "aclysma/profiling",
+      "commit": "8271551172eb6fa4cba47369aedd93790c623df9",
+      "leaf": "LICENSE-APACHE",
+      "bytes": 10818,
+      "sha256": "10d30a673cd5e9349bdc02aeb48f14b3386d27d0da32df8f0a555d4aa16aa551",
+      "url": "https://raw.githubusercontent.com/aclysma/profiling/8271551172eb6fa4cba47369aedd93790c623df9/LICENSE-APACHE",
+      "file": "docs/licenses/upstream/aclysma-profiling-8271551172eb6fa4cba47369aedd93790c623df9-LICENSE-APACHE"
+    },
+    "iced-rs-iced-0ecf60664df7b8ac7d7aef5f7279d5323027f693-LICENSE": {
+      "repository": "iced-rs/iced",
+      "commit": "0ecf60664df7b8ac7d7aef5f7279d5323027f693",
+      "leaf": "LICENSE",
+      "file": "docs/licenses/upstream/iced-rs-iced-0ecf60664df7b8ac7d7aef5f7279d5323027f693-LICENSE",
+      "bytes": 1073,
+      "sha256": "fc9086ba4eba4b77e4c603906362742bc3715ffa2c7810c6074fe7780d3a0398",
+      "url": "https://raw.githubusercontent.com/iced-rs/iced/0ecf60664df7b8ac7d7aef5f7279d5323027f693/LICENSE"
+    },
+    "iced-rs-iced-54abf81d13fec06d4d9ac754b03ce2c3313e8a1f-LICENSE": {
+      "repository": "iced-rs/iced",
+      "commit": "54abf81d13fec06d4d9ac754b03ce2c3313e8a1f",
+      "leaf": "LICENSE",
+      "file": "docs/licenses/upstream/iced-rs-iced-54abf81d13fec06d4d9ac754b03ce2c3313e8a1f-LICENSE",
+      "bytes": 1073,
+      "sha256": "fc9086ba4eba4b77e4c603906362742bc3715ffa2c7810c6074fe7780d3a0398",
+      "url": "https://raw.githubusercontent.com/iced-rs/iced/54abf81d13fec06d4d9ac754b03ce2c3313e8a1f/LICENSE"
+    },
+    "iced-rs-iced-38237dd294da3256c2ac4d3f8288fc73956c91e0-LICENSE": {
+      "repository": "iced-rs/iced",
+      "commit": "38237dd294da3256c2ac4d3f8288fc73956c91e0",
+      "leaf": "LICENSE",
+      "file": "docs/licenses/upstream/iced-rs-iced-38237dd294da3256c2ac4d3f8288fc73956c91e0-LICENSE",
+      "bytes": 1073,
+      "sha256": "fc9086ba4eba4b77e4c603906362742bc3715ffa2c7810c6074fe7780d3a0398",
+      "url": "https://raw.githubusercontent.com/iced-rs/iced/38237dd294da3256c2ac4d3f8288fc73956c91e0/LICENSE"
+    },
+    "brendanzab-gl-rs-ea503e8d5fb6d73c6030e6191ce738cd3bf3433e-LICENSE": {
+      "repository": "brendanzab/gl-rs",
+      "commit": "ea503e8d5fb6d73c6030e6191ce738cd3bf3433e",
+      "leaf": "LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "url": "https://raw.githubusercontent.com/brendanzab/gl-rs/ea503e8d5fb6d73c6030e6191ce738cd3bf3433e/LICENSE",
+      "file": "docs/licenses/upstream/brendanzab-gl-rs-ea503e8d5fb6d73c6030e6191ce738cd3bf3433e-LICENSE"
+    },
+    "brendanzab-gl-rs-f150967b1c44ae888e6676f93f639ebc82771bdc-LICENSE": {
+      "repository": "brendanzab/gl-rs",
+      "commit": "f150967b1c44ae888e6676f93f639ebc82771bdc",
+      "leaf": "LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "url": "https://raw.githubusercontent.com/brendanzab/gl-rs/f150967b1c44ae888e6676f93f639ebc82771bdc/LICENSE",
+      "file": "docs/licenses/upstream/brendanzab-gl-rs-f150967b1c44ae888e6676f93f639ebc82771bdc-LICENSE"
+    },
+    "zakarumych-gpu-alloc-61020bdcb4eb04fca6bbf748aeb9570e859236e0-COPYING": {
+      "repository": "zakarumych/gpu-alloc",
+      "commit": "61020bdcb4eb04fca6bbf748aeb9570e859236e0",
+      "leaf": "COPYING",
+      "file": "docs/licenses/upstream/zakarumych-gpu-alloc-61020bdcb4eb04fca6bbf748aeb9570e859236e0-COPYING",
+      "bytes": 347,
+      "sha256": "12121dfa588677007848ab922a45a1e3248868f6ff063598fceb3141d7897314",
+      "url": "https://raw.githubusercontent.com/zakarumych/gpu-alloc/61020bdcb4eb04fca6bbf748aeb9570e859236e0/COPYING"
+    },
+    "zakarumych-gpu-alloc-61020bdcb4eb04fca6bbf748aeb9570e859236e0-license-MIT": {
+      "repository": "zakarumych/gpu-alloc",
+      "commit": "61020bdcb4eb04fca6bbf748aeb9570e859236e0",
+      "leaf": "license/MIT",
+      "file": "docs/licenses/upstream/zakarumych-gpu-alloc-61020bdcb4eb04fca6bbf748aeb9570e859236e0-license-MIT",
+      "bytes": 1075,
+      "sha256": "f774bf68151714985324d90adbd59e8f271b7ba518608d871b6ba16464692879",
+      "url": "https://raw.githubusercontent.com/zakarumych/gpu-alloc/61020bdcb4eb04fca6bbf748aeb9570e859236e0/license/MIT"
+    },
+    "zakarumych-gpu-alloc-7ddd1fe576fcfc503347eb97e476a47581479f22-COPYING": {
+      "repository": "zakarumych/gpu-alloc",
+      "commit": "7ddd1fe576fcfc503347eb97e476a47581479f22",
+      "leaf": "COPYING",
+      "file": "docs/licenses/upstream/zakarumych-gpu-alloc-7ddd1fe576fcfc503347eb97e476a47581479f22-COPYING",
+      "bytes": 347,
+      "sha256": "12121dfa588677007848ab922a45a1e3248868f6ff063598fceb3141d7897314",
+      "url": "https://raw.githubusercontent.com/zakarumych/gpu-alloc/7ddd1fe576fcfc503347eb97e476a47581479f22/COPYING"
+    },
+    "zakarumych-gpu-alloc-7ddd1fe576fcfc503347eb97e476a47581479f22-license-MIT": {
+      "repository": "zakarumych/gpu-alloc",
+      "commit": "7ddd1fe576fcfc503347eb97e476a47581479f22",
+      "leaf": "license/MIT",
+      "file": "docs/licenses/upstream/zakarumych-gpu-alloc-7ddd1fe576fcfc503347eb97e476a47581479f22-license-MIT",
+      "bytes": 1075,
+      "sha256": "f774bf68151714985324d90adbd59e8f271b7ba518608d871b6ba16464692879",
+      "url": "https://raw.githubusercontent.com/zakarumych/gpu-alloc/7ddd1fe576fcfc503347eb97e476a47581479f22/license/MIT"
+    },
+    "zakarumych-gpu-descriptor-bb28b4e55b742e0ea3e7a0968e7ee6287ba0e06a-COPYING": {
+      "repository": "zakarumych/gpu-descriptor",
+      "commit": "bb28b4e55b742e0ea3e7a0968e7ee6287ba0e06a",
+      "leaf": "COPYING",
+      "file": "docs/licenses/upstream/zakarumych-gpu-descriptor-bb28b4e55b742e0ea3e7a0968e7ee6287ba0e06a-COPYING",
+      "bytes": 352,
+      "sha256": "f72143f7e9d9fb8bd336b139fa22f825a299591c29f2f7338c5566347b137613",
+      "url": "https://raw.githubusercontent.com/zakarumych/gpu-descriptor/bb28b4e55b742e0ea3e7a0968e7ee6287ba0e06a/COPYING"
+    },
+    "zakarumych-gpu-descriptor-bb28b4e55b742e0ea3e7a0968e7ee6287ba0e06a-license-MIT": {
+      "repository": "zakarumych/gpu-descriptor",
+      "commit": "bb28b4e55b742e0ea3e7a0968e7ee6287ba0e06a",
+      "leaf": "license/MIT",
+      "file": "docs/licenses/upstream/zakarumych-gpu-descriptor-bb28b4e55b742e0ea3e7a0968e7ee6287ba0e06a-license-MIT",
+      "bytes": 1080,
+      "sha256": "5226e27d5fbc683db56c52853cdb9d15b69abadb525a60f95c862c2dbd77cdc8",
+      "url": "https://raw.githubusercontent.com/zakarumych/gpu-descriptor/bb28b4e55b742e0ea3e7a0968e7ee6287ba0e06a/license/MIT"
+    },
+    "zakarumych-gpu-descriptor-9f2fb9546591322e7b77ee1e79385e01effd85e4-COPYING": {
+      "repository": "zakarumych/gpu-descriptor",
+      "commit": "9f2fb9546591322e7b77ee1e79385e01effd85e4",
+      "leaf": "COPYING",
+      "file": "docs/licenses/upstream/zakarumych-gpu-descriptor-9f2fb9546591322e7b77ee1e79385e01effd85e4-COPYING",
+      "bytes": 352,
+      "sha256": "f72143f7e9d9fb8bd336b139fa22f825a299591c29f2f7338c5566347b137613",
+      "url": "https://raw.githubusercontent.com/zakarumych/gpu-descriptor/9f2fb9546591322e7b77ee1e79385e01effd85e4/COPYING"
+    },
+    "zakarumych-gpu-descriptor-9f2fb9546591322e7b77ee1e79385e01effd85e4-license-MIT": {
+      "repository": "zakarumych/gpu-descriptor",
+      "commit": "9f2fb9546591322e7b77ee1e79385e01effd85e4",
+      "leaf": "license/MIT",
+      "file": "docs/licenses/upstream/zakarumych-gpu-descriptor-9f2fb9546591322e7b77ee1e79385e01effd85e4-license-MIT",
+      "bytes": 1080,
+      "sha256": "5226e27d5fbc683db56c52853cdb9d15b69abadb525a60f95c862c2dbd77cdc8",
+      "url": "https://raw.githubusercontent.com/zakarumych/gpu-descriptor/9f2fb9546591322e7b77ee1e79385e01effd85e4/license/MIT"
+    },
+    "gfx-rs-rspirv-e91a5debc10c395b36db7721dfff6326d697a1e2-LICENSE": {
+      "repository": "gfx-rs/rspirv",
+      "commit": "e91a5debc10c395b36db7721dfff6326d697a1e2",
+      "leaf": "LICENSE",
+      "file": "docs/licenses/upstream/gfx-rs-rspirv-e91a5debc10c395b36db7721dfff6326d697a1e2-LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "url": "https://raw.githubusercontent.com/gfx-rs/rspirv/e91a5debc10c395b36db7721dfff6326d697a1e2/LICENSE"
+    },
+    "retep998-winapi-rs-9497609ef44cc9bcd16cd2411c0ee6ccaf5483aa-LICENSE-MIT": {
+      "repository": "retep998/winapi-rs",
+      "commit": "9497609ef44cc9bcd16cd2411c0ee6ccaf5483aa",
+      "leaf": "LICENSE-MIT",
+      "file": "docs/licenses/upstream/retep998-winapi-rs-9497609ef44cc9bcd16cd2411c0ee6ccaf5483aa-LICENSE-MIT",
+      "bytes": 1068,
+      "sha256": "5b19674a1db628a475850a131956ed49521b744e3dda8f5a94141f9aba681219",
+      "url": "https://raw.githubusercontent.com/retep998/winapi-rs/9497609ef44cc9bcd16cd2411c0ee6ccaf5483aa/LICENSE-MIT"
+    },
+    "retep998-winapi-rs-9497609ef44cc9bcd16cd2411c0ee6ccaf5483aa-LICENSE-APACHE": {
+      "repository": "retep998/winapi-rs",
+      "commit": "9497609ef44cc9bcd16cd2411c0ee6ccaf5483aa",
+      "leaf": "LICENSE-APACHE",
+      "file": "docs/licenses/upstream/retep998-winapi-rs-9497609ef44cc9bcd16cd2411c0ee6ccaf5483aa-LICENSE-APACHE",
+      "bytes": 11357,
+      "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1",
+      "url": "https://raw.githubusercontent.com/retep998/winapi-rs/9497609ef44cc9bcd16cd2411c0ee6ccaf5483aa/LICENSE-APACHE"
+    },
+    "AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE.chromium": {
+      "repository": "AccessKit/accesskit",
+      "commit": "5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3",
+      "leaf": "LICENSE.chromium",
+      "file": "docs/licenses/upstream/AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE.chromium",
+      "bytes": 1559,
+      "sha256": "845022e0c1db1abb41a6ba4cd3c4b674ec290f3359d9d3c78ae558d4c0ed9308",
+      "url": "https://raw.githubusercontent.com/AccessKit/accesskit/5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3/LICENSE.chromium"
+    }
+  },
+  "packages": {
+    "accesskit-0.21.1": {
+      "repository": "AccessKit/accesskit",
+      "commit": "0b6901a8c8e6fb1cb5a2dc7c19dc7bee1cc5ad09",
+      "path_in_vcs": "common",
+      "sources": [
+        "AccessKit-accesskit-0b6901a8c8e6fb1cb5a2dc7c19dc7bee1cc5ad09-LICENSE-MIT",
+        "AccessKit-accesskit-0b6901a8c8e6fb1cb5a2dc7c19dc7bee1cc5ad09-LICENSE-APACHE"
+      ]
+    },
+    "accesskit_consumer-0.31.0": {
+      "repository": "AccessKit/accesskit",
+      "commit": "5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3",
+      "path_in_vcs": "consumer",
+      "sources": [
+        "AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE-MIT",
+        "AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE-APACHE"
+      ]
+    },
+    "accesskit_macos-0.22.2": {
+      "repository": "AccessKit/accesskit",
+      "commit": "5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3",
+      "path_in_vcs": "platforms/macos",
+      "sources": [
+        "AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE-MIT",
+        "AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE-APACHE"
+      ]
+    },
+    "accesskit_unix-0.17.2": {
+      "repository": "AccessKit/accesskit",
+      "commit": "5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3",
+      "path_in_vcs": "platforms/unix",
+      "sources": [
+        "AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE-MIT",
+        "AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE-APACHE"
+      ]
+    },
+    "accesskit_windows-0.29.2": {
+      "repository": "AccessKit/accesskit",
+      "commit": "5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3",
+      "path_in_vcs": "platforms/windows",
+      "sources": [
+        "AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE-MIT",
+        "AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE-APACHE",
+        "AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE.chromium"
+      ]
+    },
+    "accesskit_winit-0.29.2": {
+      "repository": "AccessKit/accesskit",
+      "commit": "5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3",
+      "path_in_vcs": "platforms/winit",
+      "sources": [
+        "AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE-MIT",
+        "AccessKit-accesskit-5801c4a49ff9b2c9ec3f77b3c31272d0da4c5cd3-LICENSE-APACHE"
+      ]
+    },
+    "ecolor-0.33.3": {
+      "repository": "emilk/egui",
+      "commit": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+      "path_in_vcs": "crates/ecolor",
+      "sources": [
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-MIT",
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-APACHE"
+      ]
+    },
+    "egui-0.33.3": {
+      "repository": "emilk/egui",
+      "commit": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+      "path_in_vcs": "crates/egui",
+      "sources": [
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-MIT",
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-APACHE"
+      ]
+    },
+    "eframe-0.33.3": {
+      "repository": "emilk/egui",
+      "commit": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+      "path_in_vcs": "crates/eframe",
+      "sources": [
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-MIT",
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-APACHE"
+      ]
+    },
+    "egui-wgpu-0.33.3": {
+      "repository": "emilk/egui",
+      "commit": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+      "path_in_vcs": "crates/egui-wgpu",
+      "sources": [
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-MIT",
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-APACHE"
+      ]
+    },
+    "egui-winit-0.33.3": {
+      "repository": "emilk/egui",
+      "commit": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+      "path_in_vcs": "crates/egui-winit",
+      "sources": [
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-MIT",
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-APACHE"
+      ]
+    },
+    "egui_glow-0.33.3": {
+      "repository": "emilk/egui",
+      "commit": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+      "path_in_vcs": "crates/egui_glow",
+      "sources": [
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-MIT",
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-APACHE"
+      ]
+    },
+    "emath-0.33.3": {
+      "repository": "emilk/egui",
+      "commit": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+      "path_in_vcs": "crates/emath",
+      "sources": [
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-MIT",
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-APACHE"
+      ]
+    },
+    "epaint-0.33.3": {
+      "repository": "emilk/egui",
+      "commit": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+      "path_in_vcs": "crates/epaint",
+      "sources": [
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-MIT",
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-APACHE"
+      ]
+    },
+    "epaint_default_fonts-0.33.3": {
+      "repository": "emilk/egui",
+      "commit": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+      "path_in_vcs": "crates/epaint_default_fonts",
+      "sources": [
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-MIT",
+        "emilk-egui-44cdd653e2317d300fb8a6c9c36b03f23991e803-LICENSE-APACHE"
+      ]
+    },
+    "iced_core-0.14.0": {
+      "repository": "iced-rs/iced",
+      "commit": "3997291f318a8bc06fa522f5579836fb3feb94df",
+      "path_in_vcs": "core",
+      "sources": [
+        "iced-rs-iced-3997291f318a8bc06fa522f5579836fb3feb94df-LICENSE"
+      ]
+    },
+    "iced_debug-0.14.0": {
+      "repository": "iced-rs/iced",
+      "commit": "3997291f318a8bc06fa522f5579836fb3feb94df",
+      "path_in_vcs": "debug",
+      "sources": [
+        "iced-rs-iced-3997291f318a8bc06fa522f5579836fb3feb94df-LICENSE"
+      ]
+    },
+    "iced_futures-0.14.0": {
+      "repository": "iced-rs/iced",
+      "commit": "3997291f318a8bc06fa522f5579836fb3feb94df",
+      "path_in_vcs": "futures",
+      "sources": [
+        "iced-rs-iced-3997291f318a8bc06fa522f5579836fb3feb94df-LICENSE"
+      ]
+    },
+    "iced_graphics-0.14.0": {
+      "repository": "iced-rs/iced",
+      "commit": "3997291f318a8bc06fa522f5579836fb3feb94df",
+      "path_in_vcs": "graphics",
+      "sources": [
+        "iced-rs-iced-3997291f318a8bc06fa522f5579836fb3feb94df-LICENSE"
+      ]
+    },
+    "iced_program-0.14.0": {
+      "repository": "iced-rs/iced",
+      "commit": "3997291f318a8bc06fa522f5579836fb3feb94df",
+      "path_in_vcs": "program",
+      "sources": [
+        "iced-rs-iced-3997291f318a8bc06fa522f5579836fb3feb94df-LICENSE"
+      ]
+    },
+    "iced_renderer-0.14.0": {
+      "repository": "iced-rs/iced",
+      "commit": "3997291f318a8bc06fa522f5579836fb3feb94df",
+      "path_in_vcs": "renderer",
+      "sources": [
+        "iced-rs-iced-3997291f318a8bc06fa522f5579836fb3feb94df-LICENSE"
+      ]
+    },
+    "iced_runtime-0.14.0": {
+      "repository": "iced-rs/iced",
+      "commit": "3997291f318a8bc06fa522f5579836fb3feb94df",
+      "path_in_vcs": "runtime",
+      "sources": [
+        "iced-rs-iced-3997291f318a8bc06fa522f5579836fb3feb94df-LICENSE"
+      ]
+    },
+    "clipboard-win-5.4.1": {
+      "repository": "DoumanAsh/clipboard-win",
+      "commit": "3b27cf2bfd1adcfa6e0264eb51c1025ddaf0f342",
+      "path_in_vcs": "",
+      "sources": [
+        "DoumanAsh-clipboard-win-3b27cf2bfd1adcfa6e0264eb51c1025ddaf0f342-LICENSE"
+      ]
+    },
+    "constify-0.0.1": {
+      "repository": "DGriffin91/egui_software_backend",
+      "commit": "d17cbcdb2bf4e853543c4c7db61c9d4e2f2233a4",
+      "path_in_vcs": "constify",
+      "sources": [
+        "DGriffin91-egui_software_backend-d17cbcdb2bf4e853543c4c7db61c9d4e2f2233a4-LICENSE-MIT",
+        "DGriffin91-egui_software_backend-d17cbcdb2bf4e853543c4c7db61c9d4e2f2233a4-LICENSE-APACHE"
+      ]
+    },
+    "profiling-1.0.18": {
+      "repository": "aclysma/profiling",
+      "commit": "8271551172eb6fa4cba47369aedd93790c623df9",
+      "path_in_vcs": "profiling",
+      "sources": [
+        "aclysma-profiling-8271551172eb6fa4cba47369aedd93790c623df9-LICENSE-MIT",
+        "aclysma-profiling-8271551172eb6fa4cba47369aedd93790c623df9-LICENSE-APACHE"
+      ]
+    },
+    "iced_tiny_skia-0.14.1": {
+      "repository": "iced-rs/iced",
+      "commit": "0ecf60664df7b8ac7d7aef5f7279d5323027f693",
+      "path_in_vcs": "tiny_skia",
+      "sources": [
+        "iced-rs-iced-0ecf60664df7b8ac7d7aef5f7279d5323027f693-LICENSE"
+      ]
+    },
+    "iced_widget-0.14.2": {
+      "repository": "iced-rs/iced",
+      "commit": "54abf81d13fec06d4d9ac754b03ce2c3313e8a1f",
+      "path_in_vcs": "widget",
+      "sources": [
+        "iced-rs-iced-54abf81d13fec06d4d9ac754b03ce2c3313e8a1f-LICENSE"
+      ]
+    },
+    "iced_winit-0.14.1": {
+      "repository": "iced-rs/iced",
+      "commit": "38237dd294da3256c2ac4d3f8288fc73956c91e0",
+      "path_in_vcs": "winit",
+      "sources": [
+        "iced-rs-iced-38237dd294da3256c2ac4d3f8288fc73956c91e0-LICENSE"
+      ]
+    },
+    "gl_generator-0.14.0": {
+      "repository": "brendanzab/gl-rs",
+      "commit": "ea503e8d5fb6d73c6030e6191ce738cd3bf3433e",
+      "path_in_vcs": null,
+      "sources": [
+        "brendanzab-gl-rs-ea503e8d5fb6d73c6030e6191ce738cd3bf3433e-LICENSE"
+      ]
+    },
+    "khronos_api-3.1.0": {
+      "repository": "brendanzab/gl-rs",
+      "commit": "f150967b1c44ae888e6676f93f639ebc82771bdc",
+      "path_in_vcs": null,
+      "sources": [
+        "brendanzab-gl-rs-f150967b1c44ae888e6676f93f639ebc82771bdc-LICENSE"
+      ]
+    },
+    "gpu-alloc-0.6.2": {
+      "repository": "zakarumych/gpu-alloc",
+      "commit": "61020bdcb4eb04fca6bbf748aeb9570e859236e0",
+      "path_in_vcs": "gpu-alloc",
+      "sources": [
+        "zakarumych-gpu-alloc-61020bdcb4eb04fca6bbf748aeb9570e859236e0-COPYING",
+        "zakarumych-gpu-alloc-61020bdcb4eb04fca6bbf748aeb9570e859236e0-license-MIT"
+      ]
+    },
+    "gpu-alloc-types-0.3.1": {
+      "repository": "zakarumych/gpu-alloc",
+      "commit": "7ddd1fe576fcfc503347eb97e476a47581479f22",
+      "path_in_vcs": "types",
+      "sources": [
+        "zakarumych-gpu-alloc-7ddd1fe576fcfc503347eb97e476a47581479f22-COPYING",
+        "zakarumych-gpu-alloc-7ddd1fe576fcfc503347eb97e476a47581479f22-license-MIT"
+      ]
+    },
+    "gpu-descriptor-0.3.2": {
+      "repository": "zakarumych/gpu-descriptor",
+      "commit": "bb28b4e55b742e0ea3e7a0968e7ee6287ba0e06a",
+      "path_in_vcs": "gpu-descriptor",
+      "sources": [
+        "zakarumych-gpu-descriptor-bb28b4e55b742e0ea3e7a0968e7ee6287ba0e06a-COPYING",
+        "zakarumych-gpu-descriptor-bb28b4e55b742e0ea3e7a0968e7ee6287ba0e06a-license-MIT"
+      ]
+    },
+    "gpu-descriptor-types-0.2.0": {
+      "repository": "zakarumych/gpu-descriptor",
+      "commit": "9f2fb9546591322e7b77ee1e79385e01effd85e4",
+      "path_in_vcs": "types",
+      "sources": [
+        "zakarumych-gpu-descriptor-9f2fb9546591322e7b77ee1e79385e01effd85e4-COPYING",
+        "zakarumych-gpu-descriptor-9f2fb9546591322e7b77ee1e79385e01effd85e4-license-MIT"
+      ]
+    },
+    "spirv-0.3.0+sdk-1.3.268.0": {
+      "repository": "gfx-rs/rspirv",
+      "commit": "e91a5debc10c395b36db7721dfff6326d697a1e2",
+      "path_in_vcs": "spirv",
+      "sources": [
+        "gfx-rs-rspirv-e91a5debc10c395b36db7721dfff6326d697a1e2-LICENSE"
+      ]
+    },
+    "iced_wgpu-0.14.0": {
+      "repository": "iced-rs/iced",
+      "commit": "3997291f318a8bc06fa522f5579836fb3feb94df",
+      "path_in_vcs": "wgpu",
+      "sources": [
+        "iced-rs-iced-3997291f318a8bc06fa522f5579836fb3feb94df-LICENSE"
+      ]
+    },
+    "winapi-x86_64-pc-windows-gnu-0.4.0": {
+      "repository": "retep998/winapi-rs",
+      "commit": "9497609ef44cc9bcd16cd2411c0ee6ccaf5483aa",
+      "path_in_vcs": "x86_64",
+      "sources": [
+        "retep998-winapi-rs-9497609ef44cc9bcd16cd2411c0ee6ccaf5483aa-LICENSE-MIT",
+        "retep998-winapi-rs-9497609ef44cc9bcd16cd2411c0ee6ccaf5483aa-LICENSE-APACHE"
+      ],
+      "payload_binding": {
+        "schema": 1,
+        "kind": "exact-crate-git-tree",
+        "crate_sha256": "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f",
+        "target_tree_sha256": "fe41ec7c95ccde956af6906c24c7477e86284542d313504ba100da2f6a589292",
+        "root_tree_sha256": "0e1a2a42d797d993c55361d1e4092671f3f17ac3a1063e3162c63fa8f32970cf",
+        "archive_count": 1416
+      }
+    }
+  },
+  "coverage_complete": false
+}

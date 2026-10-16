@@ -1,0 +1,8 @@
+# dlpad local AT-SPI state correction
+
+Vendored accesskit_atspi_common 0.14.2 from the locked crates.io registry archive. MIT OR Apache-2.0 license files retained. Only src/node.rs state mapping changes: disabled controls must omit Enabled/Sensitive even when the role does not support ReadOnly. Existing ReadOnly behavior is retained; only the else branch additionally checks disabled. Actual CPU unavailable-button evidence previously reported false enabled state. No new runtime dependency, features, network behavior or default UI change. Upstream source and patch are locally reviewable; no external issue was posted.
+
+
+Expanded-state correction: the provider's explicit AccessKit `is_expanded()` property now maps `Some(false)` to AT-SPI Expandable, `Some(true)` to Expandable + Expanded, and `None` to neither. The cached primary accesskit 0.21.1 docs define false as collapsed and omitted as not applicable. Existing disabled/read-only behavior is retained. The existing generic state XOR notification emits Expandable/Expanded changes without a new event protocol or dependency.
+
+The `expanded_regression` test constructs a real Adapter/consumer Tree and updates None → closed → open → closed → None. It checks native PlatformNode states and exact AdapterCallback StateChanged events, rather than mirroring the mapping in a shallow test. Root ran the pre-fix test and reproduced the missing Expandable failure (exit101). Post-fix Cargo and actual private GUI verification are coordinated by root. CLI tests do not prove reader announcements or other OS behavior. No external issue/message was posted.

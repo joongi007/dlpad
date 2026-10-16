@@ -1,0 +1,101 @@
+using System;
+using System.IO;
+using System.Text;
+using System.Threading;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Web.Script.Serialization;
+public static class NativeInstallerWrongShaPrivateProbe {
+ static volatile bool ObserverStopping;
+ [DllImport("kernel32.dll",SetLastError=true)] static extern bool GetExitCodeProcess(IntPtr process,out uint code);
+ [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Unicode)] struct SI {public int cb;public string reserved,desktop,title;public uint x,y,xs,ys,xc,yc,fill,flags;public short show,reserved2;public IntPtr r2,input,output,error;}
+ [StructLayout(LayoutKind.Sequential)] struct PI {public IntPtr process,thread;public uint pid,tid;}
+ [StructLayout(LayoutKind.Sequential)] struct Basic {public long a,b;public uint flags;public UIntPtr min,max;public uint active;public UIntPtr affinity;public uint priority,schedule;}
+ [StructLayout(LayoutKind.Sequential)] struct Io {public ulong a,b,c,d,e,f;}
+ [StructLayout(LayoutKind.Sequential)] struct Limits {public Basic basic;public Io io;public UIntPtr p,j,peakp,peakj;}
+ [StructLayout(LayoutKind.Sequential)] struct Accounting {public long user,kernel,periodUser,periodKernel;public uint faults,total,active,terminated;}
+ [StructLayout(LayoutKind.Sequential)] struct Point {public int x,y;}
+ [StructLayout(LayoutKind.Sequential)] struct Rect {public int left,top,right,bottom;}
+ [DllImport("user32.dll",CharSet=CharSet.Unicode,SetLastError=true)] static extern IntPtr CreateDesktop(string name,IntPtr device,IntPtr mode,uint flags,uint access,IntPtr security);
+ [DllImport("user32.dll",SetLastError=true)] static extern bool CloseDesktop(IntPtr h);
+ [DllImport("user32.dll",SetLastError=true)] static extern bool SetThreadDesktop(IntPtr h);
+ [DllImport("user32.dll")] static extern IntPtr GetThreadDesktop(uint tid);
+ [DllImport("kernel32.dll")] static extern uint GetCurrentThreadId();
+ [DllImport("user32.dll")] static extern IntPtr OpenInputDesktop(uint flags,bool inherit,uint access);
+ [DllImport("user32.dll",CharSet=CharSet.Unicode)] static extern bool GetUserObjectInformation(IntPtr h,int index,StringBuilder value,int length,out int needed);
+ delegate bool EnumFn(IntPtr h,IntPtr l);
+ [DllImport("user32.dll")] static extern bool EnumDesktopWindows(IntPtr desktop,EnumFn callback,IntPtr l);
+ [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h,out uint pid);
+ [DllImport("user32.dll",CharSet=CharSet.Unicode)] static extern int GetWindowText(IntPtr h,StringBuilder text,int length);
+ [DllImport("user32.dll",CharSet=CharSet.Unicode)] static extern int GetClassName(IntPtr h,StringBuilder text,int length);
+ [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
+ [DllImport("user32.dll",SetLastError=true)] static extern bool PostMessage(IntPtr h,uint m,IntPtr w,IntPtr l);
+ [DllImport("user32.dll",EntryPoint="SendMessageTimeoutW",ExactSpelling=true,CharSet=CharSet.Unicode,SetLastError=true)] static extern IntPtr SendMessageTimeout(IntPtr h,uint m,IntPtr w,IntPtr l,uint flags,uint timeout,out IntPtr result);
+ [DllImport("user32.dll")] static extern bool ScreenToClient(IntPtr h,ref Point p);
+ [DllImport("user32.dll")] static extern bool ClientToScreen(IntPtr h,ref Point p);
+ [DllImport("user32.dll")] static extern bool GetClientRect(IntPtr h,out Rect rect);
+ [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr h,out Rect rect);
+ [DllImport("user32.dll",SetLastError=true)] static extern bool SetWindowPos(IntPtr h,IntPtr after,int x,int y,int width,int height,uint flags);
+ [DllImport("user32.dll")] static extern bool PrintWindow(IntPtr h,IntPtr dc,uint flags);
+ [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)] static extern bool CreateProcess(string app,StringBuilder command,IntPtr sa,IntPtr ta,bool inherit,uint flags,IntPtr env,string cwd,ref SI si,out PI pi);
+ [DllImport("kernel32.dll")] static extern IntPtr CreateJobObject(IntPtr sa,string name);
+ [DllImport("kernel32.dll")] static extern bool SetInformationJobObject(IntPtr h,int info,ref Limits limits,uint size);
+ [DllImport("kernel32.dll")] static extern bool AssignProcessToJobObject(IntPtr job,IntPtr process);
+ [DllImport("kernel32.dll",SetLastError=true)] static extern bool QueryInformationJobObject(IntPtr job,int info,out Accounting accounting,uint size,IntPtr needed);
+ [DllImport("kernel32.dll")] static extern bool TerminateJobObject(IntPtr job,uint code);
+ [DllImport("kernel32.dll")] static extern uint ResumeThread(IntPtr thread);
+ [DllImport("kernel32.dll")] static extern uint WaitForSingleObject(IntPtr h,uint ms);
+ [DllImport("kernel32.dll")] static extern bool TerminateProcess(IntPtr process,uint code);
+ [DllImport("kernel32.dll")] static extern bool GetProcessTimes(IntPtr h,out long created,out long exited,out long kernel,out long user);
+ [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr h);
+ static void Require(bool ok,string reason){if(!ok)throw new Exception(reason+" (Win32 "+Marshal.GetLastWin32Error()+")");}
+ static string Input(){IntPtr h=OpenInputDesktop(0,false,1);Require(h!=IntPtr.Zero,"Input desktop query");try{int n;StringBuilder b=new StringBuilder(256);Require(GetUserObjectInformation(h,2,b,512,out n),"Input desktop name");return b.ToString();}finally{CloseDesktop(h);}}
+ static void Owned(IntPtr window,PI pi,long start){Require(!ObserverStopping,"Observer cooperative stop");uint pid;GetWindowThreadProcessId(window,out pid);long actual,e,k,u;Require(pid==pi.pid && WaitForSingleObject(pi.process,0)==258,"Owned HWND/process identity");Require(GetProcessTimes(pi.process,out actual,out e,out k,out u)&&actual==start,"Owned process start identity");}
+ [StructLayout(LayoutKind.Sequential)] struct S10SA {public int length;public IntPtr descriptor;public int inherit;}
+ [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)] static extern bool CreateDirectoryW(string path,ref S10SA attributes);
+ static void S10Plain(string path){
+  Require(Path.IsPathRooted(path)&&Path.GetFullPath(path)==path,"Absolute normalized fixture path required");
+  string current=path;int count=0;
+  while(!String.IsNullOrEmpty(current)){
+   Require(++count<=512,"Path ancestor bound");
+   if(File.Exists(current)||Directory.Exists(current))Require((File.GetAttributes(current)&FileAttributes.ReparsePoint)==0,"Reparse fixture path rejected");
+   string next=Path.GetDirectoryName(current);if(next==current)break;current=next;
+  }
+ }
+ static void S10PrivateNewDirectory(string path){
+  S10Plain(path);Require(!File.Exists(path)&&!Directory.Exists(path),"Fresh private directory required");
+  var sid=System.Security.Principal.WindowsIdentity.GetCurrent().User;Require(sid!=null,"Current SID unavailable");
+  var security=new System.Security.AccessControl.DirectorySecurity();security.SetOwner(sid);security.SetAccessRuleProtection(true,false);
+  security.AddAccessRule(new System.Security.AccessControl.FileSystemAccessRule(sid,System.Security.AccessControl.FileSystemRights.FullControl,
+   System.Security.AccessControl.InheritanceFlags.ContainerInherit|System.Security.AccessControl.InheritanceFlags.ObjectInherit,
+   System.Security.AccessControl.PropagationFlags.None,System.Security.AccessControl.AccessControlType.Allow));
+  byte[] bytes=security.GetSecurityDescriptorBinaryForm();GCHandle pinned=GCHandle.Alloc(bytes,GCHandleType.Pinned);
+  try{S10SA sa=new S10SA();sa.length=Marshal.SizeOf(typeof(S10SA));sa.descriptor=pinned.AddrOfPinnedObject();
+   Require(CreateDirectoryW(path,ref sa),"Create-only private directory failed");
+  }finally{pinned.Free();}
+  S10Plain(path);var observed=new DirectoryInfo(path).GetAccessControl();Require(observed.AreAccessRulesProtected,"Private ACL not protected");
+  Require(observed.GetOwner(typeof(System.Security.Principal.SecurityIdentifier)).Equals(sid),"Private owner mismatch");
+  var rules=observed.GetAccessRules(true,true,typeof(System.Security.Principal.SecurityIdentifier));Require(rules.Count==1,"Private ACL rule count");
+  var rule=(System.Security.AccessControl.FileSystemAccessRule)rules[0];Require(rule.IdentityReference.Equals(sid)&&!rule.IsInherited&&rule.AccessControlType==System.Security.AccessControl.AccessControlType.Allow&&rule.FileSystemRights==System.Security.AccessControl.FileSystemRights.FullControl,"Private ACL exact rule mismatch");
+ }
+ static string S10FileHash(FileStream file){long size=file.Length;Require(size>=0&&size<=268435456,"Pinned hash bound");file.Position=0;using(var sha=System.Security.Cryptography.SHA256.Create()){byte[] buffer=new byte[65536];long total=0;while(true){int n=file.Read(buffer,0,(int)Math.Min(buffer.Length,size-total+1));if(n==0)break;total+=n;Require(total<=size,"Hash growth rejected before update");sha.TransformBlock(buffer,0,n,null,0);}Require(total==size&&file.Length==size,"Pinned size changed");sha.TransformFinalBlock(new byte[0],0,0);return BitConverter.ToString(sha.Hash).Replace("-","").ToLowerInvariant();}}
+ static FileStream S10Pin(string path,string expected){
+  S10Plain(path);Require(expected.Length==64,"SHA length");foreach(char c in expected)Require((c>='0'&&c<='9')||(c>='a'&&c<='f')||(c>='A'&&c<='F'),"SHA syntax");
+  var file=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read);try{Require(S10FileHash(file)==expected.ToLowerInvariant(),"Pinned immutable SHA mismatch");return file;}catch{file.Dispose();throw;}
+ }
+ [DllImport("user32.dll",SetLastError=true)] static extern IntPtr GetDlgItem(IntPtr window,int id);
+ [DllImport("user32.dll")] static extern bool IsWindowEnabled(IntPtr h);
+ static string Quote(string s){var b=new StringBuilder("\"");int slash=0;foreach(char c in s){if(c=='\\'){slash++;continue;}if(c=='"'){b.Append('\\',slash*2+1);b.Append(c);}else{b.Append('\\',slash);b.Append(c);}slash=0;}b.Append('\\',slash*2);return b.Append('"').ToString();}
+ static string ControlText(IntPtr window,int id,PI pi,long created){Owned(window,pi,created);IntPtr child=GetDlgItem(window,id);Require(child!=IntPtr.Zero,"Exact owned control missing");uint pid;GetWindowThreadProcessId(child,out pid);Require(pid==pi.pid,"Control PID mismatch");IntPtr size;Require(SendMessageTimeout(child,0x000e,IntPtr.Zero,IntPtr.Zero,2,1000,out size)!=IntPtr.Zero,"Bounded text length");Require(size.ToInt64()>=0&&size.ToInt64()<=32767,"Text cap");IntPtr mem=Marshal.AllocHGlobal(65536);try{IntPtr read;Require(SendMessageTimeout(child,0x000d,new IntPtr(32768),mem,2,1000,out read)!=IntPtr.Zero,"Bounded text read");Require(read.ToInt64()>=0&&read.ToInt64()<=32767,"Text return bound");return Marshal.PtrToStringUni(mem,(int)read);}finally{Marshal.FreeHGlobal(mem);}}
+ static void Click(IntPtr window,int id,PI pi,long created){Owned(window,pi,created);IntPtr child=GetDlgItem(window,id);uint pid;GetWindowThreadProcessId(child,out pid);Require(child!=IntPtr.Zero&&pid==pi.pid&&IsWindowEnabled(child),"Owned enabled button");IntPtr r;Require(SendMessageTimeout(child,0x00f5,IntPtr.Zero,IntPtr.Zero,2,1000,out r)!=IntPtr.Zero,"Bounded BM_CLICK");}
+ static void WaitStatus(IntPtr hwnd,PI pi,long created,string expected,int seconds){var clock=System.Diagnostics.Stopwatch.StartNew();while(clock.Elapsed.TotalSeconds<seconds){if(ControlText(hwnd,301,pi,created)==expected)return;Thread.Sleep(100);}throw new Exception("Exact status deadline");}
+ static void Png(IntPtr hwnd,PI pi,long created,string file){Owned(hwnd,pi,created);Rect r;Require(GetClientRect(hwnd,out r)&&r.right>0&&r.bottom>0&&r.right<=1600&&r.bottom<=1200,"PNG bound");using(var bitmap=new System.Drawing.Bitmap(r.right,r.bottom))using(var g=System.Drawing.Graphics.FromImage(bitmap)){IntPtr dc=g.GetHdc();try{Require(PrintWindow(hwnd,dc,1),"Private owned PNG capture");}finally{g.ReleaseHdc(dc);}using(var output=new FileStream(file,FileMode.CreateNew,FileAccess.Write,FileShare.None))bitmap.Save(output,System.Drawing.Imaging.ImageFormat.Png);}}
+ [DllImport("kernel32.dll")] static extern void SetLastError(uint error);
+ static void WriteNew(string path,byte[] data){using(var f=new FileStream(path,FileMode.CreateNew,FileAccess.Write,FileShare.Read)){f.Write(data,0,data.Length);f.Flush(true);}}
+ public static int Main(string[] args){Console.OutputEncoding=new UTF8Encoding(false);var result=new Dictionary<string,object>{{"status","FAIL"},{"actual_ime",false},{"physical_reader",false},{"installer_complete",false},{"global_input",false},{"clipboard_used",false}};IntPtr desktop=IntPtr.Zero,job=IntPtr.Zero;PI pi=new PI();IntPtr previous=GetThreadDesktop(GetCurrentThreadId());bool bound=false;string output=null;int exit=1;
+ try{Require(args.Length==5,"installerExe installerSHA CPU CPU_SHA freshOutput");output=Path.GetFullPath(args[4]);S10PrivateNewDirectory(output);string input=Input();result["input_before"]=input;using(var installer=S10Pin(Path.GetFullPath(args[0]),args[1]))using(var cpu=S10Pin(Path.GetFullPath(args[2]),args[3])){
+ string root=Path.Combine(Path.GetTempPath(),"dlpad-native-installer-owned-"+Guid.NewGuid().ToString("N"));S10PrivateNewDirectory(root);string source=Path.Combine(root,"source");S10PrivateNewDirectory(source);string payload=Path.Combine(source,"dlpad.exe");long size=cpu.Length;Require(size>0&&size<=134217728,"CPU bounded");cpu.Position=0;using(var f=new FileStream(payload,FileMode.CreateNew,FileAccess.Write,FileShare.Read)){byte[] buffer=new byte[65536];long total=0;int n;while((n=cpu.Read(buffer,0,(int)Math.Min(buffer.Length,size-total+1)))!=0){total+=n;Require(total<=size,"Growing copy refused");f.Write(buffer,0,n);}Require(total==size,"Exact copy count");f.Flush(true);}byte[] notice=Encoding.UTF8.GetBytes("Synthetic local development notice; no legal completeness claim.\n");WriteNew(Path.Combine(source,"notice.txt"),notice);WriteNew(Path.Combine(root,"foreign-sentinel"),Encoding.ASCII.GetBytes("preserve"));string noticeSHA;using(var f=File.OpenRead(Path.Combine(source,"notice.txt")))noticeSHA=S10FileHash(f);string manifest=Path.Combine(root,"manifest.json"),bundle=Path.Combine(root,"bundle"),journal=Path.Combine(root,"journal");WriteNew(manifest,Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new{schema=1,version="0.1.0",target="x86_64-pc-windows-msvc",development_only=true,entries=new[]{new{name="dlpad.exe",bytes=size,sha256=new string('0',64)},new{name="notice.txt",bytes=(long)notice.Length,sha256=noticeSHA}}})));
+ string manifestSHA;using(var f=File.OpenRead(manifest))manifestSHA=S10FileHash(f);string name="dlpad-installer-"+Guid.NewGuid().ToString("N");desktop=CreateDesktop(name,IntPtr.Zero,IntPtr.Zero,0,0x1ff,IntPtr.Zero);Require(desktop!=IntPtr.Zero,"Private desktop");job=CreateJobObject(IntPtr.Zero,null);Limits lim=new Limits();lim.basic.flags=0x2000;Require(job!=IntPtr.Zero&&SetInformationJobObject(job,9,ref lim,(uint)Marshal.SizeOf(typeof(Limits))),"Owned Job");SI si=new SI();si.cb=Marshal.SizeOf(typeof(SI));si.desktop=name;string exe=Path.GetFullPath(args[0]);string cmd=Quote(exe)+" --manifest "+Quote(manifest)+" --source-dir "+Quote(source)+" --bundle-root "+Quote(bundle)+" --journal-root "+Quote(journal);Require(CreateProcess(exe,new StringBuilder(cmd),IntPtr.Zero,IntPtr.Zero,false,0x08000004,IntPtr.Zero,Path.GetDirectoryName(exe),ref si,out pi),"Suspended bootstrap");Require(AssignProcessToJobObject(job,pi.process),"Assign before resume");long created,e,k,u;Require(GetProcessTimes(pi.process,out created,out e,out k,out u),"Original creation");Require(ResumeThread(pi.thread)!=0xffffffff,"Resume");Require(SetThreadDesktop(desktop),"Private observer bind");bound=true;IntPtr hwnd=IntPtr.Zero;for(int tries=0;tries<150&&hwnd==IntPtr.Zero;tries++){int count=0;bool overflow=false,duplicate=false;SetLastError(0);bool ok=EnumDesktopWindows(desktop,delegate(IntPtr h,IntPtr l){if(++count>64){overflow=true;return false;}uint id;GetWindowThreadProcessId(h,out id);var title=new StringBuilder(256);var cls=new StringBuilder(256);GetWindowText(h,title,256);GetClassName(h,cls,256);if(id==pi.pid&&IsWindowVisible(h)&&title.ToString()=="dlpad 개발용 설치"&&cls.ToString()=="DlpadDevelopmentInstaller"){if(hwnd!=IntPtr.Zero){duplicate=true;return false;}hwnd=h;}return true;},IntPtr.Zero);Require(!overflow&&!duplicate&&(ok||(!ok&&Marshal.GetLastWin32Error()==0&&count==0)),"Exact desktop enumeration");Thread.Sleep(100);}Require(hwnd!=IntPtr.Zero,"Main HWND");Owned(hwnd,pi,created);Require(!Directory.Exists(bundle)&&!Directory.Exists(journal),"No auto install");foreach(var pair in new[]{new{ID=101,Text=manifest},new{ID=102,Text=source},new{ID=103,Text=bundle},new{ID=104,Text=journal}})Require(ControlText(hwnd,pair.ID,pi,created)==pair.Text,"Exact path prepopulation");Png(hwnd,pi,created,Path.Combine(output,"initial.png"));Click(hwnd,201,pi,created);WaitStatus(hwnd,pi,created,"원본 파일이나 기록을 확인하지 못했습니다. 명세와 원본이 같은 묶음인지 확인하세요. 만들어진 파일은 보존합니다.",90);Require(IsWindowEnabled(GetDlgItem(hwnd,201))&&!IsWindowEnabled(GetDlgItem(hwnd,202))&&IsWindowEnabled(GetDlgItem(hwnd,203))&&!IsWindowEnabled(GetDlgItem(hwnd,204)),"Completed failure idle controls");Require(!Directory.Exists(bundle)&&!File.Exists(bundle)&&!Directory.Exists(journal)&&!File.Exists(journal),"Wrong SHA creates neither root");Png(hwnd,pi,created,Path.Combine(output,"wrongsha.png"));Owned(hwnd,pi,created);Require(PostMessage(hwnd,0x10,IntPtr.Zero,IntPtr.Zero)&&WaitForSingleObject(pi.process,10000)==0,"Natural close");uint code;Require(GetExitCodeProcess(pi.process,out code)&&code==0,"Natural exit0");bool empty=false;for(int i=0;i<250;i++){Accounting a;Require(QueryInformationJobObject(job,1,out a,(uint)Marshal.SizeOf(typeof(Accounting)),IntPtr.Zero),"Original Job query");if(a.active==0){empty=true;break;}Thread.Sleep(20);}Require(empty,"Natural Job0 deadline");Require(!Directory.Exists(bundle)&&!File.Exists(bundle)&&!Directory.Exists(journal)&&!File.Exists(journal),"Both roots still absent after exit");Require(S10FileHash(installer)==args[1]&&S10FileHash(cpu)==args[3],"Original inputs preserved");using(var f=File.OpenRead(payload))Require(S10FileHash(f)==args[3],"Synthetic source preserved");using(var f=File.OpenRead(manifest))Require(S10FileHash(f)==manifestSHA,"Manifest preserved");using(var f=File.OpenRead(Path.Combine(source,"notice.txt")))Require(S10FileHash(f)==noticeSHA,"Notice preserved");Require(File.ReadAllText(Path.Combine(root,"foreign-sentinel"))=="preserve","Sentinel preserved");result["owned_root"]=root;result["pid"]=pi.pid;result["creation_filetime"]=created;result["hwnd"]=hwnd.ToInt64();result["natural_exit_code"]=code;result["natural_job_zero"]=true;result["wrongsha_error_status_observed"]=true;result["new_roots_absent"]=true;result["worker_completion_observed"]=true;result["typed_error_kind_receipt_observed"]=false;result["error_scope"]="Exact GUI InvalidData-associated catalog message, not an ErrorKind receipt";result["pixel_review_pending"]=true;result["status"]="REVIEW_REQUIRED";exit=0;}}
+ catch(Exception error){result["error"]=error.GetType().Name+": "+error.Message;}
+ finally{if(pi.process!=IntPtr.Zero&&WaitForSingleObject(pi.process,0)!=0){result["forced_cleanup"]=true;if(job!=IntPtr.Zero)TerminateJobObject(job,94);else TerminateProcess(pi.process,94);WaitForSingleObject(pi.process,5000);exit=1;result["status"]="FAIL";}if(pi.thread!=IntPtr.Zero)CloseHandle(pi.thread);if(pi.process!=IntPtr.Zero)CloseHandle(pi.process);if(job!=IntPtr.Zero)CloseHandle(job);if(bound){bool restored=SetThreadDesktop(previous);result["thread_desktop_restored"]=restored;if(!restored){exit=1;result["status"]="FAIL";}}if(desktop!=IntPtr.Zero){bool closed=CloseDesktop(desktop);result["private_desktop_closed"]=closed;if(!closed){exit=1;result["status"]="FAIL";}}try{string after=Input();result["input_after"]=after;bool same=result.ContainsKey("input_before")&&Object.Equals(result["input_before"],after);result["input_desktop_unchanged"]=same;if(!same){exit=1;result["status"]="FAIL";}}catch{exit=1;result["status"]="FAIL";}string json=new JavaScriptSerializer(){MaxJsonLength=16384}.Serialize(result);if(output!=null&&Directory.Exists(output))WriteNew(Path.Combine(output,"result.json"),Encoding.UTF8.GetBytes(json));Console.WriteLine(json);}return exit;}
+}

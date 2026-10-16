@@ -1,0 +1,25 @@
+[workspace]
+members = ["crates/core", "crates/engine", "crates/app"]
+resolver = "2"
+exclude = ["vendor/winit", "vendor/accesskit_atspi_common", "vendor/egui", "vendor/accesskit_windows"]
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.94"
+license = "MIT"
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+[profile.release]
+opt-level = "s"
+lto = "thin"
+codegen-units = 1
+strip = true
+
+
+[patch.crates-io]
+egui = { path = "vendor/egui" }
+winit = { path = "vendor/winit" }
+accesskit_windows = { path = "vendor/accesskit_windows" }
+
+accesskit_atspi_common = { path = "vendor/accesskit_atspi_common" }

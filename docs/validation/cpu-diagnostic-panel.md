@@ -1,0 +1,19 @@
+# CPU 진단 panel 구현 범위
+
+2026-10-03, R13/S10 P0 최초릴리스 기능. 신규 accessible_diagnostics.rs만수정했다. DiagnosticReport와reports::attach_local_mpd/save_report/ReportFormat을재사용하며외부전송·rawcache·자동삭제·기존파일덮어쓰기를추가하지않는다. 새파일저장과localMPD첨부는명시버튼으로만실행한다.
+
+Report는Clone불가하여UI Option<Box>에서command로이동하고workerresponse로돌아온다. report파일작업중편집·추가·export를disabled한다. UI에는이전에검토한cachedpreview만남고report를중복보관하지않는다. Markdown/JSON cache는report수정·format변경·workerresult때만계산하며매frame직렬화하지않는다. preview최대2MiB, 입력32KiB UTF8byte/typed8192chars, 기존sanitizedlog최대4096bytes, MPD첨부는engine1MiB+검출1byte정책이다. 초과preview는텍스트를비우고copy/export를거절한다. 오류는한국어fixedcatalog이며rawpath/panicpayload를전달하지않는다.
+
+로그선택·수정후core edit_log로재정제·개별/전체제외, MPD구조preview및개별/전체제외를제공한다. 저장은create_new engine정책으로기존파일을보존하며clipboard는명시copy만한다. 파일I/O는단일worker와command/result각capacity1. ctx는workerresult/stopack때만wake하고idleUI주기repaint없음. stop은새명령을막고진행중boundedMPD/저장호출완료를기다린다. UIthread join/Drop blocking없음. outerworker panic은RAIIstopack/fixedfailedsignal로처리하고operationpanic은report반환과고정실패로처리한다. OSabort/강제종료ack보장은별도범위다.
+
+작성한실패회귀7개: 기존exportfile보존+report반환, 명시새sanitizedJSONexport/cache0, MPD구조화/secret제거/oversize원본보존, editedlog재정제/invalidindex보존, preview/Unicode입력상한, undrainedresultstopack, workerpanicstopack/fixederror. 담당파일rustfmt exit0. 7개회귀는실제LinuxCPU와Windowsaccessible/CPU양binary에서실행해통과했고root연결·컴파일·Clippy·release도통과했다.
+
+root소유중앙catalog참조: OMIT_MPD/OMIT_ALL_MPD/DIAGNOSTIC_FAILED/DIAGNOSTIC_SAVED/PREVIEW_TOO_LARGE/DIAGNOSTIC_INPUT_TOO_LARGE. 기존문구는REPORT_REVIEW/COPY_REPORT/SAVE_REPORT/EXPORT_PATH/MARKDOWN/JSON/LOG_INDEX/EDIT_LOG/APPLY_EDIT/OMIT_LOG/REMOVE_LOGS/MPD_PATH/ATTACH_MPD/INVALID_LOG_INDEX를사용한다.
+
+현재미검증: actualprivateGUI previewformat/copy/localattach/edit/omit/save와AccessKit/keyboard의전체인수, Windows/macOS/Linux진단GUI전체동작. rootmodule/Candidate report이관·CloseWait연결과CLI검증은완료했다. Report상태는session메모리만이며외부AI API/계정/클라우드/업로드와무관하다.
+
+Windows 실제 통합시험에서 기존 Candidate fixture의 AlreadyExists 충돌이확인되어두panel의cfg(test)Fixture에도독립 AtomicU64 sequence와create_dir AlreadyExists만최대256회재시도를추가했다. 기존temp경로삭제없이새소유디렉터리생성성공후만fixturecleanup대상으로삼는다. productionjobID/reportclock/worker코드는변경하지않았다. 최초실패증거는windows-cpu-diagnostics/에보존하고새fixturefix검증은별도prefix를사용한다.
+
+후속실제검증: rootLinuxCPUClippy/27tests/release통과보고; WindowsGNUCPU전체Clippy/test/release모두exit0/167passed1ignored를windows-cpu-diagnostics-fixturefix.md와원시증거에기록했다. 신규진단7개회귀는Windowsaccessible/CPU양binary통과. 새CPUexe298e1b...를privateGUI담당에게전달했으며actualGUI게이트는유지한다.
+
+현재통합결과: rootLinux fmt/CPU Clippy/default193/CPU242/fullrelease pass, 생산CPU8fb4 SHA는test-onlyfixture보강전후동일. Windowsfixturefix전체CPU lint/test/release167passed1ignored/237inputsstable. S10workitem은전체진단GUI인수진행중이라in-progress를유지하고7개module시험성공을실제GUI성공으로대체하지않는다.
