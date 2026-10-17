@@ -929,13 +929,58 @@ mod tests {
     }
     #[test]
     fn marker_replacement_preserves_original_and_foreign_bytes() {
+        use windows_sys::Wdk::Storage::FileSystem::{
+            FILE_RENAME_INFORMATION, FileRenameInformation, NtSetInformationFile,
+        };
+        use windows_sys::Win32::System::IO::IO_STATUS_BLOCK;
         let (_temp, source, cache, copy, bytes, mut owned) = owned_fixture();
         let marker = copy.parent().unwrap().join(recovery_marker::MARKER_NAME);
         let original = copy.parent().unwrap().join("original-marker-sentinel");
         let marker_bytes = fs::read(&marker).unwrap();
-        fs::rename(&marker, &original).unwrap();
+        // Inject replacement through a retained DELETE capability. MoveFileEx's
+        // path-based target-parent reopen conflicts with the owner's DELETE
+        // handle on Server 2022, before this test reaches identity validation.
+        // This fixture-only capability does not alter production sharing rights.
+        let raw = unsafe {
+            ReOpenFile(
+                owned.marker.as_ref().unwrap().0.as_raw_handle(),
+                DELETE,
+                SHARE_ALL,
+                FILE_FLAG_OPEN_REPARSE_POINT,
+            )
+        };
+        assert!(!raw.is_null() && raw != INVALID_HANDLE_VALUE);
+        let rename_cap = unsafe { File::from_raw_handle(raw) };
+        let units: Vec<u16> = original.file_name().unwrap().encode_wide().collect();
+        let offset = std::mem::offset_of!(FILE_RENAME_INFORMATION, FileName);
+        let used = (offset + units.len() * 2).max(std::mem::size_of::<FILE_RENAME_INFORMATION>());
+        let mut storage = vec![0u64; used.div_ceil(8)];
+        let info = storage.as_mut_ptr().cast::<FILE_RENAME_INFORMATION>();
+        let mut io_status = IO_STATUS_BLOCK::default();
+        // SAFETY: aligned initialized storage, original live DELETE handle and
+        // fixed simple fixture leaf; NULL root means original same-parent rename.
+        let status = unsafe {
+            (*info).FileNameLength = (units.len() * 2) as u32;
+            std::ptr::copy_nonoverlapping(
+                units.as_ptr(),
+                info.cast::<u8>().add(offset).cast::<u16>(),
+                units.len(),
+            );
+            NtSetInformationFile(
+                rename_cap.as_raw_handle(),
+                &mut io_status,
+                info.cast(),
+                used as u32,
+                FileRenameInformation,
+            )
+        };
+        assert_eq!(status, 0, "fixture rename NTSTATUS {status:#010x}");
+        drop(rename_cap);
         fs::write(&marker, &marker_bytes).unwrap();
-        assert!(owned.cleanup().is_err());
+        assert_eq!(
+            owned.cleanup().unwrap_err(),
+            CookieImportError::CleanupOwnershipChanged
+        );
         owned.defer_cleanup();
         assert_eq!(fs::read(original).unwrap(), marker_bytes);
         assert_eq!(fs::read(source).unwrap(), bytes);

@@ -296,11 +296,15 @@ impl CreatedFile {
         let mut storage = vec![0u64; count];
         let info = storage.as_mut_ptr().cast::<FILE_RENAME_INFORMATION>();
         let mut status = IO_STATUS_BLOCK::default();
-        // SAFETY: live original synchronous file/root handles, aligned initialized
+        // Same-parent rename uses the original file's parent, not a separately
+        // opened target directory. Supplying RootDirectory makes older Windows
+        // reopen the target and can conflict with our retained DELETE capability.
+        // FILE_RENAME_INFORMATION documents NULL + a simple leaf for this case.
+        // SAFETY: live original synchronous file handle, aligned initialized
         // storage, bounded validated single leaf, and non-replacing class 10.
         let result = unsafe {
             (*info).Anonymous.ReplaceIfExists = false;
-            (*info).RootDirectory = root.file.as_raw_handle();
+            (*info).RootDirectory = std::ptr::null_mut();
             (*info).FileNameLength = u32::try_from(name_bytes)
                 .map_err(|_| FreshNamePublishError::BeforePublish(rejected()))?;
             std::ptr::copy_nonoverlapping(

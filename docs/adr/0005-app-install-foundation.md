@@ -106,3 +106,7 @@ Native development bootstrap 후속 후보: 기존 worker-only local prepare/ins
 전체 결정은 Proposed다. 별도 test-only cold journal v4는 기존 원 parent HANDLE과 정확한 leaf의 NtCreateFile FILE_OPEN으로 append 권한을 관측하고 Windows17회귀·strict engine clippy를 통과했다. 앞선 ReOpenFile의 raw5 실패는 보존하며 Windows 전체의 일반적 불가능성으로 단정하지 않는다. 이 실험은 Live 제품/설치본에 채택하지 않았다.
 
 최초 P0의 실제 복구·업그레이드 시험은 현재 지원하는 새 폴더 설치·Accepted ADR0009 명시 감독 실행 정책으로 진행했다. 서로 다른 두0.1.0 개발 snapshot A31/B32의 동일 합성 프로필 A→B→A와 B 설치 충돌 후 A 재실행을 실제 확인했다. Queued3·library2·작은 테마 변경의 좁은 호환 근거이며 미래 DB downgrade·자동 교체/rollback·crash/powerloss 보장이 아니다. [실제 범위](../work-items/S07-manual-side-by-side-profile-20261016.md). 전체 durable revision 제안을 사용자 확정 P0 의무로 상향하지 않으며 앱 updater는 사용자 지정 후속 순서를 유지한다.
+
+## 2026-10-17 동일 폴더 공개의 Windows 호환성 수정 후보
+
+실제 hosted Server2022의 원 파일 공개가 NTSTATUS0xc0000043으로 실패해 설치 계열21회귀로 전파됐다. 동일 폴더의 단순 leaf 공개는 원 DELETE file HANDLE을 유지한 채 FILE_RENAME_INFORMATION.RootDirectory=NULL을 사용하도록 수정한다. 원 fresh root identity 검증·replace=false·foreign write/delete 거절은 유지하며 절대경로 재개방/공유 모드 완화로 대체하지 않는다. [공식 구조 계약](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_file_rename_information)과 [원 실패·최소 비교·실제 검증 상태](../work-items/S11-hosted-windows-file-sharing-20261017.md)를 따른다. 이 국소 호환성 수정은 Proposed durable revision/updater 아키텍처의 채택을 뜻하지 않는다.
