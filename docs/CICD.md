@@ -14,6 +14,12 @@ Git에는 소스·문서·native assets·vendor·lock을 넣고 로컬 증거/ZI
 
 첫 docs job19명령과 Windows source/format은 실제 통과했으나 run38942396783의 Lint는125로 실패했다. 원 artifact는 Clippy 자체0·두 로그reader종료·원Job자손5초내자연종료미확인/강제정리를 기록했다. Cargo 오류로 바꾸어 설명하지 않는다. 기존 통과 로컬 CI와 같은 dev/test debug0·incremental0 설정과 상세 실패/잔류프로세스/로그 tail 출력을 추가하고 실제 새 hosted 실행에서 검증한다. 테스트 assertions·overflow·release 프로필과 자연Job종료 게이트는 유지한다. 실제 c7 재실행38946356371도 Clippy0 뒤 vctip.exe 잔류로 실패했으므로 프로필 일치만으로 해결됐다고 보지 않는다. 다음 수정은 원 설치·registry를 보존하고 runner 임시 폴더의 byte-identical MSVC bin 복사본에서만 vctip.exe를 제외한다. 공식 [Developer PowerShell](https://learn.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell?view=vs-2022)의 원 INCLUDE/LIB를 사용하며 CC/CXX/AR/linker와 PATH는 복사본을 선택한다. 복사는 최대4096파일/개별512MiB/전체2GiB로 제한하고 실제 bytes/hash를 ci-msvc-copy.json artifact에 기록한다. Rust/앱 의존성·배포 크기 비용0이며 runner 임시 디스크·복사 I/O만 추가된다. 실제 새 hosted 완료 전에는 해결로 표시하지 않는다. [실패 작업](work-items/S11-hosted-ci-lint-125-20261017.md).
 
+## 실제 hosted 전체 통과 — 2026-10-17
+
+[run39040643416](https://github.com/joongi007/dlpad/actions/runs/39040643416), source commit5d4cf73bf2e642c378e564ff7eae2ae51fedf430의 docs와 Windows2022 native job이 모두 성공했다. fmt·workspace CPU Clippy/test·workspace release·대체/CPU/GPU renderer·installer/companion compile·source/lifecycle binding과 graph/artifact 기록을 실행했다. 원 test stdout은 주 harness1684PASS/0FAIL/43ignored와 별도 filtered child1PASS다. 7개 capture 모두 원 Job 자연종료/worker0/reader종료·강제정리0을 확인했다.
+
+첫125는 vctip.exe 잔류였고, 그 뒤22FAIL은 동일 폴더 publication에 불필요한 target-parent reopen 및 marker 시험의 주입 방식 문제였다. 원 설치를 보존한 CI-private MSVC와 원 file HANDLE의 same-parent rename으로 수정했다. [종료125](work-items/S11-hosted-ci-lint-125-20261017.md), [Windows 공유 실패·최종 증거](work-items/S11-hosted-windows-file-sharing-20261017.md). 이 성공은 실제 GUI/별도 native fixture43개·서명·정식 패키징·공개 CD 완료가 아니다. 이후 문서-only commit의 재실행 상태는 위 source 검증과 구분해 Actions에서 확인한다.
+
 ## 목표 파이프라인
 
 | 시점 | 수행 | 결과/게이트 |

@@ -29,7 +29,7 @@ cargo build -p dlpad --bin dlpad-cpu --features cpu --release --locked
 
 ## 검증과 CI
 
-PR·push에서 문서·Python 정책 검사와 Windows Rust 포맷·린트·테스트·release 빌드를 실행하도록 [GitHub Actions](.github/workflows/ci.yml)를 설정했습니다. 개발 실행 파일과 로그를 artifact로 보관합니다. 설정 존재와 실제 Actions 실행 성공은 구분하며, 서명·정식 패키징·Release 게시 자동화는 후속입니다. [CI/CD 범위](docs/CICD.md).
+PR·push에서 문서·Python 정책 검사와 Windows Rust 포맷·린트·테스트·release 빌드를 실행하도록 [GitHub Actions](.github/workflows/ci.yml)를 설정했습니다. 개발 실행 파일과 로그를 artifact로 보관합니다. 2026-10-17 [Windows hosted CI 전체 통과](https://github.com/joongi007/dlpad/actions/runs/39040643416)를 확인했습니다(source `5d4cf73`). 서명·정식 패키징·Release 게시 자동화는 후속입니다. [CI/CD 범위](docs/CICD.md).
 
 ```sh
 python3 scripts/check_docs.py --source-only

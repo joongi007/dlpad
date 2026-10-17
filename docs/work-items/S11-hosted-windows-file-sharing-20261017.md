@@ -1,6 +1,6 @@
 # S11: Hosted Windows 파일 공개·교체 실패 수정
 
-- 상태: in-progress
+- 상태: done
 - 분류: bug
 - 우선순위: P0
 - 요구사항: R08, R10, R11
@@ -38,3 +38,17 @@ cookies/windows.rs는 제품 동작 변경 없이 marker 교체 시험의 주입
 ## 로컬 검증 진행 기록
 
 source-only docs1118개·원 로컬 docs1213개/133개 upstream notice 검사가 통과했다. 첫 native Rust 검증은 fmt0 후 기존 GNU 환경 누출로 MSVC build-script link를 잘못 선택해101, 두 번째는 PATH의 GNU Cargo subcommand 영향으로 link.exe 누락101이었다. 두 원 로그와 자연Job정리/데스크톱 불변을 보존했으며 제품 테스트 실패나 성공으로 집계하지 않는다. 세 번째는 기존 검증 MSVC의 CARGO·PATH·RUSTC·linker·compiler 환경까지 맞춰 실행 중이다. Windows11 로컬과 Server2022 hosted 결과를 구분하며 원격 재실행으로 최종 판정한다.
+
+## 로컬 Windows 회귀 결과
+
+v3에서 cargo fmt --all -- --check와 engine all-targets strict Clippy는0이었다. engine 전체는568PASS/8FAIL/17ignored였고8개 모두 새 target에 guardian 선행 build가 없어서 실패한 것으로 로그를 확인했다. 이어 v4에서 동일 소스·같은 target에 cargo build -p dlpad-engine --bin dlpad-process-guard --locked --offline을 먼저 실행한 뒤 cargo test -p dlpad-engine --lib --locked --offline을 다시 실행했다:576PASS/0FAIL/17ignored, helper 내부 필터 child1PASS(합산 중복 안 함). 원 Job naturalzero/finalzero/forcedfalse·source675불변·input desktop불변·exit0이었다. 이전 실패들을 PASS로 수정하지 않고 v1~v4 로그를 각각 보존했다.
+
+수정3c7efbd와 별도 의미검색 계획5d4cf73을 origin/main에 정상 push하고 원격 동SHA를 확인했다. 실제 새 run39040643416은 현재 docs/format 성공, native 진행 중이다. Server2022 시험 통과/전체CI 완료는 아직 대기다.
+
+실제 run39040643416/5d4cf73의 Server2022 Tests 단계도 성공했다. 원 hosted22FAIL과 같은 전체 Windows 호출 경계에서 수정 후 GREEN을 관측했으며 fmt/Lint도 성공했다. 현재 release compile 이하 게이트가 진행 중이므로 전체 CI 성공 여부는 아직 별도다.
+
+## 최종 원격 통합 검증
+
+[실제 CI run39040643416](https://github.com/joongi007/dlpad/actions/runs/39040643416), commit5d4cf73bf2e642c378e564ff7eae2ae51fedf430의 docs/native 두 job이 모두 success다. fmt·workspace CPU strict Clippy·workspace CPU test·workspace release·대체 renderer·CPU·설치기·companion·GPU compile·source/7 lifecycle binding·artifact/graph 기록 전 단계가 통과했다. 원 로그의42개 주 harness는1684PASS/0FAIL/43ignored이고 내부 filtered child harness1개는1PASS다(원문 합산1685PASS/43harness이며 child 중복을 구분). 제외43개는 기존 별도 fixture/명시 native 인수 항목이며 이번 수정에서 제외를 추가하지 않았다.
+
+원 build-log ZIP548206B/SHA256 f8a241b7682275dba1c1a1ac0e2882add56e1ddffceaaf2763ccc47a0bf203c8를 원 head/artifact digest와 대조해 보존했다. 원7개 Job lifecycle 모두worker0/naturalemptytrue/forcedfalse/readerdrainedtrue이며 source-before/after 2148개 항목이 동일하다. 수정 Rust2파일의 artifact source SHA와 현재 파일 SHA도 일치한다. whole 포맷의 private_job_cleanup_verified/remote_execution_authenticated 등 더 넓은 readiness 플래그는 원 false를 유지한다. GUI·실제 계정·clean OS 설치·서명 배포 인수를 새로 완료한 것으로 확대하지 않는다. Cargo.lock/의존성/schema 변경0, 이 작업의 추가 결정/권한 대기0이다. 최종 결과와 README/CI 문서를 갱신하며 문서-only 후속 commit은 같은 workflow의 새 실행을 만들 수 있다.
