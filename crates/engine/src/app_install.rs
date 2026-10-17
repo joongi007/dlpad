@@ -346,3 +346,11 @@ pub use local_prepare::{
 mod local_remove;
 #[cfg(windows)]
 pub use local_remove::{LocalRemovalReport, LocalRemovalRequest, remove_local_journal_bundle};
+
+#[cfg(windows)]
+mod update_prepare;
+#[cfg(windows)]
+pub use update_prepare::{
+    PreparedUpdateBundle, UpdatePreparationError, UpdatePreparationFailure,
+    UpdatePreparationRequest, prepare_staged_update,
+};

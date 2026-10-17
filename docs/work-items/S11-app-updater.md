@@ -51,3 +51,8 @@ Root Linux targeted `cargo test -p dlpad-engine --lib --locked --offline app_upd
 [BundleObservation](S11-update-bundle-validation-20261018.md)을 통합했다. source경로 재오픈 없이 원StagedPackage reader/native identity와 signed전체SHA를 전후 확인하고, 현재preview7member·manifest5·CRC/SHA/size/ZIPphysical구조·binding을 검증한다. Root Linux37PASS, 실제Windowsengine strictlint/app_update43PASS와 실제unsigned49cZIP 호환성으로 해당 읽기범위를 인수했다. nativeUI/자동설치/기존버전교체 권한으로 승격하지 않는다. 새dependency/lock변경0, 호출시에만2회전체hash+member streaming 비용이며 idle0이다.
 
 후속교체 감사: 기존 active/receipt는 canonical고정경로와nativeID를 결합하므로 A를 A.old로 옮기는 rollback은 기존기록과 충돌한다. 기존A를 그대로두고 새고정B를 준비하는 방식을 검토한다. 원installer supervisor는 A Job밖에 있어 전환조정을 재사용할 수 있으나 A자식helper는같은Job에들어가 owner종료를기다리면서로대기할수있다. 새전용localIPC·원childPID/creation/SID/nonce검증·A CloseWait/Job0·B readiness ACK·append-only activation 선택과 profile schema 호환성 인수가 필요하다. restore전용IPC를 update명령으로 확장하거나 receipt를쓰기/삭제권한으로 오인하지 않는다. 이내용은 정적감사에근거한후속안이며 실제교체실험/채택/자동rollback완료가 아니다.
+
+
+## 별도 새 설치 준비 인수
+
+[별도 설치 준비](S11-update-bundle-preparation-20261018.md)를 구현했다. 원 ZIP 검증→7member 원 owned 파일 전개→readonly seal→기존 journal-aware 새 고정 bundle을 연결했으며 A/프로필/도구/미디어를 변경하지 않는다. Root 실제 Windows engine strict lint, app_update51PASS, 준비7PASS와 실제49c ZIP을 합성 test-only 키로 staging/새 bundle 준비한1PASS를 확인했다. 운영키·새 프로세스 실행·global launcher 전환·실패 복귀 인수는 여전히 남는다. 현재 native 화면의 수동 설치 범위를 자동 교체 완료로 바꾸지 않는다.

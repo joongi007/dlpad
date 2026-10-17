@@ -459,3 +459,8 @@ ADR0005의 durable revision/cold writer 실험은 Proposed 기반으로 보존�
 
 
 업데이트 BundleObservation은 원 StagedPackage의 native identity와 signed whole-file size/hash를 전후 대조한 뒤 현재 preview ZIP7member·manifest5payload·각CRC/SHA·binding을 읽은 bounded 관측이다. 추출 파일·설치/실행/삭제 권한이나 운영 publisher/legal 완전성이 아니다. 다음 동작은 원 StagedPackage를 유지하고 다시 검증해야 한다. [범위와 원본 검증](docs/work-items/S11-update-bundle-validation-20261018.md).
+
+
+## 별도 업데이트 설치 준비
+
+Prepared update bundle은 원 StagedPackage를 전체 재검증하고 Windows private FreshRoot에 exact7member를 전개한 뒤, readonly 원 source HANDLE과 별도 고정 FreshJournalAwareBundle을 유지한 결과다. 기존 설치/선택/프로필을 수정하거나 자동 실행하는 권한은 아니다. 부분 생성 실패는 원capability와 파일을 보존하며 경로 힌트로 정리하지 않는다. [구현과 실제 인수](docs/work-items/S11-update-bundle-preparation-20261018.md)를 따른다.

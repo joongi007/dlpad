@@ -462,6 +462,320 @@ fn deflate_output_exceeding_its_declared_small_size_is_stopped() {
     ));
 }
 
+fn rw_new(path: &std::path::Path) -> std::fs::File {
+    std::fs::OpenOptions::new()
+        .create_new(true)
+        .read(true)
+        .write(true)
+        .open(path)
+        .unwrap()
+}
+type CopyFixture = (
+    tempfile::TempDir,
+    std::fs::File,
+    Vec<std::fs::File>,
+    Vec<(String, Vec<u8>)>,
+);
+fn copy_fixture(deflate: bool) -> CopyFixture {
+    use std::io::Write;
+    let temp = tempfile::tempdir().unwrap();
+    let members = members();
+    let bytes = zip(&members, deflate);
+    let mut source = rw_new(&temp.path().join("original.zip"));
+    source.write_all(&bytes).unwrap();
+    source.seek(SeekFrom::Start(0)).unwrap();
+    let files = (0..7)
+        .map(|i| rw_new(&temp.path().join(format!("output-{i}"))))
+        .collect();
+    (temp, source, files, members)
+}
+fn output_refs(files: &mut [std::fs::File]) -> Vec<(&'static str, &mut std::fs::File)> {
+    EXPECTED.into_iter().zip(files.iter_mut()).collect()
+}
+fn observe_file(source: &mut std::fs::File) -> BundleObservation {
+    let size = source.metadata().unwrap().len();
+    source.seek(SeekFrom::Start(0)).unwrap();
+    let mut raw = Vec::new();
+    source.read_to_end(&mut raw).unwrap();
+    inspect_reader(
+        source,
+        "0.2.0",
+        2,
+        size,
+        &Sha256::digest(&raw).into(),
+        &AtomicBool::new(false),
+        deadline(),
+    )
+    .unwrap()
+}
+#[test]
+fn copy_members_to_distinct_empty_owned_files_in_either_order_and_rewind() {
+    for deflate in [false, true] {
+        let (_temp, mut source, mut files, members) = copy_fixture(deflate);
+        let observed = observe_file(&mut source);
+        let source_id = crate::file_identity::from_file(&source).unwrap();
+        let ids: Vec<_> = files
+            .iter()
+            .map(|f| crate::file_identity::from_file(f).unwrap())
+            .collect();
+        let mut outputs = output_refs(&mut files);
+        outputs.reverse();
+        copy_observed_reader(
+            &mut source,
+            &observed,
+            &mut outputs,
+            &AtomicBool::new(false),
+            deadline(),
+        )
+        .unwrap();
+        for (index, file) in files.iter_mut().enumerate() {
+            assert_eq!(file.stream_position().unwrap(), 0);
+            let mut bytes = Vec::new();
+            file.read_to_end(&mut bytes).unwrap();
+            assert_eq!(
+                bytes,
+                members
+                    .iter()
+                    .find(|(n, _)| n == EXPECTED[index])
+                    .unwrap()
+                    .1
+            );
+            assert_eq!(crate::file_identity::from_file(file).unwrap(), ids[index]);
+        }
+        assert_eq!(crate::file_identity::from_file(&source).unwrap(), source_id);
+        assert_eq!(source.stream_position().unwrap(), 0);
+    }
+}
+#[test]
+fn copy_output_namespace_nonempty_alias_and_source_alias_fail_before_writes() {
+    use std::io::Write;
+    for case in [
+        "duplicate-name",
+        "missing-name",
+        "nonempty",
+        "duplicate-id",
+        "source-id",
+    ] {
+        let (_temp, mut source, mut files, _) = copy_fixture(false);
+        let observed = observe_file(&mut source);
+        if case == "nonempty" {
+            files[3].write_all(b"foreign sentinel").unwrap();
+        }
+        if case == "duplicate-id" {
+            files[1] = files[0].try_clone().unwrap();
+        }
+        if case == "source-id" {
+            files[1] = source.try_clone().unwrap();
+        }
+        let original: Vec<_> = files.iter().map(|f| f.metadata().unwrap().len()).collect();
+        let mut outputs = output_refs(&mut files);
+        if case == "duplicate-name" {
+            outputs[1].0 = outputs[0].0;
+        }
+        if case == "missing-name" {
+            outputs.pop();
+        }
+        assert!(
+            copy_observed_reader(
+                &mut source,
+                &observed,
+                &mut outputs,
+                &AtomicBool::new(false),
+                deadline()
+            )
+            .is_err(),
+            "{case}"
+        );
+        assert_eq!(
+            files
+                .iter()
+                .map(|f| f.metadata().unwrap().len())
+                .collect::<Vec<_>>(),
+            original,
+            "{case}"
+        );
+    }
+}
+#[cfg(unix)]
+#[test]
+fn copy_directory_output_is_not_treated_as_regular_file() {
+    let (temp, mut source, mut files, _) = copy_fixture(false);
+    let observed = observe_file(&mut source);
+    files[2] = std::fs::File::open(temp.path()).unwrap();
+    assert_eq!(
+        copy_observed_reader(
+            &mut source,
+            &observed,
+            &mut output_refs(&mut files),
+            &AtomicBool::new(false),
+            deadline()
+        )
+        .unwrap_err(),
+        BundleError::Output
+    );
+    assert_eq!(files[0].metadata().unwrap().len(), 0);
+}
+#[test]
+fn copy_cancelled_and_expired_requests_leave_outputs_empty() {
+    let (_temp, mut source, mut files, _) = copy_fixture(false);
+    let observed = observe_file(&mut source);
+    assert_eq!(
+        copy_observed_reader(
+            &mut source,
+            &observed,
+            &mut output_refs(&mut files),
+            &AtomicBool::new(true),
+            deadline()
+        )
+        .unwrap_err(),
+        BundleError::Cancelled
+    );
+    assert_eq!(
+        copy_observed_reader(
+            &mut source,
+            &observed,
+            &mut output_refs(&mut files),
+            &AtomicBool::new(false),
+            Instant::now()
+        )
+        .unwrap_err(),
+        BundleError::TimedOut
+    );
+    assert!(files.iter().all(|f| f.metadata().unwrap().len() == 0));
+}
+#[test]
+fn copy_rechecks_original_crc_and_hash_after_prior_inspection() {
+    use std::io::Write;
+    let (_temp, mut source, mut files, _) = copy_fixture(false);
+    let observed = observe_file(&mut source);
+    let mut raw = Vec::new();
+    source.seek(SeekFrom::Start(0)).unwrap();
+    source.read_to_end(&mut raw).unwrap();
+    let offset = raw
+        .windows(b"MZ synthetic CPU".len())
+        .position(|w| w == b"MZ synthetic CPU")
+        .unwrap();
+    source.seek(SeekFrom::Start(offset as u64)).unwrap();
+    source.write_all(b"X").unwrap();
+    assert!(
+        copy_observed_reader(
+            &mut source,
+            &observed,
+            &mut output_refs(&mut files),
+            &AtomicBool::new(false),
+            deadline()
+        )
+        .is_err()
+    );
+    assert!(files.iter().any(|f| f.metadata().unwrap().len() > 0));
+    assert_eq!(source.metadata().unwrap().len(), observed.package_bytes());
+}
+#[test]
+fn copy_final_original_zip_hash_detects_metadata_change_even_when_members_match() {
+    use std::io::Write;
+    let (_temp, mut source, mut files, _) = copy_fixture(false);
+    let observed = observe_file(&mut source);
+    let mut raw = Vec::new();
+    source.seek(SeekFrom::Start(0)).unwrap();
+    source.read_to_end(&mut raw).unwrap();
+    let offset = central_offsets(&raw)[0] + 12;
+    source.seek(SeekFrom::Start(offset as u64)).unwrap();
+    source.write_all(&[raw[offset] ^ 1]).unwrap();
+    assert_eq!(
+        copy_observed_reader(
+            &mut source,
+            &observed,
+            &mut output_refs(&mut files),
+            &AtomicBool::new(false),
+            deadline()
+        )
+        .unwrap_err(),
+        BundleError::OuterHash
+    );
+    assert!(files.iter().all(|f| f.metadata().unwrap().len() > 0));
+}
+#[test]
+fn copy_readback_failure_keeps_partial_output_without_success() {
+    let (temp, mut source, mut files, _) = copy_fixture(false);
+    let observed = observe_file(&mut source);
+    files[0] = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(temp.path().join("write-only-output"))
+        .unwrap();
+    assert!(matches!(
+        copy_observed_reader(
+            &mut source,
+            &observed,
+            &mut output_refs(&mut files),
+            &AtomicBool::new(false),
+            deadline()
+        ),
+        Err(BundleError::Io(_))
+    ));
+    assert_eq!(
+        files[0].metadata().unwrap().len(),
+        observed
+            .members()
+            .iter()
+            .find(|m| m.name() == EXPECTED[0])
+            .unwrap()
+            .bytes()
+    );
+}
+
+#[test]
+fn shared_stream_decoder_cancellation_retains_only_bounded_partial_output() {
+    use std::io::Write;
+    let mut members = members();
+    let data = vec![b'a'; BUFFER * 3];
+    replace_member(&mut members, "payload/dlpad.exe", data);
+    let bytes = zip(&members, true);
+    let mut buffer = [0u8; BUFFER];
+    let archive = ZipArchive::from_seekable(Cursor::new(&bytes), &mut buffer).unwrap();
+    let mut entries = archive.entries(&mut buffer);
+    let mut layout = None;
+    while let Some(header) = entries.next_entry().unwrap() {
+        if header.file_path().as_ref() == b"payload/dlpad.exe" {
+            layout = Some(Member {
+                name: "payload/dlpad.exe".into(),
+                wayfinder: header.wayfinder(),
+                method: header.compression_method(),
+                bytes: header.uncompressed_size_hint(),
+            });
+            break;
+        }
+    }
+    let temp = tempfile::tempdir().unwrap();
+    let mut file = rw_new(&temp.path().join("partial"));
+    let cancel = AtomicBool::new(false);
+    struct Cancelling<'a>(&'a mut std::fs::File, &'a AtomicBool);
+    impl Write for Cancelling<'_> {
+        fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+            let n = self.0.write(bytes)?;
+            self.1.store(true, Ordering::Release);
+            Ok(n)
+        }
+        fn flush(&mut self) -> io::Result<()> {
+            self.0.flush()
+        }
+    }
+    let mut output = Cancelling(&mut file, &cancel);
+    assert_eq!(
+        read_member_to(
+            &archive,
+            &layout.unwrap(),
+            false,
+            Some(&mut output),
+            &cancel,
+            deadline()
+        )
+        .unwrap_err(),
+        BundleError::Cancelled
+    );
+    assert!(file.metadata().unwrap().len() > 0 && file.metadata().unwrap().len() <= BUFFER as u64);
+}
+
 #[cfg(windows)]
 mod windows {
     use super::*;
@@ -536,6 +850,65 @@ mod windows {
             );
             drop(package);
             assert_eq!(std::fs::read(path.join(c.asset_name())).unwrap(), bytes);
+        }
+    }
+    #[test]
+    fn actual_stage_bridge_validates_whole_package_before_writing_any_output() {
+        use windows_sys::Win32::Storage::FileSystem::{
+            FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT,
+        };
+        for valid in [true, false] {
+            let temp = tempfile::tempdir().unwrap();
+            let path = std::fs::canonicalize(temp.path()).unwrap();
+            let parent = std::fs::OpenOptions::new()
+                .read(true)
+                .custom_flags(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT)
+                .open(&path)
+                .unwrap();
+            let sentinel = path.join("previous-installation-A");
+            std::fs::write(&sentinel, b"untouched previous A").unwrap();
+            let mut members = members();
+            if !valid {
+                replace_member(&mut members, "payload/dlpad.exe", b"changed CPU".to_vec());
+            }
+            let bytes = zip(&members, true);
+            let candidate = candidate(&bytes);
+            let mut package = stage_verified_package(
+                &candidate,
+                &mut Cursor::new(&bytes),
+                StageRequest {
+                    parent: &parent,
+                    parent_path: &path,
+                    nonce: "copy",
+                },
+                &AtomicBool::new(false),
+                deadline(),
+            )
+            .unwrap();
+            let source_id = package.identity().clone();
+            let mut files: Vec<_> = (0..7)
+                .map(|index| rw_new(&path.join(format!("prepared-output-{index}"))))
+                .collect();
+            let result = copy_staged_bundle(
+                &mut package,
+                &mut output_refs(&mut files),
+                &AtomicBool::new(false),
+                deadline(),
+            );
+            assert_eq!(result.is_ok(), valid);
+            if valid {
+                assert!(files.iter().all(|f| f.metadata().unwrap().len() > 0));
+            } else {
+                assert!(files.iter().all(|f| f.metadata().unwrap().len() == 0));
+            }
+            package.verify_current().unwrap();
+            assert_eq!(package.identity(), &source_id);
+            assert_eq!(std::fs::read(&sentinel).unwrap(), b"untouched previous A");
+            drop(package);
+            assert_eq!(
+                std::fs::read(path.join(candidate.asset_name())).unwrap(),
+                bytes
+            );
         }
     }
 }

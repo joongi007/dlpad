@@ -29,3 +29,6 @@ Root 실제 Windows MSVC의 engine all-targets strict Clippy 통과, metadata8+�
 
 
 원 StagedPackage를 읽는 bundle 검사도 같은 권한 경계를 따른다. exact7 regular ZIP member/current profile, manifest5개의 version/target/hash·CRC·physical ranges·binding CPU/installer를64KiB stream/각 metadata64KiB/expanded256MiB로 제한한다. 원HANDLE 검증과 전체signedSHA 전후 검사를 통과해도 readonly BundleObservation만 반환한다. 현재profile 밖 ZIP64/extra/comment/preamble/trailing은 거절한다. 후보가 만료/다른 설치로 바뀌지 않았는지와 실행 권한은 미래 교체 coordinator에서 별도 확인해야 한다. Root Windows engine strict Clippy 및 app_update43PASS(실제stagecap1 포함), Linux workspace targeted37PASS, 실제49c unsigned installer ZIP parser 호환성을 확인했다. 운영키·교체/rollback 전체가 미완료이므로 본 ADR의 Proposed 상태는 유지한다.
+
+
+별도 새 설치 준비 API도 기존 private FreshRoot/CreatedFile와 journal-aware coordinator를 재사용했다. 원 ZIP은 경로로 다시 열지 않고 7개의 caller-owned empty/distinct File에 bounded stream/CRC/SHA/readback한 뒤 original readonly HANDLE로 seal한다. 새 B의 내부 active 기록은 기존 A나 global launcher 선택이 아니다. Root Windows strict engine lint·app_update51·준비7·명시 실제49c ZIP fixture1PASS, Linux targeted45PASS로 해당 범위를 인수했다. 실제49c fixture는 test-only 키를 사용하므로 운영 signature/새 앱 실행 증거가 아니다. [작업 상세](../work-items/S11-update-bundle-preparation-20261018.md). 운영 전환/rollback이 남아 Proposed 상태를 유지한다.

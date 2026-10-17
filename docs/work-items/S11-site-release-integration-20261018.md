@@ -27,3 +27,6 @@ Root fullWindows strictlint/test/release, privateUI한글/조회/배율/종료, 
 
 
 소개/자동ZIP 검수 main은49c3812이며 CI39060610796 전체success와 실제원ZIP 설치/설치앱private실행까지 Root검토했다. 운영공개는사용자초기별도승인범위에따라질문을남겼고답변전실행하지않는다. 후속 read-only bundle검사는별도 codex/update-bundle-integration-20261018 branch에서 전체CI를확인하며 승인대상49c검수본과구분한다. 기존localmain/index/새helper/운영key/공개site 상태를혼동하지않는다.
+
+
+후속 ab4a7c1 CI39064076669는 기존 archive_install notice 읽기 시험의 단계 오인으로 Tests에서 실패했다. 원 로그618PASS/1FAIL/17ignored/exit101을 보존했고 후속 빌드/GPU/autoZIP는 skipped였다. [정확 재현과 최소 수정](S11-ci-notice-read-deadline-20261018.md)은 제품 코드/정책을 바꾸지 않는 fixture 수정이다. 별도 설치 준비와 함께 실제 Windows engine strict lint·전체 주635+filtered child1PASS를 통합 검증했으며 새로운 isolated integration branch에서 hosted workspace CI를 다시 확인한다. ab4실패를49c검수본/완료된 자동 공개로 오인하지 않는다.

@@ -32,6 +32,7 @@ pub enum BundleError {
     Identity,
     OuterSize,
     OuterHash,
+    Output,
     Zip,
     Namespace,
     Limit,
@@ -50,6 +51,10 @@ pub struct MemberObservation {
     name: String,
     bytes: u64,
     sha256: [u8; 32],
+    #[cfg(any(windows, test))]
+    wayfinder: ZipArchiveEntryWayfinder,
+    #[cfg(any(windows, test))]
+    method: CompressionMethod,
 }
 impl MemberObservation {
     pub fn name(&self) -> &str {
@@ -182,6 +187,165 @@ pub fn inspect_staged_bundle(
     result
 }
 
+/// Copy only the seven already-validated members into caller-owned empty files.
+/// Caller owns directory containment/deny-write pins. Partial outputs are retained.
+/// This bridge creates no paths and grants no launch, deletion or activation rights.
+#[cfg(windows)]
+pub(crate) fn copy_staged_bundle(
+    package: &mut StagedPackage,
+    outputs: &mut [(&str, &mut std::fs::File)],
+    cancel: &AtomicBool,
+    deadline: Instant,
+) -> Result<BundleObservation, BundleError> {
+    let observation = inspect_staged_bundle(package, cancel, deadline)?;
+    let result = copy_observed_reader(
+        package.reader_mut(),
+        &observation,
+        outputs,
+        cancel,
+        deadline,
+    );
+    package
+        .verify_current()
+        .map_err(|_| BundleError::Identity)?;
+    result?;
+    Ok(observation)
+}
+
+#[cfg(any(windows, test))]
+fn copy_observed_reader(
+    source: &mut std::fs::File,
+    observation: &BundleObservation,
+    outputs: &mut [(&str, &mut std::fs::File)],
+    cancel: &AtomicBool,
+    deadline: Instant,
+) -> Result<(), BundleError> {
+    use crate::file_identity::{self, NativeFileIdentity};
+    use std::io::Write;
+    checkpoint(cancel, deadline)?;
+    if outputs.len() != EXPECTED.len() {
+        return Err(BundleError::Output);
+    }
+    let original_source = file_identity::from_file(source).map_err(io)?;
+    let mut names = Vec::with_capacity(EXPECTED.len());
+    let mut identities: Vec<NativeFileIdentity> = Vec::with_capacity(EXPECTED.len());
+    for (name, file) in outputs.iter_mut() {
+        checkpoint(cancel, deadline)?;
+        if !EXPECTED.contains(name) || names.contains(name) {
+            return Err(BundleError::Output);
+        }
+        let identity = file_identity::from_file(file).map_err(io)?;
+        if identity == original_source || identities.contains(&identity) {
+            return Err(BundleError::Identity);
+        }
+        let metadata = file.metadata().map_err(io)?;
+        if !metadata.is_file() || metadata.len() != 0 {
+            return Err(BundleError::Output);
+        }
+        names.push(*name);
+        identities.push(identity);
+    }
+    if observation.members.len() != EXPECTED.len()
+        || EXPECTED.iter().any(|name| {
+            !observation
+                .members
+                .iter()
+                .any(|member| member.name == *name)
+        })
+    {
+        return Err(BundleError::Namespace);
+    }
+    let mut buffer = [0u8; BUFFER];
+    {
+        // Wayfinders belong to the fully inspected original archive, not to
+        // caller-provided names/offsets. No second path-open is performed.
+        let archive =
+            ZipArchive::from_seekable(&mut *source, &mut buffer).map_err(|_| BundleError::Zip)?;
+        for member in &observation.members {
+            checkpoint(cancel, deadline)?;
+            let index = outputs
+                .iter()
+                .position(|(name, _)| *name == member.name)
+                .ok_or(BundleError::Output)?;
+            let output = &mut *outputs[index].1;
+            // Recheck empty/native identity just before the first write.
+            if file_identity::from_file(output).map_err(io)? != identities[index]
+                || output.metadata().map_err(io)?.len() != 0
+            {
+                return Err(BundleError::Identity);
+            }
+            output.seek(SeekFrom::Start(0)).map_err(io)?;
+            let layout = Member {
+                name: member.name.clone(),
+                wayfinder: member.wayfinder,
+                method: member.method,
+                bytes: member.bytes,
+            };
+            let (copied, _) =
+                read_member_to(&archive, &layout, false, Some(output), cancel, deadline)?;
+            if copied.name != member.name
+                || copied.bytes != member.bytes
+                || copied.sha256 != member.sha256
+            {
+                return Err(BundleError::MemberHash);
+            }
+            output.flush().map_err(io)?;
+            checkpoint(cancel, deadline)?;
+            output.sync_all().map_err(io)?;
+            checkpoint(cancel, deadline)?;
+            let before = output.metadata().map_err(io)?;
+            if !before.is_file()
+                || before.len() != member.bytes
+                || file_identity::from_file(output).map_err(io)? != identities[index]
+            {
+                return Err(BundleError::Identity);
+            }
+            output.seek(SeekFrom::Start(0)).map_err(io)?;
+            let mut digest = Sha256::new();
+            let mut count = 0u64;
+            loop {
+                checkpoint(cancel, deadline)?;
+                let limit = usize::try_from(member.bytes - count + 1)
+                    .unwrap_or(BUFFER)
+                    .min(BUFFER);
+                let n = output.read(&mut buffer[..limit]).map_err(io)?;
+                checkpoint(cancel, deadline)?;
+                if n == 0 {
+                    break;
+                }
+                count = count.checked_add(n as u64).ok_or(BundleError::Limit)?;
+                if count > member.bytes {
+                    return Err(BundleError::Limit);
+                }
+                digest.update(&buffer[..n]);
+            }
+            let digest: [u8; 32] = digest.finalize().into();
+            if count != member.bytes || digest != member.sha256 {
+                return Err(BundleError::MemberHash);
+            }
+            let after = output.metadata().map_err(io)?;
+            if after.len() != before.len()
+                || after.modified().map_err(io)? != before.modified().map_err(io)?
+                || file_identity::from_file(output).map_err(io)? != identities[index]
+            {
+                return Err(BundleError::Identity);
+            }
+            output.seek(SeekFrom::Start(0)).map_err(io)?;
+        }
+    }
+    hash_outer(
+        source,
+        observation.package_bytes,
+        &observation.package_sha256,
+        cancel,
+        deadline,
+    )?;
+    if file_identity::from_file(source).map_err(io)? != original_source {
+        return Err(BundleError::Identity);
+    }
+    checkpoint(cancel, deadline)
+}
+
 struct Member {
     name: String,
     wayfinder: ZipArchiveEntryWayfinder,
@@ -204,6 +368,17 @@ fn read_member<R: ReaderAt>(
     archive: &ZipArchive<R>,
     member: &Member,
     retain: bool,
+    cancel: &AtomicBool,
+    deadline: Instant,
+) -> Result<(MemberObservation, Vec<u8>), BundleError> {
+    checkpoint(cancel, deadline)?;
+    read_member_to(archive, member, retain, None, cancel, deadline)
+}
+fn read_member_to<R: ReaderAt>(
+    archive: &ZipArchive<R>,
+    member: &Member,
+    retain: bool,
+    mut output: Option<&mut dyn std::io::Write>,
     cancel: &AtomicBool,
     deadline: Instant,
 ) -> Result<(MemberObservation, Vec<u8>), BundleError> {
@@ -239,6 +414,10 @@ fn read_member<R: ReaderAt>(
             return Err(BundleError::Limit);
         }
         digest.update(&buffer[..n]);
+        if let Some(writer) = output.as_deref_mut() {
+            writer.write_all(&buffer[..n]).map_err(io)?;
+            checkpoint(cancel, deadline)?;
+        }
         if retain {
             kept.extend_from_slice(&buffer[..n]);
         }
@@ -257,6 +436,10 @@ fn read_member<R: ReaderAt>(
             name: member.name.clone(),
             bytes: count,
             sha256: digest.finalize().into(),
+            #[cfg(any(windows, test))]
+            wayfinder: member.wayfinder,
+            #[cfg(any(windows, test))]
+            method: member.method,
         },
         kept,
     ))

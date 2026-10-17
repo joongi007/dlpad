@@ -1010,10 +1010,20 @@ mod tests {
     }
     impl Read for NoticeRead {
         fn read(&mut self, output: &mut [u8]) -> io::Result<usize> {
-            let n = self.body.read(output)?;
             if self.is_notice {
                 self.notice_reads.fetch_add(1, Ordering::AcqRel);
             }
+            // A body timeout is an I/O failure, not a race against installation preparation.
+            // Deliver one real partial byte before failing the next notice Read.
+            if self.mode == "read-timeout" && !self.first {
+                return Err(io::ErrorKind::TimedOut.into());
+            }
+            let limit = if self.mode == "read-timeout" {
+                output.len().min(1)
+            } else {
+                output.len()
+            };
+            let n = self.body.read(&mut output[..limit])?;
             if n > 0 && self.mode == "read-mutation" {
                 output[0] ^= 1;
             }
@@ -1021,9 +1031,6 @@ mod tests {
                 self.first = false;
                 if self.mode == "read-cancel" {
                     self.cancel.store(true, Ordering::Release);
-                }
-                if self.mode == "read-timeout" {
-                    std::thread::sleep(Duration::from_millis(1100));
                 }
             }
             Ok(n)
@@ -1156,6 +1163,25 @@ mod tests {
         }
     }
     #[test]
+    fn notice_body_timeout_is_an_io_failure_after_a_real_partial_read() {
+        use super::super::direct_download::DownloadTransport;
+        let (_temp, source, package, caps) = notice_fixture();
+        let cancel = std::sync::Arc::new(AtomicBool::new(false));
+        let mut transport = notice_transport(&source, &package, &caps, &cancel, "read-timeout");
+        let mut reader = transport
+            .open(&package.notices[0].source_url, Duration::from_secs(10))
+            .unwrap();
+        let mut output = [0u8; 8];
+        assert_eq!(reader.read(&mut output).unwrap(), 1);
+        assert_eq!(output[0], fs::read(&caps[0].path).unwrap()[0]);
+        assert_eq!(
+            reader.read(&mut output).unwrap_err().kind(),
+            io::ErrorKind::TimedOut
+        );
+        assert_eq!(transport.notice_reads.load(Ordering::Acquire), 2);
+        assert!(!cancel.load(Ordering::Acquire));
+    }
+    #[test]
     fn notice_transfer_failures_preserve_original_inputs_prior_active_and_foreign_destination() {
         for mode in [
             "short",
@@ -1190,8 +1216,6 @@ mod tests {
             let mut transport = notice_transport(&source, &package, &caps, &cancel, mode);
             let timeout = if mode == "pre-deadline" {
                 Duration::ZERO
-            } else if mode == "read-timeout" {
-                Duration::from_secs(1)
             } else {
                 Duration::from_secs(10)
             };
@@ -1207,7 +1231,16 @@ mod tests {
             if mode == "read-cancel" || mode == "pre-cancel" {
                 assert!(matches!(result, Err(ToolError::Cancelled)));
             }
-            if mode == "read-timeout" || mode == "pre-deadline" {
+            if mode == "read-timeout" {
+                assert!(
+                    matches!(result, Err(ToolError::Io(ref error)) if error.kind() == io::ErrorKind::TimedOut)
+                );
+                assert!(
+                    transport.notice_reads.load(Ordering::Acquire) >= 2,
+                    "body timeout must follow an actual partial notice read"
+                );
+            }
+            if mode == "pre-deadline" {
                 assert!(matches!(result, Err(ToolError::TimedOut)));
             }
             if matches!(mode, "read-cancel" | "read-timeout" | "read-mutation") {
