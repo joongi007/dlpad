@@ -27,9 +27,19 @@ cargo build -p dlpad --bin dlpad-cpu --features cpu --release --locked
 
 실행 파일은 `target/release/dlpad-cpu.exe`입니다. 다운로드·미디어 처리용 외부 도구는 앱의 설정에서 관리하거나 기존 설치를 선택합니다. [개발 안내](CONTRIBUTING.md).
 
+## 소개 페이지와 배포 준비
+
+[정적 소개 페이지](site/index.html)를 구현했습니다. 공개 릴리스가 생기면 설치형·포터블 ZIP을 연결하며, 릴리스가 없거나 조회에 실패하면 GitHub Releases 안내를 유지합니다. 웹 런타임 의존성·외부 폰트·분석 스크립트는 없습니다. [사이트 작업과 실제 검증](docs/work-items/S11-introduction-site-20261018.md).
+
+```sh
+python3 scripts/build_site.py --output /tmp/dlpad-site-preview
+```
+
+빌드 출력은 새 디렉터리여야 하며 기존 폴더를 지우거나 덮어쓰지 않습니다. Windows 자동 릴리스는 정확한 `vX.Y.Z` 태그와 Cargo 버전을 대조하고 같은 CI에서 검증한 실행 파일을 설치 ZIP·포터블 ZIP으로 묶어 미공개 preview draft를 만드는 구성입니다. 아직 첫 hosted 패키지·공개 배포를 검증하지 않았습니다.
+
 ## 검증과 CI
 
-PR·push에서 문서·Python 정책 검사와 Windows Rust 포맷·린트·테스트·release 빌드를 실행하도록 [GitHub Actions](.github/workflows/ci.yml)를 설정했습니다. 개발 실행 파일과 로그를 artifact로 보관합니다. 2026-10-17 [Windows hosted CI 전체 통과](https://github.com/joongi007/dlpad/actions/runs/39040643416)를 확인했습니다(source `5d4cf73`). 서명·정식 패키징·Release 게시 자동화는 후속입니다. [CI/CD 범위](docs/CICD.md).
+PR·push에서 문서·Python 정책 검사와 Windows Rust 포맷·린트·테스트·release 빌드를 실행하도록 [GitHub Actions](.github/workflows/ci.yml)를 설정했습니다. 개발 실행 파일과 로그를 artifact로 보관합니다. 2026-10-17 [Windows hosted CI 전체 통과](https://github.com/joongi007/dlpad/actions/runs/39040643416)를 확인했습니다(source `5d4cf73`). 소개 페이지와 Windows 설치형·포터블 초안 릴리스 자동화를 구현 중입니다. 서명·실제 공개·앱 자동 교체는 별도 게이트입니다. [CI/CD 범위](docs/CICD.md).
 
 ```sh
 python3 scripts/check_docs.py --source-only

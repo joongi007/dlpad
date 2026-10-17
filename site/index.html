@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="URL에서 내 폴더까지. 영상 미리보기, 구간 저장, 다운로드와 파일 관리를 담은 Rust 네이티브 Windows 앱, dlpad.">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <title>dlpad · 저장하고 싶은 순간을, 내 폴더에</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">본문으로 건너뛰기</a>
+  <header class="header wrap">
+    <a class="brand" href="#" aria-label="dlpad 처음으로"><img src="assets/logo.svg" width="30" height="30" alt="">dlpad</a>
+    <nav aria-label="주요 메뉴"><a href="#features">기능</a><a href="#download">다운로드</a><a class="source-link" href="https://github.com/joongi007/dlpad">GitHub <span aria-hidden="true">↗</span></a></nav>
+    <button class="theme" id="theme" type="button" aria-label="어두운 테마로 변경" title="테마 변경"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 15.5A8.5 8.5 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5Z"/></svg><span id="theme-label">테마</span></button>
+  </header>
+  <main id="main" tabindex="-1">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">Windows에서 만나는 yt-dlp</p>
+        <h1 id="hero-title">저장하고 싶은 순간을,<br><span>내 폴더에.</span></h1>
+        <p class="lead">영상 주소 하나로 시작하세요.<br>미리 보고, 필요한 구간을 고르고,<br class="mobile-break"> 저장한 파일까지 한곳에서.</p>
+        <div class="hero-actions"><a class="button primary" href="#download"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg>Windows용 다운로드</a><a class="text-link" href="#features">어떤 앱인가요? <span aria-hidden="true">↓</span></a></div>
+        <p class="hero-note">Rust 네이티브 · 오픈 소스 · Windows 64비트</p>
+      </div>
+      <figure class="app-shot"><div class="window-title" aria-hidden="true"><span><img src="assets/logo.svg" width="16" height="16" alt="">dlpad</span><span class="window-controls">─　□　×</span></div><img src="assets/app-download.png" width="960" height="640" alt="dlpad의 실제 Windows 다운로드 화면. 영상 주소, 저장 폴더와 품질을 설정할 수 있습니다." fetchpriority="high"><figcaption>실제 Windows 앱 화면 · 개발 검수본</figcaption></figure>
+    </section>
+    <div class="foundation wrap"><span>브라우저 껍데기 없이, 네이티브로.</span><p>yt-dlp의 다운로드 기능과 FFmpeg의 미디어 처리를<br>차분하고 익숙한 데스크톱 화면에 담았습니다.</p></div>
+    <section class="features wrap" id="features" aria-labelledby="features-title">
+      <div class="section-heading"><h2 id="features-title">주소에서 파일까지,<br>흐름이 끊기지 않도록.</h2><p>복잡한 명령어는 앱에 맡기고,<br>무엇을 저장할지에 집중하세요.</p></div>
+      <ol class="feature-list">
+        <li><span class="step">01</span><div><h3>주소를 붙여 넣고</h3><p>YouTube나 치지직 VOD 주소로 시작합니다. 영상 정보를 확인하고 품질과 저장 위치를 선택하세요.</p></div><span class="feature-detail">URL → 영상 확인</span></li>
+        <li><span class="step">02</span><div><h3>필요한 순간만 고르고</h3><p>미리보기를 보며 구간을 선택하거나 시간을 직접 입력하세요. 전체 영상 저장도 가능합니다.</p></div><span class="feature-detail">미리보기 · 구간 저장</span></li>
+        <li><span class="step">03</span><div><h3>내 폴더에서 이어서</h3><p>진행률과 속도를 확인하고, 저장한 파일을 검색하고 여세요. 원본을 유지하며 다른 이름으로 복사할 수 있습니다.</p></div><span class="feature-detail">다운로드 · 파일 관리</span></li>
+      </ol>
+      <p class="site-note">사이트와 원본 영상, 설치된 외부 도구에 따라 사용 가능한 기능과 이어받기 지원이 달라집니다.</p>
+    </section>
+    <section class="download" id="download" aria-labelledby="download-title"><div class="wrap download-inner">
+      <div><p class="eyebrow">내 PC에서 시작하기</p><h2 id="download-title">나에게 맞는 방식으로.</h2><p class="download-intro">설치형과 포터블, 같은 dlpad입니다.<br>현재 Windows 64비트를 우선 지원합니다.</p><p class="release-state" id="release-state" role="status">공개 릴리스 정보를 확인하고 있습니다.</p><a class="text-link" href="https://github.com/joongi007/dlpad/releases">GitHub에서 모든 릴리스 보기 <span aria-hidden="true">↗</span></a></div>
+      <div class="download-options">
+        <article><div class="option-heading"><h3>설치형</h3><span>일반적인 사용에 추천</span></div><p>ZIP을 풀고 설치 프로그램을 실행하세요.<br>설치 위치를 선택하고 앱을 시작할 수 있습니다.</p><a class="button secondary" id="installer-link" href="https://github.com/joongi007/dlpad/releases">설치형 릴리스 확인 <span aria-hidden="true">↗</span></a></article>
+        <article><div class="option-heading"><h3>포터블</h3><span>설치 없이 실행</span></div><p>ZIP을 풀고 앱 실행 파일을 여세요.<br>다운로드 도구는 앱의 설정에서 관리합니다.</p><a class="button secondary" id="portable-link" href="https://github.com/joongi007/dlpad/releases">포터블 릴리스 확인 <span aria-hidden="true">↗</span></a></article>
+      </div>
+    </div></section>
+    <section class="faq wrap" aria-labelledby="faq-title"><h2 id="faq-title">시작 전에 궁금한 점</h2><div>
+      <details><summary>다운로드 도구도 따로 설치해야 하나요?</summary><p>yt-dlp, FFmpeg, Deno 같은 외부 도구는 앱의 설정 → 도구에서 설치하고 버전을 관리할 수 있습니다. 이미 설치한 도구도 선택할 수 있습니다. 각 도구의 배포와 라이선스 조건은 서로 다릅니다.</p></details>
+      <details><summary>앱이 자동으로 업데이트되나요?</summary><p>앱 업데이트 연결은 준비 중입니다. 현재는 GitHub Releases에서 새 버전을 확인하세요. 다운로드 도구의 버전 관리는 앱 업데이트와 별개입니다.</p></details>
+      <details><summary>macOS와 Linux에서도 쓸 수 있나요?</summary><p>지금은 Windows를 우선 개발하고 검증합니다. 다른 운영체제는 후속 지원 대상이며, 현재 다운로드로 제공하지 않습니다.</p></details>
+      <details><summary>계정이나 클라우드가 필요한가요?</summary><p>dlpad 계정은 필요하지 않습니다. 영상은 선택한 로컬 폴더에 저장합니다. 원본 사이트에서 인증을 요구하는 영상은 해당 사이트의 접근 조건을 따릅니다.</p></details>
+    </div></section>
+  </main>
+  <footer class="wrap"><a class="brand" href="#"><img src="assets/logo.svg" width="24" height="24" alt="">dlpad</a><p>내려받고, 내 폴더에.</p><a href="https://github.com/joongi007/dlpad/blob/main/LICENSE">MIT License</a><a href="https://github.com/joongi007/dlpad">소스 코드 <span aria-hidden="true">↗</span></a></footer>
+</body>
+</html>
