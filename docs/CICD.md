@@ -71,3 +71,6 @@ source32607f7의 [site39057841523](https://github.com/joongi007/dlpad/actions/ru
 release workflow의 candidate-only는 main에서만 허용하고 tag에서의 후보 전용 요청은 명시거절한다. 실제tag와Cargo버전이 정확히 맞을 때만 미공개preview draft로 이어진다. 취소한 실행은draft를 만들지 않는다. 선택적 Linux signer job은 repo/org-level DLPAD_UPDATE_SIGNING_ENABLED=true와 release-signing environment의 기존 secret DLPAD_UPDATE_PRIVATE_KEY_PEM 및 variable DLPAD_UPDATE_KEY_ID가 준비된 경우에만 활성화된다. 환경 수준 변수만으로 job-level enable조건을 대체하지 않는다. signer17회귀·versiongate5회귀를 CI에 포함했다. 키가없으면 sign은skip하고 기존 unsigned development표시를 유지하며, 활성화된sign이실패하면 unsigned draft로fallback하지않는다. 실제signer workflow·운영키외부전송·첫draft/publish는미실행이다.
 
 앱은 공개버전 조회 UI와 정확한 Ed25519 bytes 검증/Windowsowned저장을 구현했지만 운영trustroot/교체helper/rollback은미완료다. release public-key aid를 제품trustroot로 자동수용하지 않는다. [통합 및 검증](work-items/S11-app-updater.md), [preview packaging](work-items/S11-auto-release-20261018.md), [서명 후보 경계](adr/0012-signed-app-update-candidates.md).
+
+
+source49c3812의 [CI39060610796](https://github.com/joongi007/dlpad/actions/runs/39060610796)는 ZIP 생성/보관까지 전체success다. Root가 원artifact SHA·installer7/portable6·동일payload를 대조하고 실제GUID임시Windows설치·재검증·원파일/기록hash·자연종료를 확인했다. 공개Pages는 repo Pages source를 GitHub Actions로 구성하고 DLPAD_PAGES_ENABLED=true를 설정하는 공개 단계가 남으며 현재는 build/artifact만제공한다. 태그/미공개draft/publicRelease/운영signing도 아직미실행이다. [실제산출물·원검수](work-items/S11-auto-release-20261018.md).

@@ -44,3 +44,10 @@ Linux Root 통합 verifier8+미지원1=9PASS. 기존 media_preview.rs:591 Linux 
 Root 실제 Windows 최종 명령은 `cargo clippy --workspace --all-targets --features dlpad/cpu --locked --offline -- -D warnings`, `cargo test --workspace --features dlpad/cpu --locked --offline`, `cargo build --workspace --features dlpad/cpu --release --locked --offline`다. guard 선행 build 포함4명령 exit0, 원 stdout43 harness 집계1729PASS/0FAIL/43ignored 중 filtered child1이 포함되어 주 harness1728+child1로 구분한다. `.local-tools/update-integration-20261018/native-full-v1/native-tests.log`를 Root가 직접 읽었고 natural-zero/final-zero=True, forced=False, final-active0, private-desktop-closed/input-desktop-unchanged/source-unchanged=True를 확인했다. 경과396.8초다. 새actualCPU10,420,736B, SHA25673c661d45be9b3b373ccbec461c8a74e261e51e818bf7c5b2ae4aca448012e41. 이전v37CPU 대비50,176B 증가이며 전체 변경 비용이지 ring 단독 비용 측정이 아니다. WindowsCPU/installer actual PE는 OS DLL만 사용하는 runtime 검사를 통과했다. clean machine 인증은 아니다.
 
 Root Linux targeted `cargo test -p dlpad-engine --lib --locked --offline app_update` 27PASS(메타데이터9/HTTP13/discovery4/Windows 저장미지원1). Windows에서만 저장6회귀를 실제 실행했다. OpenSSL3.0.2 실제 signer의 public-only fixture를 ring이 검증하고 변조는 거절했다. 원fixture private key/ZIP은 임시 디렉터리에서만 사용했고 소스에는 포함하지 않았다. 운영 신뢰키·실제 공개 업데이트·실행 중 앱 교체·rollback은 아직 미완료다.
+
+
+## 원 ZIP 내부 읽기 검증
+
+[BundleObservation](S11-update-bundle-validation-20261018.md)을 통합했다. source경로 재오픈 없이 원StagedPackage reader/native identity와 signed전체SHA를 전후 확인하고, 현재preview7member·manifest5·CRC/SHA/size/ZIPphysical구조·binding을 검증한다. Root Linux37PASS, 실제Windowsengine strictlint/app_update43PASS와 실제unsigned49cZIP 호환성으로 해당 읽기범위를 인수했다. nativeUI/자동설치/기존버전교체 권한으로 승격하지 않는다. 새dependency/lock변경0, 호출시에만2회전체hash+member streaming 비용이며 idle0이다.
+
+후속교체 감사: 기존 active/receipt는 canonical고정경로와nativeID를 결합하므로 A를 A.old로 옮기는 rollback은 기존기록과 충돌한다. 기존A를 그대로두고 새고정B를 준비하는 방식을 검토한다. 원installer supervisor는 A Job밖에 있어 전환조정을 재사용할 수 있으나 A자식helper는같은Job에들어가 owner종료를기다리면서로대기할수있다. 새전용localIPC·원childPID/creation/SID/nonce검증·A CloseWait/Job0·B readiness ACK·append-only activation 선택과 profile schema 호환성 인수가 필요하다. restore전용IPC를 update명령으로 확장하거나 receipt를쓰기/삭제권한으로 오인하지 않는다. 이내용은 정적감사에근거한후속안이며 실제교체실험/채택/자동rollback완료가 아니다.

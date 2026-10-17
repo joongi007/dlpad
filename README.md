@@ -35,7 +35,7 @@ cargo build -p dlpad --bin dlpad-cpu --features cpu --release --locked
 python3 scripts/build_site.py --output /tmp/dlpad-site-preview
 ```
 
-빌드 출력은 새 디렉터리여야 하며 기존 폴더를 지우거나 덮어쓰지 않습니다. Windows 자동 릴리스는 정확한 `vX.Y.Z` 태그와 Cargo 버전을 대조하고 같은 CI에서 검증한 실행 파일을 설치 ZIP·포터블 ZIP으로 묶어 미공개 preview draft를 만드는 구성입니다. 소개 페이지 hosted build와 Windows 원본 빌드/notice 수집은 통과했습니다. main CI에도 설치형·포터블 후보 ZIP 보관을 연결했으며 첫 hosted ZIP 결과와 공개 배포는 별도 확인합니다.
+빌드 출력은 새 디렉터리여야 하며 기존 폴더를 지우거나 덮어쓰지 않습니다. Windows 자동 릴리스는 정확한 `vX.Y.Z` 태그와 Cargo 버전을 대조하고 같은 CI에서 검증한 실행 파일을 설치 ZIP·포터블 ZIP으로 묶어 미공개 preview draft를 만드는 구성입니다. [Windows CI](https://github.com/joongi007/dlpad/actions/runs/39060610796)에서 설치형·포터블 후보 ZIP 생성까지 통과했고, 원 ZIP의 임시 Windows 설치·재검증도 확인했습니다. 공개 페이지·Release 게시와 앱 자동 교체는 아직 별도 단계입니다.
 
 설정 → 앱 업데이트에서 현재 버전과 안정/미리보기 채널을 조회할 수 있습니다. 서명 metadata 검증·제한된 전송·Windows owned 저장은 구현했으며, 운영키 고정과 실행 중인 앱 자동 교체·실패 복구는 아직 제공하지 않습니다. [현재 업데이트 범위](docs/work-items/S11-app-updater.md).
 

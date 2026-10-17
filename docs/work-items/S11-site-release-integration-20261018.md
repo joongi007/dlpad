@@ -1,7 +1,7 @@
 # S11: 소개·릴리스·업데이트 소스 통합
 
 - 상태: in-progress
-- 분류: infrastructure
+- 분류: feature
 - 우선순위: P1
 - 요구사항: R08, R11
 - 담당/수정 범위: Root 공유 Cargo/lock/모듈·native navigation/수명·.github/workflows·README/CONTEXT/CICD/ROADMAP/ADR index·작업기록·최종 검증. release_audit는 별도worktree의패키징/notice/signing, updater_audit는별도worktree의metadata/staging/discovery/panel/catalog, update_transport는/tmp전용HTTP. 파일 동시 수정0
@@ -24,3 +24,6 @@ Root fullWindows strictlint/test/release, privateUI한글/조회/배율/종료, 
 소개/릴리스 소스는 7b5d784 및32607f7로 원격main에normalpush했다. source32607f7의 site39057841523/CI39057841587 전체success다. RootWindows주1728+filteredchild1PASS/0FAIL/43ignored·strictlint·release와 privateGUI검수는 각 작업원기록에 있다. 공개Pages/Release·운영키·자동교체는미완료다.
 
 로컬main은7819c9e기준으로이번변경을보유하며 .git/index.lock이읽기Git실행뒤에도재생성됐다. 당시 원프로세스없음/원파일exclusive열기만으로 소유를확인한빈lock1개를 .local-tools/update-integration-20261018/git-owned-query-lock-recovery에보존했으나 후속재생성의creator는미확인이다. 추가삭제/우회/기존index재구성없이 .local-tools/worktrees/site-release-20261018의 codex/site-release-20261018 branch/독립index에서선별commit·normalpush한다. 원main index·기존작업·기록을보존했다. 따라서 로컬mainHEAD가원격최신이라고가정하지말고이통합worktree와 origin/main을확인한다. root작업소스와통합worktree의파일hash를비교하고검증소스일치를확인한다.
+
+
+소개/자동ZIP 검수 main은49c3812이며 CI39060610796 전체success와 실제원ZIP 설치/설치앱private실행까지 Root검토했다. 운영공개는사용자초기별도승인범위에따라질문을남겼고답변전실행하지않는다. 후속 read-only bundle검사는별도 codex/update-bundle-integration-20261018 branch에서 전체CI를확인하며 승인대상49c검수본과구분한다. 기존localmain/index/새helper/운영key/공개site 상태를혼동하지않는다.

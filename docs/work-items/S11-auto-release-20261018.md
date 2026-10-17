@@ -127,3 +127,22 @@ source32607f76416254f2876f32bbaf5953511f28d355의 [CI39057841587](https://github
 후속 CI는 GPU compile 뒤 같은 원파일을 재검증해 RUNNER_TEMP의 새폴더에 installer/portable ZIP·SHA256SUMS·binding·notes를 작성하고 windows-preview-candidates-SHA로14일보관한다. actual CPU/installer의 UIAutomationCore/Combase OS DLL만 allowlist에 보강 후 원 PE 검사와 packager13회귀 모두PASS다. [UI Automation OS runtime](https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-uiautomationoverview)을 근거로 외부 VC runtime/unknown DLL 거절은 유지한다.
 
 release version gate를 scripts/release_version.py로 분리했다. candidate-only main만 허용하고 tag ref의 candidate-only는 명시거절해 draft/sign으로 전환되지 않는다. 숫자버전/불일치/tag/candidate 실패회귀5PASS. draft는 취소 이후 생성하지 않도록 !cancelled()를 확인한다. optional sign은 repo/org variable DLPAD_UPDATE_SIGNING_ENABLED=true와 release-signing environment의 기존 DLPAD_UPDATE_PRIVATE_KEY_PEM/UPDATE_KEY_ID가 준비된 경우에만 실행한다(key ID 변수명 DLPAD_UPDATE_KEY_ID). 기존키 외부전송/환경설정/운영서명은 아직 수행하지 않았다. signing 실패 시 unsigned draft로 fallback하지 않는다. public-key aid는 제품 trust root가 아니다. 이 구성이 존재한다는 사실과 hosted optional sign/최초draft의 실제 성공은 구분한다.
+
+
+## 실제 hosted 설치형·포터블 산출물 — source49c3812
+
+[CI39060610796](https://github.com/joongi007/dlpad/actions/runs/39060610796)는 docs/native·GPU·신규ZIP단계까지 전체success, attempt1이다. 원candidate artifact12112071301/11,887,366B/SHAf92a68f51b19705e72923be6adcbabaa76b5b0fe029e2bcd27c411532f5fa7f8를 Root가 공식API로 내려받아 직접대조했다. 기존repo credential은 메모리와 api.github.com 인증에만 사용하고 signedAzure 다운로드에 Authorization을 전달하지 않았다. secret/URL 로그/운영키전송0이다.
+
+InstallerZIP17,193,308B/SHA9ed4360afd65c060401d4c2eb58cd64c5d03a33aecbeaafaf9baed6ad3200dc5, portable12,769,934B/SHAb0bc04f9daff8e6b0fb046b4df8908ca550b354fe040cc52e64eb268570e0b2b. Root가 SHA256SUMS·release-binding identity/source/run/flags·모든CRC·manifest5원hash·installer7/portable6·동일payload를 실제검사해 PASS했다. 원 CPU10,429,952B/SHA4a60a714ea3a0e6a8616c24535ac03903bf3e5651551349a14baedec923f3d67, installer4,423,168B/SHAa2b34c8a1896d7f1d315a8243b84f6ea902640e9987c39da80e408d84638f8a9다. Root로컬CPU와 원hostedCPU는 서로 다른 빌드bytes이며 동일하다고 표시하지 않는다.
+
+검수파일은 .local-tools/update-integration-20261018/hosted-49c/packages, 원검토는 같은폴더상위 package-review.json이다. publicRelease/Pages/태그/운영signing은 아직 수행하지 않았다. 현재installer 실제private 설치smoke는 별도로 검증한다. 과거 full_packaged probe의 empty-target·즉시enabled·과거VERIFIED문구 가정이 현재recommended-default/admission/catalog와 달라 v1~v4실패를 보존했다. 사전원source경로는일치했으며 제품코드오류로고치지않았다. 현재catalog/실제enabled전이/명시GUID임시target에맞춘로컬probe로재실행한다. 그 결과전에는실제설치인수완료로쓰지않는다.
+
+
+### 원 hosted ZIP의 실제 private 설치·Root 검수
+
+최종 v5 private observer는 current catalog/default/admission 계약에 맞춰 GUID 임시target을 명시했고 실제설치→재검증→WM_CLOSE exit0/Job자연0/강제정리0/inputdesktop불변을 통과했다. Root가 원result JSON과 installed/verified PNG를 직접 열고, 실제bundle/registered의5payload+3record namespace·manifest5원SHA/bytes·journal5원SHA·외부sentinel/forgedjournal부재를 별도Python으로 다시 대조했다. `.local-tools/update-integration-20261018/hosted-49c/private-install-v5/root-review.json`에 기록했다. oldprobe source에 대한 initialblank·readiness·검증문구 드리프트가 원인이었고 제품코드수정0이다. v1~v4 실패와 원강제정리facts도 보존한다. 최종C#derivedsource의 DEBUG instrumentation0이며 임시진단자료는 명시적인 .local-tools 아래에만 남았다.
+
+실제hosted바이너리는원49cartifact로한정하며 Root현재bundle후속코드와 동일source빌드라고 주장하지 않는다. user Documents/실영상·실제설치기본위치쓰기를사용하지않고, 도구선택은unchecked·외부도구설치0으로 유지했다. readonly default경로hint관측은 설치권한이 아니며 변경대상은 GUID임시폴더뿐이다. 정식/cleanOS/Authenticode/자동update 전체인수는 아니다.
+
+
+Root는 실제49c CI ZIP에서 임시설치한 원 dlpad.exe(SHA4a60a714...)도 별도로실행했다. gui-hosted49-v1의Light/Dark·960/800·200%focus실제스크롤·공개NoRelease조회·restart·두번자연exit0/Job0/강제0/inputdesktop불변을 확인하고 원PNG를직접열었다. raw REVIEW_REQUIRED를변조하지않고 root-review.json으로검수를추가했다. 현재Root의bundle후속소스빌드나물리IME/OSDPI/실제자동교체를검증한것은아니다.

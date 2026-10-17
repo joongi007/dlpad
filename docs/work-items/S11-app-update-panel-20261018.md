@@ -34,3 +34,6 @@ Root Windows workspace strict lint/전체test/CPUrelease build는 실제 통과�
 초기 probe 컴파일과 접근성 Invoke 미지원, content 전용 클릭을 nav에 사용한 시험도구 오류는 v1~v4 실패로 보존했다. 제품코드를 그 실패 때문에 바꾸지 않았다. 기존 진단 시험처럼 private HWND 전용 Space 활성화·UIA focus/readback으로 v5/v6를 실행했다. 사용자 화면 전환/전역SendInput/클립보드0이다. 200% 작은 창에서는 버튼이 초기viewport 아래에 있었고 focus 후 실제 ScrollArea가 움직여 버튼이 footer 위에 표시됨을 v6 PNG로 확인했다. 단순UIA client bounds만으로 시각 통과를 선언하지 않았다. 이는 합성private키 이벤트 검증이며 실제물리키보드/OSDPI변경/실제앱자동교체 성공이 아니다.
 
 원명령 `python3 .local-tools/update-integration-20261018/run-native-gui.py`는 기존 pinned Windows Python→windows-cli-host→C# private observer를 호출한다. 사용자 Documents/실영상/계정데이터는 사용하지 않았다. 개발CPU/미디어 작업산출물은 그대로 두고 현재 작업에 사용한 재빌드 가능한 Cargo debug cache만 정리했다(6286files/2,769,614,500B). 삭제목록/이유는 /tmp/dlpad-debug-cache-cleanup-20261018.json에 남겼고 release 실행파일·검수 PNG는 보존했다.
+
+
+Root는 실제49c CI ZIP에서 임시설치한 원 dlpad.exe(SHA4a60a714...)도 별도로실행했다. gui-hosted49-v1의Light/Dark·960/800·200%focus실제스크롤·공개NoRelease조회·restart·두번자연exit0/Job0/강제0/inputdesktop불변을 확인하고 원PNG를직접열었다. raw REVIEW_REQUIRED를변조하지않고 root-review.json으로검수를추가했다. 현재Root의bundle후속소스빌드나물리IME/OSDPI/실제자동교체를검증한것은아니다.

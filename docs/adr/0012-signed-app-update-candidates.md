@@ -26,3 +26,6 @@ Root 실제 Windows MSVC의 engine all-targets strict Clippy 통과, metadata8+�
 
 
 2026-10-18 통합 갱신: 공식 HTTPS 전송/공개 버전 discovery와 read-only native 설정을 추가했다. Root Windows workspace strict lint·전체 test(주1728+filtered child1 PASS/0FAIL/43ignored)·release build를 통과했다. 서명 후보가 설치 권한이 아니라는 경계는 유지한다. 운영키·signed 자동 생성의 실제 실행·owned helper 인계·교체/복구 인수는 남는다. Linux targeted27PASS를 전체 OS 지원으로 해석하지 않는다.
+
+
+원 StagedPackage를 읽는 bundle 검사도 같은 권한 경계를 따른다. exact7 regular ZIP member/current profile, manifest5개의 version/target/hash·CRC·physical ranges·binding CPU/installer를64KiB stream/각 metadata64KiB/expanded256MiB로 제한한다. 원HANDLE 검증과 전체signedSHA 전후 검사를 통과해도 readonly BundleObservation만 반환한다. 현재profile 밖 ZIP64/extra/comment/preamble/trailing은 거절한다. 후보가 만료/다른 설치로 바뀌지 않았는지와 실행 권한은 미래 교체 coordinator에서 별도 확인해야 한다. Root Windows engine strict Clippy 및 app_update43PASS(실제stagecap1 포함), Linux workspace targeted37PASS, 실제49c unsigned installer ZIP parser 호환성을 확인했다. 운영키·교체/rollback 전체가 미완료이므로 본 ADR의 Proposed 상태는 유지한다.

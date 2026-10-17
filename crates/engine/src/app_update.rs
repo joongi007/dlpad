@@ -13,3 +13,5 @@ pub use staging::{
 
 pub mod discovery;
 pub mod transport;
+
+pub mod bundle;

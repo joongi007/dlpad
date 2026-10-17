@@ -456,3 +456,6 @@ ADR0005의 durable revision/cold writer 실험은 Proposed 기반으로 보존�
 
 
 설치기 packaged 모드의 명시 재검사는 초기 admission 중단 후에도 위치·유일한 현재 journal generation 탐색을 다시 수행한다. 기본 journal 표기는 hint이며 중단 전에 current generation을 찾았다고 가정하지 않는다. worker 취소 ACK 전에는 재검사를 시작하지 않고, 빈 위치의 Vacant와 기존 설치의 검증된 readiness를 구분한다. 명시4경로 검증·실행/제거의 fresh guard·기존 자료 보존 계약은 유지한다. [재현·수정](docs/work-items/S07-installer-cancel-retry-20261017.md).
+
+
+업데이트 BundleObservation은 원 StagedPackage의 native identity와 signed whole-file size/hash를 전후 대조한 뒤 현재 preview ZIP7member·manifest5payload·각CRC/SHA·binding을 읽은 bounded 관측이다. 추출 파일·설치/실행/삭제 권한이나 운영 publisher/legal 완전성이 아니다. 다음 동작은 원 StagedPackage를 유지하고 다시 검증해야 한다. [범위와 원본 검증](docs/work-items/S11-update-bundle-validation-20261018.md).
