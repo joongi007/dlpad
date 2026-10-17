@@ -74,3 +74,12 @@ release workflow의 candidate-only는 main에서만 허용하고 tag에서의 �
 
 
 source49c3812의 [CI39060610796](https://github.com/joongi007/dlpad/actions/runs/39060610796)는 ZIP 생성/보관까지 전체success다. Root가 원artifact SHA·installer7/portable6·동일payload를 대조하고 실제GUID임시Windows설치·재검증·원파일/기록hash·자연종료를 확인했다. 공개Pages는 repo Pages source를 GitHub Actions로 구성하고 DLPAD_PAGES_ENABLED=true를 설정하는 공개 단계가 남으며 현재는 build/artifact만제공한다. 태그/미공개draft/publicRelease/운영signing도 아직미실행이다. [실제산출물·원검수](work-items/S11-auto-release-20261018.md).
+
+
+## 2026-10-18 최신 Windows 후보 인수
+
+앱 소스c5963b5의 [전체 CI39066254029](https://github.com/joongi007/dlpad/actions/runs/39066254029)는 docs/Windows CPU feature 포함 strict lint·workspace test/release·대체 렌더러·CPU/installer/companion·GPU compile·원 installer/portable ZIP 생성·artifact 보존까지 success다. Windows의 별도 CPU lint/tests label skip은 중복 방지이며 실제 capture 명령은 ci_whole_receipt.py의 --features dlpad/cpu를 포함한다. GPU 단계는 컴파일이며 hosted GPU runtime/시각시험을 뜻하지 않는다.
+
+Root는 artifact12113907821의 원 SHA를 대조하고 exact installer7/portable6 member와 manifest5·CRC/SHA/원 binaries/source/run identity를 직접 검증했다. 원 ZIP의 가상 Windows 설치·재검증과 설치 앱의 Light/Dark 재시작·100/200% 설정/키보드 focus-scroll·정상 종료도 확인했다. 별도 ZIP→staging→새 고정 bundle 시험은 test-only 키를 사용했으며 운영 서명/자동 실행 인수가 아니다. 자세한 경로와 제한은 [통합 기록](work-items/S11-site-release-integration-20261018.md)과 [설치 준비](work-items/S11-update-bundle-preparation-20261018.md)에 있다.
+
+검증한 c5963b5는 origin/main으로 normal fast-forward push했다. 먼저 repository 변수의 실제 읽기 접근과 Pages 공개 비활성을 확인했으며 태그·공개 Release·Pages 설정·운영키는 변경하지 않았다. 이 뒤 문서 전용 결과 갱신은 앱 소스를 변경하지 않으며 원격 자동 후속 실행과 위 완료 run을 구분한다. 공개 배포는 사용자 초기 별도 승인 범위에 따라 대기 중이다.

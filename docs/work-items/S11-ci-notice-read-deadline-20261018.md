@@ -1,6 +1,6 @@
 # S11: CI notice 읽기 deadline 회귀의 단계 정합성
 
-- 상태: done; Root Windows strict lint·모듈·전체 engine 인수 완료, hosted 전체 CI 후속
+- 상태: done
 - 분류: bug
 - 우선순위: P0
 - 요구사항: R05, R08, R11
@@ -58,3 +58,6 @@ Linux 테스트에서는 수정하지 않은 `media_preview.rs:591`의 cfg별 `u
 ## Root 실제 Windows 통합 검증
 
 Root가 원49c/ab4 CI 실패 로그와 패치 diff·소스 SHA를 직접 확인했다. 실제 원 Job/private desktop에서 `cargo clippy -p dlpad-engine --all-targets --locked --offline -- -D warnings` exit0, `cargo test -p dlpad-engine --lib --locked --offline tools::archive_install -- --test-threads=1` 13PASS/0FAIL을 확인했다. 원 로그는 `.local-tools/update-integration-20261018/native-engine-final-v1/native-tests.log`다. 이어진 전체 engine 시험은 Root가 정리된 debug cache의 필수 guardian 선행 빌드를 누락해8FAIL을 냈다. 원 실패는 보존했다. product/test 단정을 바꾸지 않고 `cargo build -p dlpad-engine --bin dlpad-process-guard --locked --offline` 뒤 전체 `cargo test -p dlpad-engine --lib --locked --offline`를 재실행해 주 harness635PASS/0FAIL/18ignored, 별도 filtered child1PASS를 확인했다. 같은 notice 실패 보존 시험도 실제 성공했다. 원 결과는 native-engine-final-v2/native-tests.log이며 경과43.41초, 두 명령 exit0, natural-zero/final-zero=True, forced=False, final-active0, private-desktop-closed/input-desktop-unchanged/source-unchanged=True다. 전체 Windows workspace/GPU/autoZIP hosted CI는 이 engine 검증과 별도다.
+
+
+최종 c5963b5의 hosted CI39066254029에서도 CPU feature 포함 Windows 전체 workspace Tests가 실제 success이며 원 installer/portable ZIP까지 생성됐다. Root가 원 run JSON·artifact binding을 직접 검증했다. 이 회귀를 skip하거나 제품 deadline을 늘려 통과시킨 것이 아니다.

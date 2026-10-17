@@ -30,3 +30,16 @@ Root fullWindows strictlint/test/release, privateUI한글/조회/배율/종료, 
 
 
 후속 ab4a7c1 CI39064076669는 기존 archive_install notice 읽기 시험의 단계 오인으로 Tests에서 실패했다. 원 로그618PASS/1FAIL/17ignored/exit101을 보존했고 후속 빌드/GPU/autoZIP는 skipped였다. [정확 재현과 최소 수정](S11-ci-notice-read-deadline-20261018.md)은 제품 코드/정책을 바꾸지 않는 fixture 수정이다. 별도 설치 준비와 함께 실제 Windows engine strict lint·전체 주635+filtered child1PASS를 통합 검증했으며 새로운 isolated integration branch에서 hosted workspace CI를 다시 확인한다. ab4실패를49c검수본/완료된 자동 공개로 오인하지 않는다.
+
+
+## 최신 통합 완료 범위와 공개 대기
+
+c5963b5의 CI39066254029 전체 success를 Root가 GitHub 원 run 응답에서도 직접 확인했다. 앱 code는 origin/main에 normal FF push했으며 원격 refs/heads/main=c5963b5를 다시 확인했다. Root local main/index는 기존 상태를 보존하고 건강한 site-release worktree/독립 index에서 수행했다. Pages 변수 조회 권한과 실제 공개 비활성을 먼저 확인했고 tag/Release/Pages 설정/운영키 수정0이다. 후속 문서 전용 갱신은 동일 앱 code의 검증 결과를 기록한다.
+
+받은 원 preview artifact12113907821은11,887,524B/SHA2568b695992806df2e5a5bf11b77144a6ec2e5bcc9c1492bbdc64dc710b1117bf23이다. installer ZIP SHA2566af3ab081610f121afff5e017561c61c2d4dfe5aa8687691fc59547e67f83f57, portable2f276191fe167adbbdf636aa7c6b765e7e09d429d4aace83af0ccd6cd8b110eb. Root exact7/6 namespace·manifest5·CRC/SHA/binding 일치를 확인했다. package-review.json의 당시 private_installation_pending 사실을 덮어쓰지 않고 후속 root-review.json을 따로 작성했다.
+
+최신 실제 설치 관측은 .local-tools/update-integration-20261018/hosted-c596/private-install-c596-v1/이며 raw status REVIEW_REQUIRED를 유지했다. Root가 installed.png를 열고 실제 installed namespace8(5payload+install-ready/registration/seal)·journal5 SHA·foreign sentinel 보존을 직접 확인했다. registered record 이름의 Root 일회성 검사 가정 오류는 제품 registration.rs의 실제 계약으로 정정했으며 제품 수정은 없었다. 원 설치기/CPU hash와 자연종료0/원Job0/강제정리0/private desktop 폐쇄/입력 desktop 불변을 확인했다. 설치기 전체 인증/물리IME/clean-machine/Authenticode를 완료한 것은 아니다.
+
+실제 설치 CPU(a03678047d6990fa04e303a4d269aa8f2c3fcd74631398bac55bc512571122b6)의 GUI는 gui-hosted-c596-v1/에 있다. Root는 actual Light960·200% focus-scroll·Dark restart PNG와 두 원 JSON을 직접 검수했다. 두 세션 자연종료0/원Job0/강제정리0/input desktop 불변이며 실제 공개 버전 없음 결과를 관측했다. OS theme 자체/물리 키보드/자동 설치 인수는 false로 보존한다.
+
+동일 최신 ZIP은 native-hosted-preparation-c596-v1에서 원 SHA를 고정한 test-only candidate로 실제 새 bundle/journal 준비1PASS/0FAIL(13.37초)을 확인했다. 운영키/실제 새 프로세스 전환/프로필 rollback은 미완료다. 최신 검수 ZIP 경로는 .local-tools/update-integration-20261018/hosted-c596/packages/다. 소개 페이지는 site-preview-20261018-v3/index.html 및 site-review-20261018-v4/ 실제 캡처로 검수할 수 있다. 공개 배포 질문에 대한 사용자 답변은 아직 없어 게시하지 않는다.

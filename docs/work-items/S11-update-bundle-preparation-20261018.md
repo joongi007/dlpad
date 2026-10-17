@@ -35,3 +35,6 @@ Root Linux workspace targeted app_update45PASS/0FAIL이며 기존 media_preview.
 
 
 동일 engine 구현에 notice fixture 수정만 통합한 뒤 Windows engine 전체도 주 harness635PASS/0FAIL/18ignored와 filtered child1PASS를 확인했다. 첫 실행의 guardian 선행 빌드 누락8FAIL은 보존하고, 원 guardian build 뒤 재실행해 인수했다. 전체 workspace/GPU/공개 배포/실제 앱 전환 성공을 이 결과로 대체하지 않는다.
+
+
+후속 c5963b5 hosted 전체 CI39066254029도 통과했다. 새 원 installer ZIP(SHA2566af3ab081610f121afff5e017561c61c2d4dfe5aa8687691fc59547e67f83f57)을 test-only candidate로 사용해 동일 명시 fixture1PASS/0FAIL을 다시 실행했다. 운영키/자동 앱 실행은 제외한다. CPU10,430,464B·installer4,423,680B로49c 대비 각각512B 증가했다. 이는 모든 후속 변경을 합친 PE 차이이며 모듈별 원인/메모리 비용 분해가 아니다.
