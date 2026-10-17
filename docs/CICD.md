@@ -31,7 +31,7 @@ Git에는 소스·문서·native assets·vendor·lock을 넣고 로컬 증거/ZI
 | release 환경 승인 | 서명·notarization·설치/업데이트/제거 시험 | 서명 검증된 artifact만 공개 |
 | publish | checksum·라이선스·변경 내역·지원 OS 표 게시 | 동일 검증 artifact 승격, 재빌드하지 않음 |
 
-tag/release 자동화는 이 문서의 계획이며 아직 workflow로 구현하지 않았다. 인증서·저장소·패키지 형식과 앱 entrypoint가 확정되기 전에 비어 있는 릴리스를 생성하지 않는다. 최초 공개 전에는 maintainer가 release 환경 권한·승인 정책을 설정한다.
+2026-10-18 `.github/workflows/release.yml`에 Windows preview draft 자동화를 구현했다. 정확한 버전 태그→reusable CI 전체 성공→동일 SHA/run artifact ID 다운로드→실행 파일 재빌드 없이 notice·runtime·원 로그 검증→설치 ZIP/포터블 ZIP→미공개 draft 순서다. 아직 실제 hosted 패키징 성공과 공개를 검증하지 않았다. 정식 서명·업데이트 교체 인수는 별도다. 인증서·저장소·패키지 형식과 앱 entrypoint가 확정되기 전에 비어 있는 릴리스를 생성하지 않는다. 최초 공개 전에는 maintainer가 release 환경 권한·승인 정책을 설정한다.
 
 ## OS와 패키지
 
@@ -52,3 +52,13 @@ S04/S07에서 cargo audit/deny 또는 동등 검사, license inventory, SBOM, �
 릴리스 시험은 깨끗한 환경 설치 → 선택 도구 설치 → 샘플 다운로드 → 앱 업데이트 → DB migration → 제거(미디어 보존)를 수행한다. rollback은 이전 앱과 DB schema 호환성을 확인하며 migration 전에 backup을 만든다. 관리 도구 업데이트는 앱 업데이트와 별도로 rollback 가능해야 한다.
 
 도구를 제외한 앱 크기만 보여주지 않고 최소 설치, 추천 도구 포함, 선택 구성요소별 설치 크기를 게시한다. CI cache는 성능 최적화일 뿐 재현성을 대체하지 않는다.
+
+## 소개 사이트 (2026-10-18)
+
+`site/`는 Rust 제품 UI와 별개의 정적 소개 페이지다. `scripts/build_site.py`는 명시한7개 파일만 새 출력 폴더에 생성하며 source/evidence/cache를 통째로 배포하지 않는다. 공개 GitHub Releases에서 installer·portable asset 쌍과 정확한 저장소/파일명/크기를 검사하고 stable을 우선한다. stable이 없으면 공개 preview라고 명시하며 draft는 다운로드로 노출하지 않는다. 방문자의 브라우저는 자체 `release.json`만 읽으며 GitHub API·외부 폰트·분석 서버에 요청하지 않는다.
+
+`.github/workflows/pages.yml`은 PR/main에서 사이트를 빌드하고 artifact로 검수할 수 있게 한다. `DLPAD_PAGES_ENABLED=true` 저장소 변수를 명시적으로 켠 뒤 main 자동 배포와 공개 Release 이벤트의 다운로드 갱신이 동작한다. GitHub Pages source는 Actions와 github-pages environment로 설정한다. 현재 변수·Pages 게시·공개 릴리스를 실행하지 않았다. 최초 공개는 사용자가 구체 후보를 확인한 뒤 별도 승인 범위다. GitHub 공식 [Pages workflow](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)를 기준으로 Actions SHA를 공식 refs API에서 확인했다.
+
+사이트 검증은 `python3 scripts/test_build_site.py`와 headless-only `scripts/test_site_browser.cjs`다. 후자는 SITE, 새 OUTPUT, 로컬 playwright-core 경로, Chromium 경로를 인자로 받으며 127.0.0.1의 임시 서버와 브라우저를 종료한다. Playwright는 개발 검수 도구이며 제품·공개 페이지 의존성이 아니다.
+
+Windows hosted 후보는 `-C target-feature=+crt-static`으로 C runtime을 정적 링크하도록 구성했다. 기존 로컬 Windows 후보의 검증된 방식을 따르며 별도 Visual C++ 재배포 도구 설치를 사용자의 필수 선행 조건으로 만들지 않는다. 앱 크기는 정적 runtime만큼 늘 수 있으므로 실제 산출물 크기를 기록한다. packager는 실제 PE import를 검사해 공급하지 않은 vcruntime/msvcp 등 비시스템 DLL이 남으면 실패하며, build flag만으로 깨끗한 PC 인수를 완료 처리하지 않는다. 다른 OS에는 이 플래그를 적용하지 않는다.

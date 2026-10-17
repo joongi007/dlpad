@@ -38,3 +38,7 @@ S07 출시 게이트에는 S10의 P0 진단 자료 기능도 포함한다. S10 �
 ## 선택적 로컬 영상 의미 검색 (후속 제안)
 
 P0·CI 안정화와 사용자 지정 updater 순서 이후, 선택 설치 모델을 이용한 자연어 영상/구간 검색을 검토한다. EmbeddingGemma 2는 평가 후보이며 채택·설치·구현은 아직 하지 않는다. 외부 추가·rename·수정·삭제·볼륨 분리/복귀와 모델 교체를 기존 폴더 동기화에 연결하고 원 미디어를 보존한다. native 추론/품질·비용 실험 → 선택 설치 → bounded 색인 동기화 → 검색/재생 UX 순으로 진행한다. [작업 범위·동기화·인수 조건](work-items/S12-local-video-semantic-search.md).
+
+## 2026-10-18 실행 순서
+
+사용자 지정 현재 순서는 [소개 페이지](work-items/S11-introduction-site-20261018.md) → [설치형·포터블 자동 릴리스](work-items/S11-auto-release-20261018.md) → [앱 updater](work-items/S11-app-updater.md)다. 실제 Windows CI 성공을 선행 증거로 사용한다. 정적 사이트/미공개 preview 패키징과 공개·서명·자동 교체 인수를 구분하며, 기존 설치기의 fresh 설치를 in-place rollback 완료로 표현하지 않는다.

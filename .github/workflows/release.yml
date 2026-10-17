@@ -1,0 +1,134 @@
+name: Windows preview release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      candidate_only:
+        description: Validate main and package artifacts without creating a tag or release
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  version:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      draft_allowed: ${{ steps.version.outputs.draft_allowed }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Require an exact version tag and source version
+        id: version
+        env:
+          RELEASE_REF: ${{ github.ref }}
+          CANDIDATE_ONLY: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_only }}
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, re, tomllib
+          value = os.environ['RELEASE_REF']
+          match = re.fullmatch(r'refs/tags/v((?:0|[1-9][0-9]{0,8})\.(?:0|[1-9][0-9]{0,8})\.(?:0|[1-9][0-9]{0,8}))', value)
+          manifest = tomllib.loads(pathlib.Path('Cargo.toml').read_text())
+          version = manifest['workspace']['package']['version']
+          candidate_only = os.environ['CANDIDATE_ONLY'] == 'true' and value == 'refs/heads/main'
+          if not match and not candidate_only:
+              raise SystemExit('Select a vX.Y.Z tag, or candidate-only main validation.')
+          if match and match[1] != version:
+              raise SystemExit('Tag does not match Cargo workspace version')
+          if not re.fullmatch(r'(0|[1-9][0-9]{0,8})\.(0|[1-9][0-9]{0,8})\.(0|[1-9][0-9]{0,8})', version):
+              raise SystemExit('Invalid workspace version')
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as stream:
+              stream.write('version='+version+'\n')
+              stream.write('draft_allowed='+str(bool(match) and not candidate_only).lower()+'\n')
+          PY
+  verify:
+    needs: version
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+  package:
+    needs: [version, verify]
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Require this run's verified source artifact
+        shell: pwsh
+        env:
+          SOURCE_SHA: ${{ needs.verify.outputs.source_sha }}
+          ARTIFACT_ID: ${{ needs.verify.outputs.windows_artifact_id }}
+          ARTIFACT_NAME: ${{ needs.verify.outputs.windows_artifact_name }}
+        run: |
+          if ($env:SOURCE_SHA -cne $env:GITHUB_SHA) { throw 'Artifact source SHA mismatch' }
+          if ($env:ARTIFACT_ID -notmatch '^[1-9][0-9]*$') { throw 'Missing verified artifact ID' }
+          if ($env:ARTIFACT_NAME -cne "windows-development-build-inputs-$env:GITHUB_SHA") { throw 'Artifact name mismatch' }
+      - name: Download the same-run original build inputs
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          artifact-ids: ${{ needs.verify.outputs.windows_artifact_id }}
+          path: preview-inputs
+          merge-multiple: true
+      - name: Validate and package original binaries without rebuilding
+        shell: pwsh
+        env:
+          PACKAGE_VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          python scripts/package_ci_preview.py --root "$env:GITHUB_WORKSPACE" --inputs preview-inputs --notices preview-inputs/ci-notices --commit "$env:GITHUB_SHA" --run-id "$env:GITHUB_RUN_ID" --version "$env:PACKAGE_VERSION" --output preview-release
+          if ($LASTEXITCODE -ne 0) { throw 'Preview packaging failed' }
+      - name: Preserve complete unsigned preview packages
+        id: upload
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: windows-preview-packages-${{ github.sha }}
+          path: preview-release/
+          if-no-files-found: error
+          retention-days: 30
+    outputs:
+      artifact_id: ${{ steps.upload.outputs.artifact-id }}
+  draft:
+    needs: [version, package]
+    if: needs.version.outputs.draft_allowed == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          artifact-ids: ${{ needs.package.outputs.artifact_id }}
+          path: preview-release
+          merge-multiple: true
+      - name: Create an unpublished preview draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PACKAGE_VERSION: ${{ needs.version.outputs.version }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, subprocess
+          version = os.environ['PACKAGE_VERSION']
+          folder = pathlib.Path('preview-release')
+          assets = [str(folder / name) for name in (
+              'dlpad-'+version+'-windows-x86_64-installer.zip',
+              'dlpad-'+version+'-windows-x86_64-portable.zip',
+              'SHA256SUMS', 'release-binding.json')]
+          if not all(pathlib.Path(name).is_file() for name in assets):
+              raise SystemExit('Incomplete package assets')
+          subprocess.run(['gh', 'release', 'create', 'v'+version, '--verify-tag',
+              '--draft', '--prerelease', '--target', os.environ['SOURCE_SHA'],
+              '--title', 'dlpad '+version+' Windows preview',
+              '--notes-file', str(folder/'RELEASE-NOTES.md'), *assets], check=True, timeout=180)
+          PY

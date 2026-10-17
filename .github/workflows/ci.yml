@@ -3,6 +3,15 @@ name: CI
 on:
   pull_request:
   push:
+    branches: ['**']
+  workflow_call:
+    outputs:
+      windows_artifact_name:
+        value: ${{ jobs.native.outputs.windows_artifact_name }}
+      windows_artifact_id:
+        value: ${{ jobs.native.outputs.windows_artifact_id }}
+      source_sha:
+        value: ${{ jobs.native.outputs.source_sha }}
   workflow_dispatch:
     inputs:
       include_other_platforms:
@@ -59,6 +68,12 @@ jobs:
         run: python3 scripts/test_prepare_ci_msvc.py
       - name: Validate unsigned update metadata rejection policy
         run: python3 scripts/test_update_candidate.py
+      - name: Validate public site release selection and build isolation
+        run: python3 scripts/test_build_site.py
+      - name: Validate CI notice collection and preview packaging
+        run: |
+          python3 scripts/test_collect_ci_notices.py
+          python3 scripts/test_package_ci_preview.py
       - name: Validate installer payload and ZIP failure paths
         run: python3 -m unittest discover -s scripts -p 'test_*install_payload.py'
       - name: Validate installer icon and manifest resources
@@ -76,6 +91,10 @@ jobs:
 
   native:
     needs: docs
+    outputs:
+      windows_artifact_name: windows-development-build-inputs-${{ github.sha }}
+      windows_artifact_id: ${{ steps.windows-artifact.outputs.artifact-id }}
+      source_sha: ${{ github.sha }}
     if: needs.docs.outputs.has_rust == 'true'
     strategy:
       fail-fast: false
@@ -105,6 +124,10 @@ jobs:
         run: python scripts/test_ci_capture_operation.py
       - name: Fetch exact lock dependencies
         run: cargo fetch --locked
+      - name: Link the Windows C runtime into standalone candidates
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: '"RUSTFLAGS=-C target-feature=+crt-static" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append'
       - name: Prepare CI-private Windows compiler without telemetry helper
         if: runner.os == 'Windows'
         shell: pwsh
@@ -206,7 +229,12 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Dependency metadata failed" }
           & python scripts/ci_notice_graph.py --app-tree ci-app-tree.stdout.txt --engine-tree ci-engine-tree.stdout.txt --metadata ci-metadata.stdout.json --lock Cargo.lock --output ci-graph-format.json
           if ($LASTEXITCODE -ne 0) { throw "Dependency format binding failed" }
+      - name: Collect original license bytes for Windows preview packages
+        if: runner.os == 'Windows'
+        shell: bash
+        run: python scripts/collect_ci_notices.py --root "$GITHUB_WORKSPACE" --graph ci-graph-format.json --metadata ci-metadata.stdout.json --lock Cargo.lock --whole ci-captures/whole.json --output ci-notices
       - name: Preserve unsigned Windows development build inputs
+        id: windows-artifact
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -220,6 +248,7 @@ jobs:
             rust-toolchain.toml
             windows-development-build-inputs.txt
             ci-graph-format.json
+            ci-notices/
             ci-captures/
             ci-*.stdout.*
             ci-*.stderr.txt
