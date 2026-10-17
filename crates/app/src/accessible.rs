@@ -425,6 +425,7 @@ enum SettingsSection {
     General,
     Tools,
     SaveLocation,
+    AppUpdate,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -475,6 +476,7 @@ pub(crate) struct Candidate {
     close_wait: bool,
     settings: bool,
     settings_section: SettingsSection,
+    app_update_panel: Option<crate::accessible_app_update::AppUpdatePanel>,
     network_reveal: NetworkReveal,
     diagnostic_open_reveal: DiagnosticOpenReveal,
     start_condition_reveal_frame: Option<u64>,
@@ -726,6 +728,7 @@ impl Candidate {
             close_wait: false,
             settings: std::env::args().any(|a| a == "--settings"),
             settings_section: SettingsSection::General,
+            app_update_panel: None,
             network_reveal: NetworkReveal::default(),
             diagnostic_open_reveal: DiagnosticOpenReveal::default(),
             start_condition_reveal_frame: None,
@@ -1059,6 +1062,9 @@ impl Candidate {
 impl Drop for Candidate {
     fn drop(&mut self) {
         self.appearance.request_stop();
+        if let Some(panel) = &mut self.app_update_panel {
+            panel.request_stop();
+        }
         self.tool_preferences.request_stop();
         self.metrics.request_stop();
         if let Some(tools) = &mut self.tools {
@@ -1238,11 +1244,13 @@ impl Candidate {
                 (SettingsSection::General, c::SETTINGS_GENERAL),
                 (SettingsSection::Tools, c::TOOLS),
                 (SettingsSection::SaveLocation, c::SETTINGS_SAVE_LOCATION),
+                (SettingsSection::AppUpdate, c::APP_UPDATE_TITLE),
             ] {
                 let key = match section {
                     SettingsSection::General => "general",
                     SettingsSection::Tools => "tools",
                     SettingsSection::SaveLocation => "save-location",
+                    SettingsSection::AppUpdate => "app-update",
                 };
                 let clicked = ui
                     .scope_builder(
@@ -2042,6 +2050,9 @@ impl Candidate {
         }
         self.poll();
         self.appearance.poll(ctx);
+        if let Some(panel) = &mut self.app_update_panel {
+            panel.poll(ctx);
+        }
         self.metrics.set_root(self.output_path());
         self.metrics.poll(ctx);
         let tickets = std::array::from_fn(|index| self.tool_preferences.managed_auto_ticket(index));
@@ -2124,6 +2135,10 @@ impl Candidate {
         if ctx.input(|i| i.viewport().close_requested())
             && (!self.tool_preferences.stopped()
                 || !self.appearance.stopped()
+                || self
+                    .app_update_panel
+                    .as_ref()
+                    .is_some_and(|panel| !panel.stopped())
                 || !self.metrics.stopped()
                 || self.worker.is_some()
                 || self.tools.is_some()
@@ -2151,6 +2166,9 @@ impl Candidate {
                 self.close_wait = true;
                 self.stop_local_export();
                 self.appearance.request_stop();
+                if let Some(panel) = &mut self.app_update_panel {
+                    panel.request_stop();
+                }
                 self.tool_preferences.request_stop();
                 self.metrics.request_stop();
                 if let Some(tools) = &mut self.tools {
@@ -2174,6 +2192,10 @@ impl Candidate {
             && !self.tool_path_picker.busy()
             && self.tool_preferences.stopped()
             && self.appearance.stopped()
+            && self
+                .app_update_panel
+                .as_ref()
+                .is_none_or(|panel| panel.stopped())
             && self.metrics.stopped()
             && self.tools.as_ref().is_none_or(|p| p.stopped())
             && self.history.as_ref().is_none_or(|p| p.stopped())
@@ -2586,6 +2608,14 @@ impl Candidate {
                     }
                     return;
                 }
+                if self.settings && self.settings_section == SettingsSection::AppUpdate {
+                    let enabled = !self.close_wait;
+                    let panel = self.app_update_panel.get_or_insert_with(crate::accessible_app_update::AppUpdatePanel::new);
+                    egui::ScrollArea::vertical()
+                        .id_salt("settings-app-update-content")
+                        .show(ui, |ui| panel.ui(ui, enabled));
+                    return;
+                }
                 if self.settings && self.settings_section == SettingsSection::SaveLocation {
                     egui::ScrollArea::vertical()
                         .id_salt("settings-save-location-content")
@@ -2971,6 +3001,9 @@ impl Candidate {
                         self.close_wait = true;
                         self.stop_local_export();
                         self.appearance.request_stop();
+                        if let Some(panel) = &mut self.app_update_panel {
+                            panel.request_stop();
+                        }
                         self.tool_preferences.request_stop();
                         self.metrics.request_stop();
                         if let Some(tools) = &mut self.tools {
@@ -3836,6 +3869,15 @@ mod tests {
         let settings = frame(&mut app, true, vec![click(identities[3])]);
         assert!(
             app.settings && !app.tools_open && app.settings_section == SettingsSection::General
+        );
+        let update_id = exact(&settings, c::APP_UPDATE_TITLE);
+        frame(&mut app, true, vec![click(update_id)]);
+        assert!(
+            app.settings && !app.tools_open && app.settings_section == SettingsSection::AppUpdate
+        );
+        assert!(
+            app.app_update_panel.is_none(),
+            "navigation alone does not start network or workers"
         );
         let tools_id = exact(&settings, c::TOOLS);
         frame(&mut app, true, vec![click(tools_id)]);

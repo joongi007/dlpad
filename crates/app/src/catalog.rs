@@ -810,3 +810,35 @@ pub const STARTUP_CHECKING_TITLE: &str = "앱 준비 중";
 pub const STARTUP_FAILED_TITLE: &str = "앱 준비를 완료하지 못했습니다";
 pub const STARTUP_LOCKED_HELP: &str =
     "이전 작업 확인이 끝나면 다운로드 시작과 일부 설정을 사용할 수 있습니다.";
+
+pub const APP_UPDATE_TITLE: &str = "앱 업데이트";
+pub const APP_UPDATE_INSTALLED: &str = "현재 버전";
+pub const APP_UPDATE_WINDOWS: &str = "Windows x64";
+pub const APP_UPDATE_OTHER_PLATFORM: &str = "앱 업데이트는 Windows x64에서 먼저 지원합니다.";
+pub const APP_UPDATE_CHANNEL: &str = "조회 채널";
+pub const APP_UPDATE_STABLE: &str = "안정 버전";
+pub const APP_UPDATE_PREVIEW: &str = "미리보기 버전";
+pub const APP_UPDATE_CHECK: &str = "새 버전 확인";
+pub const APP_UPDATE_CHECKING: &str = "새 버전 확인 중…";
+pub const APP_UPDATE_CANCEL: &str = "조회 중단";
+pub const APP_UPDATE_CANCELLING: &str = "조회를 중단하고 있습니다…";
+pub const APP_UPDATE_CANCELLED: &str = "버전 확인을 중단했습니다.";
+pub const APP_UPDATE_AVAILABLE: &str = "새 버전이 있습니다";
+pub const APP_UPDATE_CURRENT: &str = "현재 버전보다 새로운 공개 버전이 없습니다.";
+pub const APP_UPDATE_NONE: &str = "아직 공개된 버전이 없습니다.";
+pub const APP_UPDATE_NONE_PREVIEW: &str = "최근 공개 릴리스에 미리보기 버전이 없습니다.";
+pub const APP_UPDATE_OFFLINE: &str =
+    "버전을 확인하지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요.";
+pub const APP_UPDATE_TIMEOUT: &str = "응답 시간이 초과되었습니다. 잠시 후 다시 시도하세요.";
+pub const APP_UPDATE_RATE_LIMIT: &str = "GitHub 조회 한도에 도달했습니다. 잠시 후 다시 시도하세요.";
+pub const APP_UPDATE_INVALID: &str =
+    "릴리스 정보를 확인하지 못했습니다. 릴리스 페이지에서 확인하세요.";
+pub const APP_UPDATE_WORKER_FAILED: &str =
+    "버전 확인을 시작하지 못했습니다. 앱을 다시 열고 시도하세요.";
+pub const APP_UPDATE_RELEASE_OPEN: &str = "릴리스에서 설치";
+pub const APP_UPDATE_ALL_RELEASES: &str = "모든 릴리스 보기";
+pub const APP_UPDATE_MANUAL_ONLY: &str =
+    "앱 내 자동 설치는 아직 제공하지 않습니다. 새 버전은 릴리스에서 설치하세요.";
+pub const APP_UPDATE_CACHED: &str = "이전 확인 결과";
+pub const APP_UPDATE_INITIAL: &str = "확인을 누르면 GitHub의 공개 릴리스에서 새 버전을 조회합니다.";
+pub const APP_UPDATE_VERSION_HELP: &str = "앱 버전과 개발 검수 번호(v37 등)는 다릅니다. 다운로드 도구 업데이트는 도구 설정에서 관리합니다.";

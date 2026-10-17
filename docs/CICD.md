@@ -25,7 +25,7 @@ Git에는 소스·문서·native assets·vendor·lock을 넣고 로컬 증거/ZI
 | 시점 | 수행 | 결과/게이트 |
 |---|---|---|
 | PR | 문서·format·lint·unit·adapter fixture·Windows release compile(다른 OS는 수동 선택) | 코드 검증, 실패 시 merge 불가 |
-| main | 위 검사 + 개발용 archive | 비서명 dev build, 7일 보존, 정식 installer 아님 |
+| main | 위 검사 + 원본 입력 archive + 설치형/포터블 후보 ZIP | 비서명 preview 후보14일, 원본 입력7일 보존, 정식 서명 릴리스 아님 |
 | nightly | migration·장시간 soak·프로세스 cleanup·memory sample | 회귀 보고; 실제 사이트는 별도 선택 job |
 | v* tag | 버전 일치·전체 검사·target별 build·SBOM·digest·패키징 | draft release 후보 |
 | release 환경 승인 | 서명·notarization·설치/업데이트/제거 시험 | 서명 검증된 artifact만 공개 |
@@ -62,3 +62,12 @@ S04/S07에서 cargo audit/deny 또는 동등 검사, license inventory, SBOM, �
 사이트 검증은 `python3 scripts/test_build_site.py`와 headless-only `scripts/test_site_browser.cjs`다. 후자는 SITE, 새 OUTPUT, 로컬 playwright-core 경로, Chromium 경로를 인자로 받으며 127.0.0.1의 임시 서버와 브라우저를 종료한다. Playwright는 개발 검수 도구이며 제품·공개 페이지 의존성이 아니다.
 
 Windows hosted 후보는 `-C target-feature=+crt-static`으로 C runtime을 정적 링크하도록 구성했다. 기존 로컬 Windows 후보의 검증된 방식을 따르며 별도 Visual C++ 재배포 도구 설치를 사용자의 필수 선행 조건으로 만들지 않는다. 앱 크기는 정적 runtime만큼 늘 수 있으므로 실제 산출물 크기를 기록한다. packager는 실제 PE import를 검사해 공급하지 않은 vcruntime/msvcp 등 비시스템 DLL이 남으면 실패하며, build flag만으로 깨끗한 PC 인수를 완료 처리하지 않는다. 다른 OS에는 이 플래그를 적용하지 않는다.
+
+
+## 2026-10-18 소개·후보 ZIP·업데이트 연결
+
+source32607f7의 [site39057841523](https://github.com/joongi007/dlpad/actions/runs/39057841523)와 [CI39057841587](https://github.com/joongi007/dlpad/actions/runs/39057841587)는 모두success다. 실제 Windows 원notice 수집과 원artifact 보관까지 확인했으며 그 source에는 ZIP step이 없었다. 후속 main/PR CI는 GPU 검증 뒤 같은 원binary/source/raw lifecycle/notice를 재검증해 RUNNER_TEMP 새폴더에 installer ZIP/portable ZIP·SHA256SUMS·binding·notes를 만들고 windows-preview-candidates-SHA로14일보관한다. 재빌드는 없다. Pages 공개는 repo variable DLPAD_PAGES_ENABLED=true가 필요하며 아직 설정/게시하지 않았다.
+
+release workflow의 candidate-only는 main에서만 허용하고 tag에서의 후보 전용 요청은 명시거절한다. 실제tag와Cargo버전이 정확히 맞을 때만 미공개preview draft로 이어진다. 취소한 실행은draft를 만들지 않는다. 선택적 Linux signer job은 repo/org-level DLPAD_UPDATE_SIGNING_ENABLED=true와 release-signing environment의 기존 secret DLPAD_UPDATE_PRIVATE_KEY_PEM 및 variable DLPAD_UPDATE_KEY_ID가 준비된 경우에만 활성화된다. 환경 수준 변수만으로 job-level enable조건을 대체하지 않는다. signer17회귀·versiongate5회귀를 CI에 포함했다. 키가없으면 sign은skip하고 기존 unsigned development표시를 유지하며, 활성화된sign이실패하면 unsigned draft로fallback하지않는다. 실제signer workflow·운영키외부전송·첫draft/publish는미실행이다.
+
+앱은 공개버전 조회 UI와 정확한 Ed25519 bytes 검증/Windowsowned저장을 구현했지만 운영trustroot/교체helper/rollback은미완료다. release public-key aid를 제품trustroot로 자동수용하지 않는다. [통합 및 검증](work-items/S11-app-updater.md), [preview packaging](work-items/S11-auto-release-20261018.md), [서명 후보 경계](adr/0012-signed-app-update-candidates.md).

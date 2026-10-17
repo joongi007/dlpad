@@ -42,3 +42,6 @@ P0·CI 안정화와 사용자 지정 updater 순서 이후, 선택 설치 모델
 ## 2026-10-18 실행 순서
 
 사용자 지정 현재 순서는 [소개 페이지](work-items/S11-introduction-site-20261018.md) → [설치형·포터블 자동 릴리스](work-items/S11-auto-release-20261018.md) → [앱 updater](work-items/S11-app-updater.md)다. 실제 Windows CI 성공을 선행 증거로 사용한다. 정적 사이트/미공개 preview 패키징과 공개·서명·자동 교체 인수를 구분하며, 기존 설치기의 fresh 설치를 in-place rollback 완료로 표현하지 않는다.
+
+
+2026-10-18 진행: 소개페이지 headless10시나리오와 hosted build통과, Windows CI의 원notice/원artifact수집통과(source32607f7). 후속 main CI의 설치형·포터블 ZIP 단계와 optional signed metadata workflow를 추가했다. native read-only 버전조회/서명검증/HTTP/owned저장은 RootWindows 전체strictlint·주1728+child1PASS·release build·privateGUI조회/배율/종료 검수를 통과했다. 실제hosted후속ZIP·공개페이지/릴리스·운영trustroot·in-place교체/rollback은 남는다. UI의수동설치안내와 development/unsigned플래그를 유지한다.

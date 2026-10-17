@@ -1,6 +1,7 @@
 //! Blocking adapters must run outside the UI thread.
 pub mod activation;
 pub mod app_install;
+pub mod app_update;
 pub mod cookies;
 mod deno_runtime;
 pub mod download;

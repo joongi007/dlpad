@@ -4,6 +4,7 @@
 // Glow entrypoint is shared but unused by this CPU-only host.
 #[allow(dead_code)]
 mod accessible;
+mod accessible_app_update;
 mod accessible_diagnostics;
 mod accessible_history;
 mod accessible_library;

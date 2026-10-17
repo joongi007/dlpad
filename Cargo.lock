@@ -982,6 +982,7 @@ dependencies = [
  "lzma-rust2",
  "notify",
  "rawzip",
+ "ring",
  "rusqlite",
  "serde",
  "serde_json",

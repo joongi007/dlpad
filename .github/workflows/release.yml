@@ -35,21 +35,15 @@ jobs:
           CANDIDATE_ONLY: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_only }}
         run: |
           python3 - <<'PY'
-          import os, pathlib, re, tomllib
-          value = os.environ['RELEASE_REF']
-          match = re.fullmatch(r'refs/tags/v((?:0|[1-9][0-9]{0,8})\.(?:0|[1-9][0-9]{0,8})\.(?:0|[1-9][0-9]{0,8}))', value)
+          import os, pathlib, sys, tomllib
+          sys.path.insert(0, 'scripts')
+          import release_version
           manifest = tomllib.loads(pathlib.Path('Cargo.toml').read_text())
-          version = manifest['workspace']['package']['version']
-          candidate_only = os.environ['CANDIDATE_ONLY'] == 'true' and value == 'refs/heads/main'
-          if not match and not candidate_only:
-              raise SystemExit('Select a vX.Y.Z tag, or candidate-only main validation.')
-          if match and match[1] != version:
-              raise SystemExit('Tag does not match Cargo workspace version')
-          if not re.fullmatch(r'(0|[1-9][0-9]{0,8})\.(0|[1-9][0-9]{0,8})\.(0|[1-9][0-9]{0,8})', version):
-              raise SystemExit('Invalid workspace version')
+          version, draft_allowed = release_version.validate(os.environ['RELEASE_REF'],
+              manifest['workspace']['package']['version'], os.environ['CANDIDATE_ONLY'] == 'true')
           with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as stream:
               stream.write('version='+version+'\n')
-              stream.write('draft_allowed='+str(bool(match) and not candidate_only).lower()+'\n')
+              stream.write('draft_allowed='+str(draft_allowed).lower()+'\n')
           PY
   verify:
     needs: version
@@ -97,9 +91,61 @@ jobs:
           retention-days: 30
     outputs:
       artifact_id: ${{ steps.upload.outputs.artifact-id }}
-  draft:
+  sign:
+    if: needs.version.outputs.draft_allowed == 'true' && vars.DLPAD_UPDATE_SIGNING_ENABLED == 'true'
     needs: [version, package]
-    if: needs.version.outputs.draft_allowed == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment: release-signing
+    permissions:
+      contents: read
+    outputs:
+      artifact_id: ${{ steps.metadata.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          artifact-ids: ${{ needs.package.outputs.artifact_id }}
+          path: preview-release
+          merge-multiple: true
+      - name: Sign immutable preview metadata with the configured environment key
+        env:
+          UPDATE_PRIVATE_KEY: ${{ secrets.DLPAD_UPDATE_PRIVATE_KEY_PEM }}
+          UPDATE_KEY_ID: ${{ vars.DLPAD_UPDATE_KEY_ID }}
+          PACKAGE_VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, sys, tempfile, time
+          sys.path.insert(0, 'scripts')
+          import sign_app_update
+          secret = os.environ.pop('UPDATE_PRIVATE_KEY', '')
+          if not 0 < len(secret.encode('utf-8')) <= 16384:
+              raise SystemExit('Configured signing key is missing or oversized')
+          version = os.environ['PACKAGE_VERSION']
+          with tempfile.TemporaryDirectory(prefix='dlpad-signing-key-') as folder:
+              key = pathlib.Path(folder) / 'key.pem'
+              with key.open('x', encoding='utf-8') as stream:
+                  key.chmod(0o600)
+                  stream.write(secret)
+              del secret
+              now = int(time.time())
+              sign_app_update.sign(pathlib.Path('preview-release') / ('dlpad-'+version+'-windows-x86_64-installer.zip'),
+                  version, int(os.environ['GITHUB_RUN_ID']), 'preview', os.environ['UPDATE_KEY_ID'],
+                  key, pathlib.Path('preview-metadata'), now, now+14*86400)
+          PY
+      - name: Preserve public metadata only
+        id: metadata
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: windows-update-metadata-${{ github.sha }}
+          path: preview-metadata/
+          if-no-files-found: error
+          retention-days: 30
+  draft:
+    needs: [version, package, sign]
+    if: always() && !cancelled() && needs.version.result == 'success' && needs.package.result == 'success' && needs.version.outputs.draft_allowed == 'true' && (needs.sign.result == 'success' || (needs.sign.result == 'skipped' && vars.DLPAD_UPDATE_SIGNING_ENABLED != 'true'))
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
@@ -109,6 +155,13 @@ jobs:
         with:
           artifact-ids: ${{ needs.package.outputs.artifact_id }}
           path: preview-release
+          merge-multiple: true
+      - name: Download verified public updater metadata when signing was enabled
+        if: needs.sign.result == 'success'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          artifact-ids: ${{ needs.sign.outputs.artifact_id }}
+          path: preview-metadata
           merge-multiple: true
       - name: Create an unpublished preview draft
         env:
@@ -127,6 +180,12 @@ jobs:
               'SHA256SUMS', 'release-binding.json')]
           if not all(pathlib.Path(name).is_file() for name in assets):
               raise SystemExit('Incomplete package assets')
+          metadata = pathlib.Path('preview-metadata')
+          if metadata.exists():
+              names = ['update-windows-x86_64.json', 'update-windows-x86_64.json.sig', 'update-public-key.json']
+              if sorted(p.name for p in metadata.iterdir()) != sorted(names):
+                  raise SystemExit('Incomplete signed metadata assets')
+              assets.extend(str(metadata/name) for name in names)
           subprocess.run(['gh', 'release', 'create', 'v'+version, '--verify-tag',
               '--draft', '--prerelease', '--target', os.environ['SOURCE_SHA'],
               '--title', 'dlpad '+version+' Windows preview',

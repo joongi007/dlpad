@@ -14,7 +14,7 @@ import collect_ci_notices as notice
 from windows_candidate_package import pe
 
 TARGET = notice.TARGET
-SYSTEM_DLLS = set('advapi32 bcrypt bcryptprimitives cfgmgr32 clbcatq comctl32 comdlg32 crypt32 cryptbase cryptnet cryptsp d2d1 d3d9 d3d11 d3d12 dcomp ddraw dbghelp dnsapi dsound dwmapi dwrite dxgi gdi32 gdi32full hid imagehlp imm32 iphlpapi kernel32 kernelbase mpr msacm32 msimg32 msvcrt ncrypt netapi32 normaliz ntdll ole32 oleacc oleaut32 opengl32 powrprof propsys psapi rpcrt4 secur32 setupapi shell32 shcore shlwapi sspicli user32 userenv usp10 ucrtbase uxtheme version winhttp wininet winmm winspool wintrust wldap32 ws2_32 wtsapi32'.split())
+SYSTEM_DLLS = set('advapi32 bcrypt bcryptprimitives cfgmgr32 clbcatq combase comctl32 comdlg32 crypt32 cryptbase cryptnet cryptsp d2d1 d3d9 d3d11 d3d12 dcomp ddraw dbghelp dnsapi dsound dwmapi dwrite dxgi gdi32 gdi32full hid imagehlp imm32 iphlpapi kernel32 kernelbase mpr msacm32 msimg32 msvcrt ncrypt netapi32 normaliz ntdll ole32 oleacc oleaut32 opengl32 powrprof propsys psapi rpcrt4 secur32 setupapi shell32 shcore shlwapi sspicli user32 userenv usp10 ucrtbase uiautomationcore uxtheme version winhttp wininet winmm winspool wintrust wldap32 ws2_32 wtsapi32'.split())
 MAX_ZIP = 256 * 1024 * 1024
 
 

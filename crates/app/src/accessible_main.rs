@@ -1,5 +1,6 @@
 //! Native accessibility candidate using the existing Rust domain and engine.
 mod accessible;
+mod accessible_app_update;
 mod accessible_diagnostics;
 mod accessible_history;
 mod accessible_library;

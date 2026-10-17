@@ -38,3 +38,6 @@
 Root가 desktop-light와 mobile-dark PNG를 실제 열어 한글·배치·잘림을 확인했다. PNG 원본은 `docs/validation/evidence/windows-msvc-ui-feedback-v32-install-reinstall-launch-private-v1-20261016/gui/installed-app-private.png`다. 개발 소유 경로만 있고 개인 사용자명/계정/영상/쿠키가 없으며 캡처를 편집하거나 최신 UI 재촬영으로 표시하지 않았다. 새 제품 GUI 검증을 대신하지 않는다.
 
 Pages Actions의 공식 SHA refs API를 확인했다. 자동 build/artifact는 구성했고 공개 deploy는 DLPAD_PAGES_ENABLED 명시 설정 뒤에만 실행한다. 실제 hosted 실행/Pages 게시/첫 공개 Release는 미검증이다.
+
+
+2026-10-18 원격 확인: source32607f7의 [소개 페이지 Actions39057841523](https://github.com/joongi007/dlpad/actions/runs/39057841523)는 success다. 빌드/artifact 성공이며 DLPAD_PAGES_ENABLED를 설정하거나 공개 deploy하지 않았다. 최신 로컬 preview는 `.local-tools/site-preview-20261018-v3/index.html`, headless10시나리오 재검증·Root 이미지 확인은 `.local-tools/site-review-20261018-v4/`다.

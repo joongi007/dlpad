@@ -19,3 +19,5 @@
 - [0010: 제목 파일명과 원본 보존 복사 내보내기](0010-readable-artifacts-and-copy-export.md), 검증 중 제안
 
 - [0011: 목록 전체 기록의 bounded 검색](0011-bounded-list-search.md), 구현·검증 중 제안
+
+- [0012: 서명된 앱 업데이트 후보와 설치 권한 분리](0012-signed-app-update-candidates.md), 구현·검증 중 제안

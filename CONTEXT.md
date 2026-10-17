@@ -1,5 +1,7 @@
 # 도메인과 불변 조건
 
+앱 업데이트의 Signed candidate는 고정 키의 원 bytes 서명과 버전/sequence/채널/유효기간 정책을 통과한 관측값이다. 설치·실행 권한이 아니다. Staged update package는 Windows create-only 저장과 원 hash/identity를 확인하고 readonly reader·parent pin을 보유한 결과이며 자동 앱 교체를 뜻하지 않는다. 생성/공개/정리 불명 상태는 성공이나 삭제 권한으로 해석하지 않는다. [ADR-0012](docs/adr/0012-signed-app-update-candidates.md)를 따른다.
+
 개발 검증의 scan barrier는 제품 상태가 아니다. 기본 OFF fixture에서 첫 실제 일반 파일 관측 INSERT 이후, publication 전 원 이벤트를 기다려 CloseWait·취소 rollback·worker 반환 ACK의 순서를 관측한다. 일반 scan의 협조적 취소 경계와 기존 성공 목록 보존 계약은 그대로다. [Windows 인수 범위](docs/work-items/S03-windows-scan-closewait-native.md)를 따른다.
 
 | 용어 | 의미 |

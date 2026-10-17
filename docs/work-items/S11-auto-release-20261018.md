@@ -114,3 +114,16 @@ Root 검토에서 기존 start_new_session+leader kill만으로는 fork 동반�
 OpenSSL leader에 poll/wait를 먼저 호출하지 않는다. waitid의WEXITED|WNOHANG|WNOWAIT로 leader원child를 reap하지 않은 채 유지하고 원PGID를 SIGKILL로 정리한 다음 readerEOF/join과 마지막leaderwait를 수행한다. 종료한원leader가zombie로 남아PGID재사용을 막는 동안만 group을 주소로 삼으며 원child관계가사라졌으면 numericPID로 kill을추측하지않는다. reap후killpg호출은0이다. 정상leaderexit도 동반pipechild가남을수있으므로 동일cleanup을 적용한다. OpenSSL은 session을탈출하는자식을만들지않는 신뢰된개발도구라는 좁은범위이며 일반untrustedprocess sandbox·제품guardian의대체가 아니다.
 
 실제fakeOpenSSL fixture가 os.fork로동반child를만들고 gate를기다리도록했다. 시험은child의원pidfd를미리보유한뒤 timeout/stdout상한/leaderexit0 세경로를허용하고 원kernelprocess의pidfd readiness로 child가더이상실행되지않음을확인했다. 추가실제waitid/getpgid관측으로 groupcleanup이 originalleaderreap보다앞임을검증하고 Windows/비기본SIGCHLD의실행전거절도확인했다. 수정후 `python3 scripts/test_sign_app_update.py`17PASS, 원실제OpenSSL Ed25519서명/검증·변조거절12회귀도유지했다. 신규운영키·전역signal설정변경·외부전송·릴리스게시없음.
+
+### Root 실제 PE 통합에서 발견한 수정
+
+새 Windows MSVC CPU/installer 원 PE를 packager.runtime으로 직접 검사하니 OS 기본 UIAutomationCore.dll/Combase.dll이 초기 allowlist에 빠져 거절됐다. 접근성·COM의 OS DLL 두 개를 명시적으로 추가했고 임의 DLL/vcruntime/msvcp 거절은 유지한다. 실제 PE 재검증과 기존13실패회귀를 다시 실행한다. flags만으로 runtime 통과를 추측하거나 하위 fixture PASS를 실제 배포로 집계하지 않았다.
+
+
+## Root hosted 성공과 후속 후보 ZIP 연결
+
+source32607f76416254f2876f32bbaf5953511f28d355의 [CI39057841587](https://github.com/joongi007/dlpad/actions/runs/39057841587)는 docs/native 모두success다. 신규 원notice 수집·same-run source/lifecycle/graph·GPU compile까지 통과했으며 windows-development-build-inputs 원artifact12110418080/9,329,536B/digest5a57ceeebea3ed3c3b88a645f654022a004d66b242d8566bceea17f7803b6248가 생성됐다. 이source에 ZIP step은 없었으므로 패키징 성공으로 바꾸어 쓰지 않는다.
+
+후속 CI는 GPU compile 뒤 같은 원파일을 재검증해 RUNNER_TEMP의 새폴더에 installer/portable ZIP·SHA256SUMS·binding·notes를 작성하고 windows-preview-candidates-SHA로14일보관한다. actual CPU/installer의 UIAutomationCore/Combase OS DLL만 allowlist에 보강 후 원 PE 검사와 packager13회귀 모두PASS다. [UI Automation OS runtime](https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-uiautomationoverview)을 근거로 외부 VC runtime/unknown DLL 거절은 유지한다.
+
+release version gate를 scripts/release_version.py로 분리했다. candidate-only main만 허용하고 tag ref의 candidate-only는 명시거절해 draft/sign으로 전환되지 않는다. 숫자버전/불일치/tag/candidate 실패회귀5PASS. draft는 취소 이후 생성하지 않도록 !cancelled()를 확인한다. optional sign은 repo/org variable DLPAD_UPDATE_SIGNING_ENABLED=true와 release-signing environment의 기존 DLPAD_UPDATE_PRIVATE_KEY_PEM/UPDATE_KEY_ID가 준비된 경우에만 실행한다(key ID 변수명 DLPAD_UPDATE_KEY_ID). 기존키 외부전송/환경설정/운영서명은 아직 수행하지 않았다. signing 실패 시 unsigned draft로 fallback하지 않는다. public-key aid는 제품 trust root가 아니다. 이 구성이 존재한다는 사실과 hosted optional sign/최초draft의 실제 성공은 구분한다.
