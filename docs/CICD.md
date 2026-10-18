@@ -83,3 +83,8 @@ source49c3812의 [CI39060610796](https://github.com/joongi007/dlpad/actions/runs
 Root는 artifact12113907821의 원 SHA를 대조하고 exact installer7/portable6 member와 manifest5·CRC/SHA/원 binaries/source/run identity를 직접 검증했다. 원 ZIP의 가상 Windows 설치·재검증과 설치 앱의 Light/Dark 재시작·100/200% 설정/키보드 focus-scroll·정상 종료도 확인했다. 별도 ZIP→staging→새 고정 bundle 시험은 test-only 키를 사용했으며 운영 서명/자동 실행 인수가 아니다. 자세한 경로와 제한은 [통합 기록](work-items/S11-site-release-integration-20261018.md)과 [설치 준비](work-items/S11-update-bundle-preparation-20261018.md)에 있다.
 
 검증한 c5963b5는 origin/main으로 normal fast-forward push했다. 먼저 repository 변수의 실제 읽기 접근과 Pages 공개 비활성을 확인했으며 태그·공개 Release·Pages 설정·운영키는 변경하지 않았다. 이 뒤 문서 전용 결과 갱신은 앱 소스를 변경하지 않으며 원격 자동 후속 실행과 위 완료 run을 구분한다. 공개 배포는 사용자 초기 별도 승인 범위에 따라 대기 중이다.
+
+
+## Release 이벤트와 Pages 배포 ref — 2026-10-18 교정 중
+
+v0.1.0의 실제 published run39102954680은 사이트 build 성공 뒤 github-pages 환경이 tag ref를 거절했다. main 전용 환경 정책은 유지한다. pages-release.yml은 공개 이벤트에서 pages.yml의 main dispatch만 요청하며, 사이트 workflow는 main만 배포한다. 운영 서명키·환경 보호 규칙을 변경하지 않는다. 실제 relay hosted 회귀와 공개 release.json 확인은 [교정 작업](work-items/S11-pages-release-main-routing-20261018.md)에 기록한다.

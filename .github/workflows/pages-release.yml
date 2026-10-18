@@ -1,0 +1,26 @@
+name: Refresh introduction after release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: refresh-introduction-after-release
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: vars.DLPAD_PAGES_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Request the main site's normal build and deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow run pages.yml --ref main
