@@ -22,3 +22,5 @@ GitHub v0.1.1 설치형·포터블 및 공개 서명 metadata를 제공한다. �
 ## 검증과 handoff
 
 진행 중. source9fe2045c5b8a45ca0d2bf6cfcfd6c1f14a0512df; release run39132836927, main CI39132836883. 문서 job은 성공했다. Release Windows native의 기본 테스트/release 빌드 및 fixture strict lint/build는 성공했지만 첫 success 전환 case가 exit1로 실패해 package/draft는 실행되지 않았다. 원 Job은 natural empty/finalActive0/forcedCleanup=false이며 raw stderr와 receipt SHA를 대조했다. selection generation0이며 generic Other만 남아 최초 handshake와 준비 실패는 아직 구분할 수 없다. hosted 실패의 child-error/단계 관측을 보강한 후 원인을 확인한다. 로컬 7 PASS를 hosted 성공으로 대체하지 않는다. 공개전 v0.1.0은 유지한다. 로컬도우미/원로그는 ignored .local-tools/update-publication-20261018 아래 create-only로 보존한다.
+
+Hosted 진단1: source6b819ea2c9b09152959898bfae7c30191c14c33f, run39135953539 failure. A의 entry/preflight/commit/ready/prepare 및 요청3/worker1 뒤 Disk5 gen1을 관측했다. 원 artifact12139474450 SHA d38ad0b04db5b20d70cfa7eda9b273efa892545ef3dc23b54e17b4fb051f4bab을 다운로드했고 `.local-tools/update-publication-20261018/hosted-diagnostic-v1`에 보존했다. 첫 handshake 실패 가설은 배제하고 staging I/O의 native 오류를 추가 수집한다. 공개 보류 유지.

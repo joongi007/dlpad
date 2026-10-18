@@ -239,6 +239,19 @@ mod windows {
         }
     }
     fn transfer_code(error: &DownloadFailure) -> FailureCode {
+        #[cfg(feature = "app-update-fixture")]
+        {
+            let stage = error.stage_failure();
+            eprintln!(
+                "UPDATE_FIXTURE_DOWNLOAD kind={:?} creation={:?} publication={:?} cleanup={:?} package={} bundle={}",
+                error.kind(),
+                stage.map(|v| v.creation),
+                stage.map(|v| v.publication),
+                stage.map(|v| v.cleanup),
+                error.package().is_some(),
+                error.bundle().is_some()
+            );
+        }
         transfer_kind(error.kind())
     }
     pub(super) fn transfer_kind(error: &download::FailureKind) -> FailureCode {

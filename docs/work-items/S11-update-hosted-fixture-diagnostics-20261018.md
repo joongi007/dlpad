@@ -29,3 +29,7 @@ Root가 공유 Cargo/CI/버전·태그를 담당한다. v0.1.1 태그는 옮기�
 원 hosted capture는 case-success exit1, journal generation0/highest0, stdout0, natural Job0·강제정리0였다. 기존 stderr의 generic 오류로 최초 A 또는 요청 후 실패를 구별할 수 없었다. 이것을 특정 Server2022 원인으로 확정하지 않았다. 구현 파일에 rustfmt를 적용했으며 Windows compile/lint/진단 회귀와 hosted 실제 재실행은 아직 검증 중이다.
 
 Root 통합 검증: Windows 원 소유 Job에서 `cargo test -p dlpad-engine --bin app-update-fixture --features app-update-fixture --locked --offline` 진단2 PASS, 기존 wrapper strict Clippy/build와 실제 전환7case 전부 PASS. 원 Job natural0/forcedfalse/입력 desktop 불변. 원본은 `.local-tools/update-publication-20261018/native-ci-fixture-v2/native-tests.log`, `.local-tools/update-activation-20261018/ci-fixture-v2/whole.json`. `python3 scripts/check_docs.py --source-only` 1139문서 PASS; wrapper 정책11/패키징13 PASS. hosted 원인 판별은 다음 실행 대기.
+
+추가 관측: `host.rs`의 오류 enum/staging 생성·공개·정리/package·bundle 보유 상태, `staging.rs`의 고정 단계와 I/O kind/raw Windows code를 기본 OFF `app-update-fixture` feature에서만 stderr로 기록한다. 기존 행동·IPC·schema·키·Cargo 변경은 없고 production 기본 feature에서는 출력하지 않는다. Root가6b819ea와 비교해 진단 삽입 외 변경0을 확인했다.
+
+Root 추가 Windows검증: fixture strict lint/build, 진단2개, 실제 전환7case PASS. `.local-tools/update-publication-20261018/native-ci-fixture-v3/native-tests.json` source unchanged/exit0/가상desktop/Job natural0. 두 번째 hosted 진단 실행 대기.

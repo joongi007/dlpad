@@ -147,6 +147,12 @@ mod windows {
         Ok(())
     }
     fn io(error: io::Error) -> StageFailureKind {
+        #[cfg(feature = "app-update-fixture")]
+        eprintln!(
+            "UPDATE_FIXTURE_STAGE_IO kind={:?} os_code={:?}",
+            error.kind(),
+            error.raw_os_error()
+        );
         StageFailureKind::Io(error.kind())
     }
     fn cleanup(created: CreatedRelativeFile) -> Cleanup {
@@ -173,6 +179,8 @@ mod windows {
             created_identity: None,
         };
         let prepared = (|| -> Result<CreatedRelativeFile, StageFailureKind> {
+            #[cfg(feature = "app-update-fixture")]
+            eprintln!("UPDATE_FIXTURE_STAGE phase=validate-parent");
             checkpoint(cancel, deadline)?;
             if request.nonce.is_empty()
                 || request.nonce.len() > 64
@@ -191,6 +199,8 @@ mod windows {
             // Factory can create then fail post-create validation; never claim no mutation.
             facts.creation = Creation::AttemptedUnconfirmed;
             facts.cleanup = Cleanup::Unconfirmed;
+            #[cfg(feature = "app-update-fixture")]
+            eprintln!("UPDATE_FIXTURE_STAGE phase=create-relative");
             let created = CreatedRelativeFile::create(request.parent, &leaf).map_err(io)?;
             facts.creation = Creation::OwnedCreated;
             facts.cleanup = Cleanup::OriginalRetained;
@@ -205,7 +215,11 @@ mod windows {
             }
         };
         let written = (|| -> Result<(), StageFailureKind> {
+            #[cfg(feature = "app-update-fixture")]
+            eprintln!("UPDATE_FIXTURE_STAGE phase=verify-created");
             created.verify_current(request.parent_path).map_err(io)?;
+            #[cfg(feature = "app-update-fixture")]
+            eprintln!("UPDATE_FIXTURE_STAGE phase=copy-stream");
             let mut buffer = [0u8; 64 * 1024];
             let mut total = 0u64;
             loop {
@@ -231,11 +245,17 @@ mod windows {
             if total != candidate.asset_bytes() {
                 return Err(StageFailureKind::Validation(Error::PackageSize));
             }
+            #[cfg(feature = "app-update-fixture")]
+            eprintln!("UPDATE_FIXTURE_STAGE phase=flush-written");
             created.file_mut().flush().map_err(io)?;
             checkpoint(cancel, deadline)?;
+            #[cfg(feature = "app-update-fixture")]
+            eprintln!("UPDATE_FIXTURE_STAGE phase=sync-written");
             created.file_mut().sync_all().map_err(io)?;
             checkpoint(cancel, deadline)?;
             created.verify_current(request.parent_path).map_err(io)?;
+            #[cfg(feature = "app-update-fixture")]
+            eprintln!("UPDATE_FIXTURE_STAGE phase=verify-written");
             created.file_mut().seek(SeekFrom::Start(0)).map_err(io)?;
             candidate
                 .verify_package(created.file_mut(), cancel, deadline)
@@ -248,6 +268,8 @@ mod windows {
             facts.cleanup = cleanup(created);
             return Err(facts);
         }
+        #[cfg(feature = "app-update-fixture")]
+        eprintln!("UPDATE_FIXTURE_STAGE phase=publish");
         let mut published = match created.publish_no_replace(candidate.asset_name()) {
             Ok(p) => p,
             Err(PublishError::BeforePublish { created, error }) => {
@@ -272,6 +294,8 @@ mod windows {
         };
         let verified = (|| -> Result<(), StageFailureKind> {
             checkpoint(cancel, deadline)?;
+            #[cfg(feature = "app-update-fixture")]
+            eprintln!("UPDATE_FIXTURE_STAGE phase=verify-published");
             published.verify_current(request.parent_path).map_err(io)?;
             published
                 .reader_mut()
@@ -280,6 +304,8 @@ mod windows {
             candidate
                 .verify_package(published.reader_mut(), cancel, deadline)
                 .map_err(StageFailureKind::Validation)?;
+            #[cfg(feature = "app-update-fixture")]
+            eprintln!("UPDATE_FIXTURE_STAGE phase=verify-published");
             published.verify_current(request.parent_path).map_err(io)?;
             checkpoint(cancel, deadline)?;
             published
