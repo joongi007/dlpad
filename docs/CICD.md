@@ -114,3 +114,5 @@ v0.1.0의 실제 published run39102954680은 사이트 build 성공 뒤 github-p
 ## Pages 릴리스 조회 인증 (2026-10-19)
 
 공유 hosted runner의 무인증 REST 한도로 Pages run39142717714가 HTTP403으로 실패했다. 사이트 workflow는 기존 `contents: read`의 일시적 `github.token`으로 github.com의 현재 저장소 공개/미공개 release 목록을 조회하고 runner 임시 JSON을 기존 bounded builder에 전달한다. builder는 draft를 제외하며 정확한 공개 ZIP URL과 크기를 검증한다. token·원 API JSON은 사이트 allowlist 또는 artifact에 포함하지 않는다. 기존 사용자 GCM/운영 서명키·새 secrets는 사용하지 않는다. [실제 교정과 검증](work-items/S11-pages-authenticated-discovery-20261019.md).
+
+인증 교정 후 main d70b56f의 [실제 Pages build/deploy39143294764](https://github.com/joongi007/dlpad/actions/runs/39143294764)가 성공했고 공개 최신 FAQ·v0.1.2 ZIP 링크를 확인했다. 공식 서명 공급을 이용한 실제A0.1.1→B0.1.2 UI전환/동일프로필cold선택도 Root가 원프로세스/정확hash/PNG로 독립 인수했다. 부모 자체의 업데이트·독립DPAPI해독을 의미하지 않는다.

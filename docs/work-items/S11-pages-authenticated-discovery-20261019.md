@@ -1,6 +1,6 @@
 # S11: Pages 릴리스 조회의 무인증 요청 한도 제거
 
-- 상태: in-progress
+- 상태: completed
 - 분류: fix
 - 우선순위: P1
 - 요구사항: R08, R10
@@ -22,3 +22,5 @@
 ## 검증과 handoff
 
 수정 전 원로그는 ignored `.local-tools/update-publication-20261018/pages-docs-build-failure-v2.log`에 보존한다. 구현 후 로컬 site정책검사와 source-only 문서검사, 실제 Pages 배포/공개HTML 확인을 기록한다. 별도 운영서명키 GitHub공급·환경보호 변경은 하지 않는다.
+
+실제 인수: source d70b56f83c7cf2563bfbe0ac076de5a85edda63a, [Pages run39143294764](https://github.com/joongi007/dlpad/actions/runs/39143294764) build/deploy모두성공. 공개index.html에서v0.1.2부터설정/미리보기채널/0.1.0수동설치안내를확인하고release.json은정확0.1.2 ZIP2링크다. 로컬 `python3 scripts/test_build_site.py`8PASS, source-only1,142문서PASS, full1,237문서PASS/원notice133보존. 원실패39142717714는삭제하거나성공으로바꾸지않았다. token/원APIJSON/운영키게시0, 권한확대0, app/crate/runtime비용변화0이다.

@@ -25,3 +25,7 @@ UI는 version/channel/generation 의도만 전달한다. 서명·전송·새 설
 제품은 저장소의 공개 Ed25519 키만 고정한다. 후보가 내려주는 공개키나 fixture 키를 제품 trust로 채택하지 않는다. 최초 운영키의 비공개 부분은 현재 Windows 사용자 DPAPI로 로컬 암호화 보관했고 외부로 전송하지 않았다. `scripts/sign_local_app_update.py`는 로컬 복호화 파이프와 일시적인 /tmp 0600 파일을 이용해 공개 metadata만 생성한다. [운영 안내](../UPDATE-SIGNING.md).
 
 공개 v0.1.0에는 이 부모가 없으므로 첫 지원 버전의 수동 설치가 한 번 필요하다. 실제 Windows signed fixture의 전환·cold start·실패 복귀 7case를 근거로 이 v1 구조를 채택했다. 제품 release 빌드·설치·공개 공급과 물리 입력 인수는 별도 기록한다. 과거 v0.1.0을 자동 업데이트 지원 버전으로 표현하지 않는다.
+
+## 최초 공개 구현 검증 (2026-10-19)
+
+최초 지원 공개 버전은 v0.1.2/source9ed25f1297b59bfc922e0659279a56a227614302다. 전체Windows CI·같은실행패키지·실제설치/앱실행을검증했고, 운영키의공식공급으로 review A0.1.1의고정부모아래 B0.1.2 UI전환 및동일프로필cold선택을실제로확인했다. 원UI종료후새UI생성·같은Job/직계계보/생성시각/정확imageSHA/프로필경계·nonce·자연exit0를대조했다. 독립DPAPI해독이나A부모자체갱신을검증한것은아니다. [원본과 인수 범위](../work-items/S11-update-activation-20261018.md).

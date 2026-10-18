@@ -1,6 +1,6 @@
 # S11: v0.1.2 업데이트 지원 버전 공개
 
-- 상태: in-progress
+- 상태: completed
 - 분류: release
 - 우선순위: P1
 - 요구사항: R08, R10, R11
@@ -32,3 +32,9 @@ Hosted 진단2: source9e657047d2cac4789381a41ddb9145e058ec509c/run39136860909의
 2026-10-19 공개 직전 인수: v0.1.2 전체 release run39138176097 성공. 같은 실행 packages artifact12141341154(SHA fb16aedac118a25f6b654f21474ff414a3394daffc48d28f6e2f6046983c52f0), 원 build입력·notice·compile lifecycle·fixture7을 독립 검증했다. 설치형ZIP SHA348b0205537cf9aa3fe0d9fbdd84b2a9b1ed550a11b355b7dbee10ad9dbe431f, CPU SHA376e0265cd77e3ab0e6669f741c068301137b6619ba25630957230de461634af. 실제 private Windows 설치/재검증·원payload5 hash·설치CPU Light/Dark·800/960·200%·Dark 재실행 유지와4process 자연exit0/두Job0을 Root가 원로그/PNG로 검수했다. 물리 IME·OS DPI·독립 성능 인수는 포함하지 않는다. 설명 nested-scroll은 [후속 작업](S11-update-notes-scroll-followup-20261019.md)이다. 운영키는 로컬 DPAPI로만 보관했고 공개3파일만 새 draft에 공급해 정확7asset을 확인했다. 현재 공개 전이며 설치기 Launch 연결의 별도 최종 증거를 수집 중이다. 원본은 ignored `.local-tools/update-publication-20261018/`, 큰 artifact는 `/tmp/dlpad-v0.1.2-verified-release-20261019/`에 보존했다.
 
 공개 완료: 2026-10-18T15:49:23Z(한국2026-10-19), Release416523660/v0.1.2를 공개했다. 원 공개 API와 정확7개 browser download를 인증 없이 streaming/hash검증해 모두 일치했다. 원 근거는 `published-release-v2.json`, `public-release-v2.json`, `public-download-review-v2.json`이다. 설치기 앱실행 추가시험 native-v5는 installer→headlessparent→UI의 원Job/직계계보/생성/CPU SHA/privateDesktop/HWND nonce를 대조하고 실제UI닫기 뒤 세process exit0·inner/outerJob0·forcedFalse·원소스불변을 확인했다. Root가 원로그와 installed-ui.png를 직접 검수해 `acceptance-v2.json`에 집계했다. 도우미 v1~v4의 interop/컴파일/창채택/화면관측 실패는 원본 보존하며 제품실패 또는 성공으로 바꾸지 않는다. public signed 전환과 최종 Pages 검증은 별도 진행 중이다.
+
+최종 2026-10-19 인수 완료: 실제 공식 public 공급 A0.1.1→B0.1.2 다운로드/서명/준비/Restart/BReady 및 같은프로필 cold B선택을70.752초시험에서확인했다. 원AUI종료뒤B생성·같은고정부모/Job·정확B SHA/경로·nonce·모든UI/parent자연exit0·두Job0·입력desktop불변을Root가직접대조했다. 별도agent도원JSON/PNG8개/readonlySQLite Dark·library_entries0을확인했다. [통합인수](S11-update-activation-20261018.md)를따른다. A고정부모자체업데이트를뜻하지않는다.
+
+최종 site: release event relay39142209393→main Pages39142216156으로최신0.1.2 downloadindex를갱신했다. 후속 FAQ문서 배포39142717714는무인증API403으로실패했고, [인증교정](S11-pages-authenticated-discovery-20261019.md)후main d70b56f의 Pages39143294764가build/deploy모두성공했다. 공개index.html의새FAQ와release.json의정확0.1.2 ZIP2링크를직접확인했다. localheadless 공개버전6viewport/theme에서링크·preview/코드미서명안내·키보드/hover/overflow0을검증하고Root도모바일PNG를직접열었다. deviceScaleFactor2시험은WindowsOS DPI시험을뜻하지않는다. FAQ focusoutline/본문간격과앱설명nestedscroll은비차단후속이다.
+
+실행검증: `python3 scripts/test_build_site.py`8PASS, 기존headless browser10시나리오PASS +currentrelease6PASS, `python3 scripts/check_docs.py --source-only`1,142문서PASS, `python3 scripts/check_docs.py`1,237문서PASS/원notice133 hash보존. 문서검사만으로runtime증거를검증했다고주장하지않으며원runtime/capture는위독립검수로대조했다. 태그9ed의전체CI/mainCI성공과문서/workflow후속push CI진행상태를구별한다. 기존failed v0.1.1태그·원실패로그·원Root .git/index.lock은보존했다.

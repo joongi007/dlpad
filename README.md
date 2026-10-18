@@ -52,7 +52,7 @@ cargo test --workspace --features dlpad/cpu --locked
 cargo build --workspace --features dlpad/cpu --release --locked
 ```
 
-원본 개발 폴더의 로컬 증거까지 확인할 때는 `python3 scripts/check_docs.py`를 사용합니다. 소스 checkout은 과거 실행 증거를 포함하거나 재현 성공을 보장하지 않습니다. Windows 전체37의1,685개 테스트와 별도 설치기 취소/재검사 회귀는 로컬에서 통과했으며 미검증 OS·실환경 항목은 작업 문서에 구분했습니다.
+원본 개발 폴더의 로컬 증거까지 확인할 때는 `python3 scripts/check_docs.py`를 사용합니다. 소스 checkout은 과거 실행 증거를 포함하거나 재현 성공을 보장하지 않습니다. v0.1.2의 실제 Windows 로컬 전체 검증은 원 stdout 집계 1,838 PASS/0 FAIL/44 ignored이며 별도 signed 전환·실패 복귀 7회귀와 설치·공개 업데이트 전환/다음 실행 검수도 통과했습니다. 미검증 OS·물리 입력·성능 인수 범위는 작업 문서에 구분했습니다.
 
 ## 문서 읽는 순서
 
