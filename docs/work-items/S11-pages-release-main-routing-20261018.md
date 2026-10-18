@@ -1,6 +1,6 @@
 # S11: 공개 릴리스의 Pages main 갱신 연결
 
-- 상태: in-progress
+- 상태: done
 - 분류: bug
 - 우선순위: P1
 - 요구사항: R10, R11
@@ -27,4 +27,11 @@
 
 ## 검증과 handoff
 
-진행 중. GitHub 공식 GITHUB_TOKEN 문서는 workflow_dispatch가 새 workflow 실행을 만드는 예외임을 명시한다. 기존 태그의 workflow는 변경하지 않는다. 실패 run을 성공으로 바꾸거나 첫 published 이벤트의 자동 배포가 성공했다고 기록하지 않는다.
+실제 교정·hosted 회귀·공개 화면 검수를 완료했다. GitHub 공식 GITHUB_TOKEN 문서는 workflow_dispatch가 새 workflow 실행을 만드는 예외임을 명시한다. 기존 태그의 workflow는 변경하지 않는다. 실패 run을 성공으로 바꾸거나 첫 published 이벤트의 자동 배포가 성공했다고 기록하지 않는다.
+
+
+## 실제 교정 결과
+
+수정 source `1e5239caadb5d3ecfe2d4c64aadaf31616e7296c`를 normal main push했다. 사이트 회귀8 PASS, source-only1130문서 PASS. 수동 relay run39103416541 success → GITHUB_TOKEN이 요청한 main Pages run39103421782 success를 실제 확인했다. 공개 release.json은 v0.1.0/preview=true/signed=false와 정확한 ZIP URL을 반환하고, 실제 PC·모바일 headless 검수가 통과했다. 첫 published 실패를 보존했으며 새 라우팅의 후속 태그 published 이벤트 실행은 아직 미검증이다. Pages 환경 규칙·v0.1.0 태그·공개 ZIP·운영키는 변경하지 않았다. 공식 근거: https://docs.github.com/en/actions/concepts/security/github_token , https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments . 원 증거는 .local-tools/publication-20261018/pages-release-failure-jobs.json 및 pages-relay-review.json이다.
+
+재발 방지: checkout의 ref를 main으로 바꾸어도 원 workflow의 GITHUB_REF는 tag로 남는다. 배포 환경은 그 ref를 검사하므로 릴리스 이벤트와 main의 빌드·배포를 분리했다. 최종 문서 검사는 source-only1130문서·기본1225문서 PASS, 원 notice133개 hash 일치다.

@@ -17,7 +17,7 @@ URL 입력부터 영상 다운로드, 구간 저장, 파일 확인까지 지원�
 
 ## 현재 상태와 실행
 
-현재 **Windows 개발 검수 단계(v37 이후 배포·업데이트 준비)**입니다. 아직 서명된 정식 릴리스나 앱 자동 업데이트를 제공하지 않습니다. 개발 검수 번호와 Cargo 버전0.1.0은 별개입니다. 설치 ZIP과 로컬 실행 증거는 소스 저장소에 포함하지 않습니다. [소스 checkout 범위](docs/SOURCE-CHECKOUT.md), [현재 P0](docs/validation/P0-current-20261016.md).
+현재 **Windows 64비트 미리보기 v0.1.0**을 [GitHub Releases](https://github.com/joongi007/dlpad/releases/tag/v0.1.0)에서 받을 수 있습니다. 설치형·포터블 ZIP을 제공합니다. 코드 서명 없는 개발 preview이며 앱 자동 업데이트는 제공하지 않습니다. 개발 검수 번호와 Cargo 버전은 별개입니다. [소스 checkout 범위](docs/SOURCE-CHECKOUT.md), [현재 P0](docs/validation/P0-current-20261016.md).
 
 Windows x64의 Rust MSVC toolchain과 C++ 빌드 도구가 준비된 환경에서 앱을 빌드합니다. 정확한 Rust 버전은 `rust-toolchain.toml`로 고정합니다.
 
@@ -27,21 +27,21 @@ cargo build -p dlpad --bin dlpad-cpu --features cpu --release --locked
 
 실행 파일은 `target/release/dlpad-cpu.exe`입니다. 다운로드·미디어 처리용 외부 도구는 앱의 설정에서 관리하거나 기존 설치를 선택합니다. [개발 안내](CONTRIBUTING.md).
 
-## 소개 페이지와 배포 준비
+## 소개 페이지와 다운로드
 
-[정적 소개 페이지](site/index.html)를 구현했습니다. 공개 릴리스가 생기면 설치형·포터블 ZIP을 연결하며, 릴리스가 없거나 조회에 실패하면 GitHub Releases 안내를 유지합니다. 웹 런타임 의존성·외부 폰트·분석 스크립트는 없습니다. [사이트 작업과 실제 검증](docs/work-items/S11-introduction-site-20261018.md).
+[소개 페이지](https://joongi007.github.io/dlpad/)에서 기능·설치 방법과 최신 설치형·포터블 ZIP을 확인할 수 있습니다. 공개 릴리스가 없거나 조회에 실패하면 GitHub Releases 안내를 유지합니다. 웹 런타임 의존성·외부 폰트·분석 스크립트는 없습니다. [공개 및 실제 검증](docs/work-items/S11-github-publication-20261018.md).
 
 ```sh
 python3 scripts/build_site.py --output /tmp/dlpad-site-preview
 ```
 
-빌드 출력은 새 디렉터리여야 하며 기존 폴더를 지우거나 덮어쓰지 않습니다. Windows 자동 릴리스는 정확한 `vX.Y.Z` 태그와 Cargo 버전을 대조하고 같은 CI에서 검증한 실행 파일을 설치 ZIP·포터블 ZIP으로 묶어 미공개 preview draft를 만드는 구성입니다. [Windows CI](https://github.com/joongi007/dlpad/actions/runs/39066254029)(앱 소스c5963b5)에서 설치형·포터블 후보 ZIP 생성까지 통과했고, 받은 원 ZIP의 임시 Windows 설치·재검증과 설치된 앱의 격리 GUI 실행도 확인했습니다. 공개 페이지·Release 게시와 앱 자동 교체는 아직 별도 단계입니다.
+빌드 출력은 새 디렉터리여야 하며 기존 폴더를 지우거나 덮어쓰지 않습니다. 정확한 `vX.Y.Z` 태그와 Cargo 버전 일치 → Windows 전체 CI → 같은 실행의 원본으로 ZIP 패키징 → 미공개 preview draft 생성을 자동화했습니다. [v0.1.0 릴리스 실행](https://github.com/joongi007/dlpad/actions/runs/39101008422)이 실제 성공했으며 파일·체크섬을 대조한 뒤 공개했습니다. 공개 Release 이벤트를 받은 별도 workflow가 main의 사이트 배포를 요청해 다운로드 링크를 갱신하도록 구성했습니다. 후속 버전도 draft 검수 후 게시합니다.
 
 설정 → 앱 업데이트에서 현재 버전과 안정/미리보기 채널을 조회할 수 있습니다. 서명 metadata 검증·제한된 전송·Windows owned 저장·별도 새 설치 준비까지 구현·검증했으며, 운영키 고정과 실행 중인 앱 자동 교체·실패 복구는 아직 제공하지 않습니다. [현재 업데이트 범위](docs/work-items/S11-app-updater.md).
 
 ## 검증과 CI
 
-PR·push에서 문서·Python 정책 검사와 Windows Rust 포맷·린트·테스트·release 빌드를 실행하도록 [GitHub Actions](.github/workflows/ci.yml)를 설정했습니다. 개발 실행 파일과 로그를 artifact로 보관합니다. 2026-10-17 [Windows hosted CI 전체 통과](https://github.com/joongi007/dlpad/actions/runs/39040643416)를 확인했습니다(source `5d4cf73`). [소개 페이지 빌드](https://github.com/joongi007/dlpad/actions/runs/39057841523)와 [Windows 빌드·notice 수집](https://github.com/joongi007/dlpad/actions/runs/39057841587)도 source32607f7에서 통과했습니다. 서명·실제 공개·앱 자동 교체는 별도 게이트입니다. [CI/CD 범위](docs/CICD.md).
+PR·push에서 문서·Python 정책 검사와 Windows Rust 포맷·린트·테스트·release 빌드를 실행합니다. 개발 실행 파일과 로그를 artifact로 보관합니다. [v0.1.0 전체 검증·패키징](https://github.com/joongi007/dlpad/actions/runs/39101008422), [CI/CD 범위](docs/CICD.md). 공개 설치형·포터블 ZIP은 같은 CI의 원본 실행 파일을 재사용하며 재빌드하지 않습니다. 운영 코드 서명과 앱 자동 교체는 후속입니다.
 
 ```sh
 python3 scripts/check_docs.py --source-only

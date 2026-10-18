@@ -1,5 +1,11 @@
 # CI/CD와 배포 계획
 
+## 현재 공개 상태 — 2026-10-18
+
+사용자의 공개 승인에 따라 [소개 페이지](https://joongi007.github.io/dlpad/)와 [Windows v0.1.0 preview](https://github.com/joongi007/dlpad/releases/tag/v0.1.0)를 게시했다. [태그 기반 전체 검증·동일 실행 ZIP·draft 생성](https://github.com/joongi007/dlpad/actions/runs/39101008422)과 [릴리스 갱신 relay → main Pages 배포](https://github.com/joongi007/dlpad/actions/runs/39103421782)이 실제 성공했다. 설치형·포터블 ZIP, SHA256SUMS, release-binding.json의 원본 CI 일치와 인증 없는 공개 다운로드 해시를 대조했다. 이번 a98 원 ZIP의 격리 Windows 설치·재검증과 설치 앱의 Light/Dark·재시작·자연 종료도 Root가 확인했다. 코드 서명 없는 preview이며 운영 서명키·앱 자동 교체는 제공하지 않는다. [공개 인수 기록](work-items/S11-github-publication-20261018.md).
+
+아래의 날짜별 실행 기록은 당시 상태를 보존한다. 정식 서명·전체 자동 업데이트 목표와 현재 preview 공개를 구분한다.
+
 ## 현재 제공되는 자동화
 
 `.github/workflows/ci.yml`은 PR/push/수동 실행에서 문서 링크·필수 문서·Rust 도입 계약을 검사한다. manifest가 없으면 native 검증이 skip임을 요약에 남긴다. manifest 도입 시 정확한 toolchain과 lockfile을 요구하고 Windows에서 fmt/clippy/test/release build를 실행한다. Linux/macOS는 `workflow_dispatch`의 `include_other_platforms` 선택으로만 실행하며 현재 Windows 우선 개발 범위와 구분한다. 각 OS build log는 artifact로 보존한다.
@@ -31,7 +37,7 @@ Git에는 소스·문서·native assets·vendor·lock을 넣고 로컬 증거/ZI
 | release 환경 승인 | 서명·notarization·설치/업데이트/제거 시험 | 서명 검증된 artifact만 공개 |
 | publish | checksum·라이선스·변경 내역·지원 OS 표 게시 | 동일 검증 artifact 승격, 재빌드하지 않음 |
 
-2026-10-18 `.github/workflows/release.yml`에 Windows preview draft 자동화를 구현했다. 정확한 버전 태그→reusable CI 전체 성공→동일 SHA/run artifact ID 다운로드→실행 파일 재빌드 없이 notice·runtime·원 로그 검증→설치 ZIP/포터블 ZIP→미공개 draft 순서다. 아직 실제 hosted 패키징 성공과 공개를 검증하지 않았다. 정식 서명·업데이트 교체 인수는 별도다. 인증서·저장소·패키지 형식과 앱 entrypoint가 확정되기 전에 비어 있는 릴리스를 생성하지 않는다. 최초 공개 전에는 maintainer가 release 환경 권한·승인 정책을 설정한다.
+2026-10-18 `.github/workflows/release.yml`에 Windows preview draft 자동화를 구현했다. 정확한 버전 태그→reusable CI 전체 성공→동일 SHA/run artifact ID 다운로드→실행 파일 재빌드 없이 notice·runtime·원 로그 검증→설치 ZIP/포터블 ZIP→미공개 draft 순서다. 실제 v0.1.0 hosted 패키징·draft·공개를 검증했다. 정식 서명·업데이트 교체 인수는 별도다. 인증서·저장소·패키지 형식과 앱 entrypoint가 확정되기 전에 비어 있는 릴리스를 생성하지 않는다. 최초 공개 전에는 maintainer가 release 환경 권한·승인 정책을 설정한다.
 
 ## OS와 패키지
 
@@ -57,7 +63,7 @@ S04/S07에서 cargo audit/deny 또는 동등 검사, license inventory, SBOM, �
 
 `site/`는 Rust 제품 UI와 별개의 정적 소개 페이지다. `scripts/build_site.py`는 명시한7개 파일만 새 출력 폴더에 생성하며 source/evidence/cache를 통째로 배포하지 않는다. 공개 GitHub Releases에서 installer·portable asset 쌍과 정확한 저장소/파일명/크기를 검사하고 stable을 우선한다. stable이 없으면 공개 preview라고 명시하며 draft는 다운로드로 노출하지 않는다. 방문자의 브라우저는 자체 `release.json`만 읽으며 GitHub API·외부 폰트·분석 서버에 요청하지 않는다.
 
-`.github/workflows/pages.yml`은 PR/main에서 사이트를 빌드하고 artifact로 검수할 수 있게 한다. `DLPAD_PAGES_ENABLED=true` 저장소 변수를 명시적으로 켠 뒤 main 자동 배포와 공개 Release 이벤트의 다운로드 갱신이 동작한다. GitHub Pages source는 Actions와 github-pages environment로 설정한다. 현재 변수·Pages 게시·공개 릴리스를 실행하지 않았다. 최초 공개는 사용자가 구체 후보를 확인한 뒤 별도 승인 범위다. GitHub 공식 [Pages workflow](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)를 기준으로 Actions SHA를 공식 refs API에서 확인했다.
+`.github/workflows/pages.yml`은 PR/main에서 사이트를 빌드하고 artifact로 검수할 수 있게 한다. `DLPAD_PAGES_ENABLED=true` 저장소 변수를 명시적으로 켠 뒤 main 자동 배포와 공개 Release 이벤트의 다운로드 갱신이 동작한다. GitHub Pages source는 Actions와 github-pages environment로 설정한다. 사용자의 공개 승인 후 저장소 변수와 workflow Pages를 활성화했고 실제 소개 페이지·preview Release 게시와 main 배포의 다운로드 갱신을 검증했다. 후속 태그는 draft 검수 후 게시한다. 최초 published 이벤트의 tag 배포 거절을 main 갱신 relay로 교정했고, 실제 수동 relay와 그 토큰이 요청한 main 배포를 검증했다. 후속 새 태그의 published 자동 연결은 다음 릴리스에서 확인한다. GitHub 공식 [Pages workflow](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)를 기준으로 Actions SHA를 공식 refs API에서 확인했다.
 
 사이트 검증은 `python3 scripts/test_build_site.py`와 headless-only `scripts/test_site_browser.cjs`다. 후자는 SITE, 새 OUTPUT, 로컬 playwright-core 경로, Chromium 경로를 인자로 받으며 127.0.0.1의 임시 서버와 브라우저를 종료한다. Playwright는 개발 검수 도구이며 제품·공개 페이지 의존성이 아니다.
 
@@ -85,6 +91,6 @@ Root는 artifact12113907821의 원 SHA를 대조하고 exact installer7/portable
 검증한 c5963b5는 origin/main으로 normal fast-forward push했다. 먼저 repository 변수의 실제 읽기 접근과 Pages 공개 비활성을 확인했으며 태그·공개 Release·Pages 설정·운영키는 변경하지 않았다. 이 뒤 문서 전용 결과 갱신은 앱 소스를 변경하지 않으며 원격 자동 후속 실행과 위 완료 run을 구분한다. 공개 배포는 사용자 초기 별도 승인 범위에 따라 대기 중이다.
 
 
-## Release 이벤트와 Pages 배포 ref — 2026-10-18 교정 중
+## Release 이벤트와 Pages 배포 ref — 2026-10-18 교정 완료
 
 v0.1.0의 실제 published run39102954680은 사이트 build 성공 뒤 github-pages 환경이 tag ref를 거절했다. main 전용 환경 정책은 유지한다. pages-release.yml은 공개 이벤트에서 pages.yml의 main dispatch만 요청하며, 사이트 workflow는 main만 배포한다. 운영 서명키·환경 보호 규칙을 변경하지 않는다. 실제 relay hosted 회귀와 공개 release.json 확인은 [교정 작업](work-items/S11-pages-release-main-routing-20261018.md)에 기록한다.

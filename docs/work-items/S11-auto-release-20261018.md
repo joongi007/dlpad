@@ -1,6 +1,6 @@
 # S11: 자동 Windows 릴리스 패키징 사전 감사
 
-- 상태: in-progress
+- 상태: done
 - 분류: research
 - 우선순위: P1
 - 요구사항: R11
@@ -146,3 +146,8 @@ InstallerZIP17,193,308B/SHA9ed4360afd65c060401d4c2eb58cd64c5d03a33aecbeaafaf9bae
 
 
 Root는 실제49c CI ZIP에서 임시설치한 원 dlpad.exe(SHA4a60a714...)도 별도로실행했다. gui-hosted49-v1의Light/Dark·960/800·200%focus실제스크롤·공개NoRelease조회·restart·두번자연exit0/Job0/강제0/inputdesktop불변을 확인하고 원PNG를직접열었다. raw REVIEW_REQUIRED를변조하지않고 root-review.json으로검수를추가했다. 현재Root의bundle후속소스빌드나물리IME/OSDPI/실제자동교체를검증한것은아니다.
+
+
+## 2026-10-18 공개 인수 완료
+
+사용자가 GitHub 공개 진행을 명시 승인했다. [소개 페이지](https://joongi007.github.io/dlpad/)와 [Windows v0.1.0 preview](https://github.com/joongi007/dlpad/releases/tag/v0.1.0)를 게시했고 [태그 실행](https://github.com/joongi007/dlpad/actions/runs/39101008422)의 전체 검증·동일 실행 원본 패키징·draft 생성을 확인했다. Root는 원 artifact digest, installer7/portable6 member·manifest5·동일 payload, SHA256SUMS·source/run binding을 직접 대조한 뒤 preview로 공개했다. 공개 asset4개를 인증 없이 다시 스트리밍해 검수 SHA와 비교했다. 수동 relay 회귀로 요청한 [main Pages 배포](https://github.com/joongi007/dlpad/actions/runs/39103421782)와 live release.json의 preview/코드 서명 없음·정확한 ZIP 링크, 실제 headless PC·모바일 화면을 확인했다. [공개 작업의 원 증거와 제한](S11-github-publication-20261018.md)을 따른다. 운영 서명·실행 중 앱 교체·rollback·깨끗한 실기기 인수는 이 완료 범위가 아니다.

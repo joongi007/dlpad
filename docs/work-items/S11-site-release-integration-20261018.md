@@ -43,3 +43,8 @@ c5963b5의 CI39066254029 전체 success를 Root가 GitHub 원 run 응답에서�
 실제 설치 CPU(a03678047d6990fa04e303a4d269aa8f2c3fcd74631398bac55bc512571122b6)의 GUI는 gui-hosted-c596-v1/에 있다. Root는 actual Light960·200% focus-scroll·Dark restart PNG와 두 원 JSON을 직접 검수했다. 두 세션 자연종료0/원Job0/강제정리0/input desktop 불변이며 실제 공개 버전 없음 결과를 관측했다. OS theme 자체/물리 키보드/자동 설치 인수는 false로 보존한다.
 
 동일 최신 ZIP은 native-hosted-preparation-c596-v1에서 원 SHA를 고정한 test-only candidate로 실제 새 bundle/journal 준비1PASS/0FAIL(13.37초)을 확인했다. 운영키/실제 새 프로세스 전환/프로필 rollback은 미완료다. 최신 검수 ZIP 경로는 .local-tools/update-integration-20261018/hosted-c596/packages/다. 소개 페이지는 site-preview-20261018-v3/index.html 및 site-review-20261018-v4/ 실제 캡처로 검수할 수 있다. 공개 배포 질문에 대한 사용자 답변은 아직 없어 게시하지 않는다.
+
+
+## 2026-10-18 공개 인수 완료
+
+사용자가 GitHub 공개 진행을 명시 승인했다. [소개 페이지](https://joongi007.github.io/dlpad/)와 [Windows v0.1.0 preview](https://github.com/joongi007/dlpad/releases/tag/v0.1.0)를 게시했고 [태그 실행](https://github.com/joongi007/dlpad/actions/runs/39101008422)의 전체 검증·동일 실행 원본 패키징·draft 생성을 확인했다. Root는 원 artifact digest, installer7/portable6 member·manifest5·동일 payload, SHA256SUMS·source/run binding을 직접 대조한 뒤 preview로 공개했다. 공개 asset4개를 인증 없이 다시 스트리밍해 검수 SHA와 비교했다. 수동 relay 회귀로 요청한 [main Pages 배포](https://github.com/joongi007/dlpad/actions/runs/39103421782)와 live release.json의 preview/코드 서명 없음·정확한 ZIP 링크, 실제 headless PC·모바일 화면을 확인했다. [공개 작업의 원 증거와 제한](S11-github-publication-20261018.md)을 따른다. 운영 서명·실행 중 앱 교체·rollback·깨끗한 실기기 인수는 이 완료 범위가 아니다.

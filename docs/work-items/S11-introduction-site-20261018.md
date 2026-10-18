@@ -1,6 +1,6 @@
 # S11: 소개 페이지와 배포 진입점
 
-- 상태: in-progress
+- 상태: done
 - 분류: feature
 - 우선순위: P1
 - 요구사항: R08, R10, R11
@@ -41,3 +41,8 @@ Pages Actions의 공식 SHA refs API를 확인했다. 자동 build/artifact는 �
 
 
 2026-10-18 원격 확인: source32607f7의 [소개 페이지 Actions39057841523](https://github.com/joongi007/dlpad/actions/runs/39057841523)는 success다. 빌드/artifact 성공이며 DLPAD_PAGES_ENABLED를 설정하거나 공개 deploy하지 않았다. 최신 로컬 preview는 `.local-tools/site-preview-20261018-v3/index.html`, headless10시나리오 재검증·Root 이미지 확인은 `.local-tools/site-review-20261018-v4/`다.
+
+
+## 2026-10-18 공개 인수 완료
+
+사용자가 GitHub 공개 진행을 명시 승인했다. [소개 페이지](https://joongi007.github.io/dlpad/)와 [Windows v0.1.0 preview](https://github.com/joongi007/dlpad/releases/tag/v0.1.0)를 게시했고 [태그 실행](https://github.com/joongi007/dlpad/actions/runs/39101008422)의 전체 검증·동일 실행 원본 패키징·draft 생성을 확인했다. Root는 원 artifact digest, installer7/portable6 member·manifest5·동일 payload, SHA256SUMS·source/run binding을 직접 대조한 뒤 preview로 공개했다. 공개 asset4개를 인증 없이 다시 스트리밍해 검수 SHA와 비교했다. 수동 relay 회귀로 요청한 [main Pages 배포](https://github.com/joongi007/dlpad/actions/runs/39103421782)와 live release.json의 preview/코드 서명 없음·정확한 ZIP 링크, 실제 headless PC·모바일 화면을 확인했다. [공개 작업의 원 증거와 제한](S11-github-publication-20261018.md)을 따른다. 운영 서명·실행 중 앱 교체·rollback·깨끗한 실기기 인수는 이 완료 범위가 아니다.
