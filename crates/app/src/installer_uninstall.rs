@@ -409,6 +409,10 @@ mod native {
             return Err(error());
         }
         let application = wide(copy.path().as_os_str())?;
+        // Never inherit the registered helper's directory: Windows keeps the
+        // current directory open without delete sharing for the child's lifetime.
+        // The verified private copy's parent is outside every removal namespace.
+        let working_directory = wide(copy.path().parent().ok_or_else(error)?.as_os_str())?;
         let startup = STARTUPINFOEXW {
             StartupInfo: STARTUPINFOW {
                 cb: mem::size_of::<STARTUPINFOEXW>() as u32,
@@ -426,7 +430,7 @@ mod native {
                 1,
                 CREATE_SUSPENDED | EXTENDED_STARTUPINFO_PRESENT,
                 ptr::null(),
-                ptr::null(),
+                working_directory.as_ptr(),
                 &startup.StartupInfo,
                 &mut pi,
             )

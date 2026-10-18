@@ -40,3 +40,11 @@ Rust native/current-user, 관리자권한·WebView·shell문자열없음. 기존
 전체 검증: native-final-v3는 Windows fmt·strict workspace/all-target clippy·workspace tests·release build가모두exit0, source불변/privateDesktop/input불변/Job자연종료0을확인했다. 전체workspace의원stdout집계는1856PASS/0FAIL/44ignored이고별도등록12회귀도PASS다. 이후cold admission의readonly 등록상태표시만보완해native-final-ui-v1에서설치기회귀/strictlint/release를다시확인한다. 등록된앱의제거버튼은cold확인뒤에도‘제거방법’이며Windows설정의전용제거기를안내한다.
 
 최종 설치기 보완 검증: native-final-ui-v1은 Windows fmt·strict workspace/all-target clippy·설치기53PASS/0FAIL/4ignored·release build 모두exit0이다. 원source불변/privateDesktop/input불변/Job자연종료0을확인했다. 다음은정상worktree의명시19파일을커밋해새0.1.3태그CI로검증하고,같은run원ZIP의가상설치·등록·취소·제거·동일경로재설치를검수한다. 공개전까지작업상태는in-progress다.
+
+## v0.1.3 배포 검수 진행
+
+소스 `0828c42f015b7cd0be78f0829178cbcb8c1da357`을 main에 push하고 새 annotated `v0.1.3` 태그를 생성했다. 태그 이동은 없었다. [일반 CI](https://github.com/joongi007/dlpad/actions/runs/39152374923)와 [릴리스 CI](https://github.com/joongi007/dlpad/actions/runs/39152377040)는 모두 성공했다. 같은 run의 원본 패키지·notice·binding·7개 updater 회귀를 독립 대조했으며 설치형 ZIP SHA256은 `6ca204986f9785bf4dc364dbe66f96d6baa26bbc4a9ed52741e438dcde486ccf`다. 로컬 DPAPI 키로 공개 메타데이터만 서명하여 draft에 총7asset을 준비했다. 개인 키 전송은 없다.
+
+실제 CI 설치기의 private desktop 설치·Windows 등록·앱 실행과 부모/UI 자연 종료0까지 확인하고 원본 PNG를 직접 검토했다. v12/v13 observer는 DOS 경로와 extended 경로의 문자열 동등성 가정을 잘못 적용하여 제거 전에 중단했다. 같은 원 native identity를 검증하도록 observer만 수정 중이며 제품/태그는 그대로다. 제거·취소·동일 경로 재설치 인수와 공개 다운로드 검증 전에는 배포 완료로 보고하지 않는다. 실패한 시험의 원 로그와 소유 설치는 보존했다.
+
+배포 차단: v15 실제 제거에서 본체 제거 후 shell 정리가 실패하여 v0.1.3 draft는 공개하지 않는다. 태그와 실패 증거를 보존한다. 제거 자식의 support 작업 폴더 상속을 native 대조로 재현했고 v0.1.4 최소 수정과 같은 trigger 회귀를 [별도 P0 작업](S07-uninstaller-inherited-cwd-20261019.md)으로 추적한다. v0.1.3 공개7asset/성공제거는 완료되지 않았다.

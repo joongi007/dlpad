@@ -476,3 +476,6 @@ Selection journal은 DPAPI로 인증한 로컬 current/previous·최고/실패 s
 ## Windows 설치 목록과 제거 진입 (구현 중)
 
 Windows shell registration은 현재 사용자 HKCU의 앱 항목·시작 메뉴 shortcut·별도 private 제거 지원 자료의 연계다. 내부 bundle의 Registered 단계와 구분한다. installation ID는 원 baseline bundle identity/path/SID를 구분하며 OS 항목의 path·같은 이름만으로 삭제/실행 권한을 만들지 않는다. shortcut은 고정 baseline 부모를 실행해 signed UI 선택을 유지한다. 초기 DisplayVersion은 검증된 baseline 버전이고 UI 업데이트로 자동 바뀌었다고 주장하지 않는다. [후보 계약](docs/adr/0014-windows-shell-registration.md).
+
+
+제거 임시 자식의 작업 폴더는 검증된 private copy의 부모이다. 삭제 대상 support의 작업 폴더를 상속하면 Windows의 implicit directory HANDLE이 삭제를 방해하므로 명시 CreateProcessW lpCurrentDirectory를 전달한다. 이는 원 삭제 capability나 공유 모드의 완화가 아니다. v0.1.3 private QA에서 발견되어 미공개로 보존하고 v0.1.4 후보에서 회귀 검증한다. [진단과 수정](docs/work-items/S07-uninstaller-inherited-cwd-20261019.md).
