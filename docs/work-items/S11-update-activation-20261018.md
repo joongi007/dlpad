@@ -1,6 +1,6 @@
 # S11: Windows 앱 업데이트 전환과 복구
 
-- 상태: implemented, 로컬 검증 완료 / 공개 승인 대기
+- 상태: in-progress, 사용자 공개 승인 후 CI·배포 인수 중
 - 분류: feature
 - 우선순위: P1
 - 요구사항: R08, R10, R11
@@ -65,3 +65,5 @@ quiet10.0077초 참고 관측: 부모 CPUdelta0s(계측 해상도 내), working 
 
 
 최종 Release4exe의 AMD64/GUI2·console3 구분과 OS DLL allowlist 검증을 통과했다(`final-runtime.json`). 최초 검증도우미가 console helper를 GUI2로 검사해 실패했고 정확한console3계약으로재검증했다. 제품PE오류가 아니다. 검수용 exact CPU copy는 `.local-tools/update-activation-20261018/review-v0.1.1/dlpad.exe`이며 SHA는검증Release와동일하다. 기존앱을종료한뒤실행하며 CI 설치ZIP/공개릴리스라고표현하지않는다. 새 capture 출력은 `.gitignore`의 `/ci-update-captures/`로명시해CI source상태검사와분리했다.
+
+2026-10-18 후속 사용자 응답으로 main·v0.1.1 태그·설치파일 공개를 명시 승인받았다. 기존 거절은 승인 전 이력이다. 9fe2045 소스와 새태그를 normal atomic push했고 원격 main·태그를 대조했다. 비공개 운영키 외부 공급은 포함하지 않는다. 새 CI·패키지 검수·로컬 서명 후 공개 metadata와 설치ZIP 공개를 진행한다.

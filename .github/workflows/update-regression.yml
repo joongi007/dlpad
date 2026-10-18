@@ -1,0 +1,87 @@
+name: Windows updater regression
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-regression-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fixture:
+    runs-on: windows-2022
+    timeout-minutes: 25
+    env:
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+      CARGO_INCREMENTAL: '0'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Load exact checkout toolchain
+        shell: bash
+        run: |
+          rustup show active-toolchain
+          rustup component add rustfmt clippy
+      - name: Prepare explicit owned temporary and fixture roots
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = Join-Path $env:GITHUB_WORKSPACE ('.local-tools/update-regression-' + $env:GITHUB_RUN_ID + '-' + $env:GITHUB_RUN_ATTEMPT)
+          if (Test-Path -LiteralPath $root) { throw 'Fresh owned runtime directory required' }
+          [IO.Directory]::CreateDirectory($root) | Out-Null
+          foreach ($name in @('tmp', 'profile', 'media', 'cases')) {
+            [IO.Directory]::CreateDirectory((Join-Path $root $name)) | Out-Null
+          }
+          $values = @{
+            TMP = (Join-Path $root 'tmp')
+            TEMP = (Join-Path $root 'tmp')
+            DLPAD_TEST_DATA = (Join-Path $root 'profile')
+            DLPAD_LIBRARY_ROOT = (Join-Path $root 'media')
+            DLPAD_UPDATE_CASE_PARENT = (Join-Path $root 'cases')
+            DLPAD_UPDATE_RUNTIME_ROOT = $root
+            RUSTFLAGS = '-C target-feature=+crt-static'
+          }
+          foreach ($entry in $values.GetEnumerator()) {
+            if ($entry.Value -match "[\r\n]") { throw 'Multiline environment rejected' }
+            "$($entry.Key)=$($entry.Value)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          }
+      - name: Validate original capture ownership and failure policies
+        shell: pwsh
+        run: |
+          python scripts/test_ci_capture_operation.py
+          if ($LASTEXITCODE -ne 0) { throw 'Capture ownership regression failed' }
+          python scripts/test_ci_app_update_fixture.py
+          if ($LASTEXITCODE -ne 0) { throw 'Fixture capture policy regression failed' }
+      - name: Fetch exact locked Windows dependencies
+        run: cargo fetch --locked --target x86_64-pc-windows-msvc
+      - name: Prepare CI-private compiler without telemetry helper
+        shell: pwsh
+        run: ./scripts/prepare_ci_msvc.ps1
+      - name: Strict lint and build the engine updater fixture only
+        shell: pwsh
+        run: |
+          python scripts/ci_app_update_fixture.py --root "$env:GITHUB_WORKSPACE" --directory ci-update-captures --phase build --seconds 600
+          if ($LASTEXITCODE -ne 0) { throw 'Updater fixture lint/build failed' }
+      - name: Verify signed update activation and recovery
+        shell: pwsh
+        run: |
+          python scripts/ci_app_update_fixture.py --root "$env:GITHUB_WORKSPACE" --directory ci-update-captures --phase run --owned-parent "$env:DLPAD_UPDATE_CASE_PARENT" --seconds 450
+          if ($LASTEXITCODE -ne 0) { throw 'Updater activation/recovery fixture failed' }
+      - name: Preserve independent raw receipts and owned failure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: windows-update-diagnostic-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ci-update-captures/
+            ci-msvc-copy.json
+            ${{ env.DLPAD_UPDATE_RUNTIME_ROOT }}/
+          # Only the explicit synthetic runtime root is hidden; no user or signing root.
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7

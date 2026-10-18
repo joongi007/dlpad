@@ -54,6 +54,137 @@ mod windows {
         file.sync_all()?;
         Ok(())
     }
+    const CHILD_STAGES: &[&str] = &[
+        "entry",
+        "preflight",
+        "committed",
+        "ready",
+        "prepare",
+        "prepared",
+        "restart-ack",
+        "failed",
+        "exit-error",
+        "bootstrap-error",
+    ];
+    fn error_facts(error: &(dyn Error + 'static)) -> Value {
+        if let Some(value) = error.downcast_ref::<io::Error>() {
+            json!({"class":"io","kind":format!("{:?}", value.kind()),"os_code":value.raw_os_error()})
+        } else if let Some(value) = error.downcast_ref::<app_update::profile::Error>() {
+            json!({"class":"profile","kind":format!("{value:?}")})
+        } else {
+            // Arbitrary error strings may include paths or input. Only fixed classifications leave this fixture.
+            json!({"class":"fixture"})
+        }
+    }
+    fn child_diag(root: &Path, stage: &'static str, detail: Value) {
+        if !CHILD_STAGES.contains(&stage) {
+            return;
+        }
+        let path = root.join(format!("child-diag-{}-{stage}.json", std::process::id()));
+        if let Ok(mut file) = OpenOptions::new().write(true).create_new(true).open(path) {
+            let bytes =
+                serde_json::to_vec(&json!({"stage":stage,"detail":detail})).unwrap_or_default();
+            if bytes.len() <= 2048 {
+                let _ = file.write_all(&bytes);
+                let _ = file.sync_all();
+            }
+        }
+    }
+    struct OwnerDiagnostic {
+        root: PathBuf,
+        stage: &'static str,
+        passed: bool,
+        source: Option<Arc<Supply>>,
+    }
+    fn fixture_root_from_env() -> Option<PathBuf> {
+        let root = PathBuf::from(std::env::var_os("DLPAD_HOST_FIXTURE_ROOT")?);
+        let metadata = fs::symlink_metadata(&root).ok()?;
+        use std::os::windows::fs::MetadataExt;
+        if !root.is_absolute() || !metadata.is_dir() || metadata.file_attributes() & 0x400 != 0 {
+            return None;
+        }
+        let sentinel = root.join("user-sentinel");
+        let metadata = fs::symlink_metadata(&sentinel).ok()?;
+        if !metadata.is_file() || metadata.file_attributes() & 0x400 != 0 {
+            return None;
+        }
+        let file = File::open(sentinel).ok()?;
+        let mut bytes = Vec::new();
+        file.take(64).read_to_end(&mut bytes).ok()?;
+        (bytes == b"synthetic profile/media/tool data untouched").then_some(root)
+    }
+    impl Drop for OwnerDiagnostic {
+        fn drop(&mut self) {
+            if self.passed {
+                return;
+            }
+            let markers: Vec<_> = [
+                "a-first",
+                "a-restart-ack",
+                "b-ready",
+                "b-cold",
+                "a-recovered",
+                "expected-failure",
+            ]
+            .into_iter()
+            .filter(|name| {
+                fs::symlink_metadata(self.root.join(name))
+                    .is_ok_and(|m| m.is_file() && !m.file_type().is_symlink())
+            })
+            .collect();
+            let mut children = Vec::new();
+            let mut truncated = false;
+            if let Ok(entries) = fs::read_dir(&self.root) {
+                for (index, entry) in entries.enumerate() {
+                    if index >= 128 {
+                        truncated = true;
+                        break;
+                    }
+                    let Ok(entry) = entry else {
+                        continue;
+                    };
+                    let name = entry.file_name();
+                    let Some(name) = name.to_str() else {
+                        continue;
+                    };
+                    if !name.starts_with("child-diag-") || !name.ends_with(".json") {
+                        continue;
+                    }
+                    if children.len() >= 32 {
+                        truncated = true;
+                        break;
+                    }
+                    if !entry
+                        .file_type()
+                        .is_ok_and(|t| t.is_file() && !t.is_symlink())
+                    {
+                        continue;
+                    }
+                    let Ok(file) = File::open(entry.path()) else {
+                        continue;
+                    };
+                    let mut bytes = Vec::new();
+                    if file.take(2049).read_to_end(&mut bytes).is_err() || bytes.len() > 2048 {
+                        continue;
+                    }
+                    let Ok(value) = serde_json::from_slice::<Value>(&bytes) else {
+                        continue;
+                    };
+                    if value
+                        .get("stage")
+                        .and_then(Value::as_str)
+                        .is_some_and(|v| CHILD_STAGES.contains(&v))
+                    {
+                        children.push(value);
+                    }
+                }
+            }
+            eprintln!(
+                "FIXTURE_DIAGNOSTIC {}",
+                json!({"stage":self.stage,"markers":markers,"children":children,"truncated":truncated,"requests":self.source.as_ref().map(|v|v.calls.load(Ordering::SeqCst)),"workers":self.source.as_ref().map(|v|v.factories.load(Ordering::SeqCst))})
+            );
+        }
+    }
     fn next_event(child: &mut UiChild) -> Result<ParentEvent> {
         let deadline = limit();
         loop {
@@ -70,6 +201,7 @@ mod windows {
         let root = fs::canonicalize(PathBuf::from(
             std::env::var_os("DLPAD_HOST_FIXTURE_ROOT").ok_or("fixture root missing")?,
         ))?;
+        child_diag(&root, "entry", json!(null));
         let case = std::env::var("DLPAD_HOST_FIXTURE_CASE")?;
         let is_b = std::env::current_exe()?
             .file_name()
@@ -82,9 +214,12 @@ mod windows {
         if endpoint.requires_profile_preflight() {
             app_update::profile::inspect(&root, PROFILE_EPOCH, &cancel, limit())?;
         }
+        child_diag(&root, "preflight", json!(null));
         let id = file_identity::from_file(&directory(&root)?)?;
         endpoint.await_commit(&id, PROFILE_EPOCH, &cancel, limit())?;
+        child_diag(&root, "committed", json!(null));
         endpoint.runtime_ready(&cancel, limit())?;
+        child_diag(&root, "ready", json!(null));
         if is_b {
             marker(&root, if case == "cold" { "b-cold" } else { "b-ready" })?;
             let deadline = limit();
@@ -140,6 +275,7 @@ mod windows {
             &cancel,
             limit(),
         )?;
+        child_diag(&root, "prepare", json!(null));
         let mut requested_cancel = false;
         let mut requested_busy = false;
         let mut stale = false;
@@ -165,6 +301,7 @@ mod windows {
                     version,
                     generation,
                 } => {
+                    child_diag(&root, "prepared", json!({"generation":generation}));
                     if version != VERSION {
                         return Err("candidate version mismatch".into());
                     }
@@ -181,6 +318,7 @@ mod windows {
                     )?;
                 }
                 ParentEvent::RestartAccepted { .. } => {
+                    child_diag(&root, "restart-ack", json!(null));
                     marker(&root, "a-restart-ack")?;
                     return Ok(());
                 }
@@ -197,6 +335,11 @@ mod windows {
                     )?;
                 }
                 ParentEvent::Failed { code, generation } => {
+                    child_diag(
+                        &root,
+                        "failed",
+                        json!({"code":code,"generation":generation}),
+                    );
                     let expected = match case.as_str() {
                         "cancel" => 1,
                         "busy" => 7,
@@ -422,6 +565,12 @@ mod windows {
         ));
         fs::create_dir(&root)?;
         let root = fs::canonicalize(root)?;
+        let mut diagnostic = OwnerDiagnostic {
+            root: root.clone(),
+            stage: "profile",
+            passed: false,
+            source: None,
+        };
         drop(InstanceGuard::acquire(&root)?);
         fs::write(
             root.join("user-sentinel"),
@@ -437,14 +586,18 @@ mod windows {
             std::env::set_var("DLPAD_HOST_FIXTURE_ROOT", &root);
             std::env::set_var("DLPAD_HOST_FIXTURE_CASE", case);
         }
+        diagnostic.stage = "supply";
         let (source, key) = supply(case)?;
+        diagnostic.source = Some(source.clone());
+        diagnostic.stage = "host-first";
         if let Err(error) = run(&root, source.clone(), &key) {
             eprintln!(
-                "OWNER FAILURE root={root:?} error={error:?} observation={:?}",
-                observe(&root, &key)
+                "OWNER_FAILURE {}",
+                json!({"error":error_facts(error.as_ref()),"observation":observe(&root,&key).ok()})
             );
             return Err(error);
         }
+        diagnostic.stage = "observe-first";
         let first = observe(&root, &key)?;
         match case {
             "success" | "stale" => {
@@ -457,6 +610,7 @@ mod windows {
                 unsafe {
                     std::env::set_var("DLPAD_HOST_FIXTURE_CASE", "cold");
                 }
+                diagnostic.stage = "host-cold";
                 let requests = source.calls.load(Ordering::SeqCst);
                 run(&root, source.clone(), &key)?;
                 if observe(&root, &key)? != first
@@ -477,6 +631,7 @@ mod windows {
                 unsafe {
                     std::env::set_var("DLPAD_HOST_FIXTURE_CASE", "replay");
                 }
+                diagnostic.stage = "host-replay";
                 run(&root, source.clone(), &key)?;
                 if observe(&root, &key)? != first || !root.join("expected-failure").is_file() {
                     return Err("replay was accepted".into());
@@ -492,6 +647,7 @@ mod windows {
                 }
             }
         }
+        diagnostic.stage = "preservation";
         let expected_workers = if matches!(case, "start-fail" | "runtime-crash") {
             2
         } else {
@@ -514,23 +670,65 @@ mod windows {
         {
             return Err("synthetic user data changed".into());
         }
+        diagnostic.stage = "cleanup";
         fs::remove_dir_all(&root)?;
+        diagnostic.passed = true;
         println!(
             "CASE_PASS {}",
             json!({"case":case,"generation":first.0,"highest":first.1,"failed":first.2,"active":first.3,"requests":source.calls.load(Ordering::SeqCst),"workers":source.factories.load(Ordering::SeqCst),"preserved":true})
         );
         Ok(())
     }
+    #[cfg(test)]
+    mod diagnostics_tests {
+        use super::*;
+        #[test]
+        fn error_details_do_not_include_paths_or_arbitrary_messages() {
+            let error = io::Error::new(
+                io::ErrorKind::PermissionDenied,
+                "private-path-cookie-secret",
+            );
+            let facts = error_facts(&error);
+            assert_eq!(facts["kind"], "PermissionDenied");
+            assert!(!facts.to_string().contains("private-path"));
+            let other: Box<dyn Error> = "private-path-cookie-secret".into();
+            assert_eq!(error_facts(other.as_ref()), json!({"class":"fixture"}));
+        }
+        #[test]
+        fn child_records_are_fixed_stage_bounded_and_create_only() {
+            let temp = tempfile::tempdir().unwrap();
+            child_diag(temp.path(), "unknown", json!(null));
+            assert_eq!(fs::read_dir(temp.path()).unwrap().count(), 0);
+            child_diag(temp.path(), "failed", json!({"code":4,"generation":1}));
+            child_diag(temp.path(), "failed", json!({"code":99}));
+            let file = fs::read_dir(temp.path())
+                .unwrap()
+                .next()
+                .unwrap()
+                .unwrap()
+                .path();
+            let bytes = fs::read(file).unwrap();
+            assert!(bytes.len() <= 2048);
+            let value: Value = serde_json::from_slice(&bytes).unwrap();
+            assert_eq!(value["detail"]["code"], 4);
+        }
+    }
     pub fn entry() -> Result<()> {
-        if let Some(endpoint) = bootstrap::child_entry()? {
+        let endpoint = match bootstrap::child_entry() {
+            Ok(value) => value,
+            Err(error) => {
+                if let Some(root) = fixture_root_from_env() {
+                    child_diag(&root, "bootstrap-error", error_facts(&error));
+                }
+                return Err(error.into());
+            }
+        };
+        if let Some(endpoint) = endpoint {
             let result = child(endpoint);
             if let Err(error) = &result
-                && let Some(root) = std::env::var_os("DLPAD_HOST_FIXTURE_ROOT")
+                && let Some(root) = fixture_root_from_env()
             {
-                let _ = fs::write(
-                    PathBuf::from(root).join(format!("child-error-{}", std::process::id())),
-                    format!("{error:?}"),
-                );
+                child_diag(&root, "exit-error", error_facts(error.as_ref()));
             }
             return result;
         }
