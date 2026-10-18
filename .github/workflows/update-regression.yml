@@ -67,6 +67,11 @@ jobs:
         run: |
           python scripts/ci_app_update_fixture.py --root "$env:GITHUB_WORKSPACE" --directory ci-update-captures --phase build --seconds 600
           if ($LASTEXITCODE -ne 0) { throw 'Updater fixture lint/build failed' }
+      - name: Verify retained-parent publication and collision regressions
+        shell: pwsh
+        run: |
+          cargo test -p dlpad-engine --lib created_relative_file --features app-update-fixture --locked --offline
+          if ($LASTEXITCODE -ne 0) { throw 'Same-directory publication regressions failed' }
       - name: Verify signed update activation and recovery
         shell: pwsh
         run: |

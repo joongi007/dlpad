@@ -487,7 +487,7 @@ mod windows {
             ambiguous(created, target, error)
         }
     }
-    fn rename(file: &File, parent: &File, units: &[u16]) -> io::Result<()> {
+    fn rename(file: &File, units: &[u16]) -> io::Result<()> {
         let name_bytes = units.len().checked_mul(2).ok_or_else(invalid)?;
         let offset = std::mem::offset_of!(FILE_RENAME_INFORMATION, FileName);
         let used = offset
@@ -500,10 +500,13 @@ mod windows {
         let mut storage = vec![0u64; used.div_ceil(std::mem::size_of::<u64>())];
         let info = storage.as_mut_ptr().cast::<FILE_RENAME_INFORMATION>();
         let mut status = IO_STATUS_BLOCK::default();
-        // SAFETY: initialized aligned flexible buffer and live original file/parent handles; ReplaceIfExists=false.
+        // SAFETY: initialized aligned buffer, original DELETE-capable source HANDLE and
+        // validated simple leaf only. NULL RootDirectory selects the documented original
+        // same-directory form, independent of CWD, rather than target-directory-relative lookup.
+        // ReplaceIfExists=false preserves every pre-existing destination.
         let result = unsafe {
             (*info).Anonymous.ReplaceIfExists = false;
-            (*info).RootDirectory = parent.as_raw_handle();
+            (*info).RootDirectory = std::ptr::null_mut();
             (*info).FileNameLength = u32::try_from(name_bytes).map_err(|_| invalid())?;
             std::ptr::copy_nonoverlapping(
                 units.as_ptr(),
@@ -588,7 +591,7 @@ mod windows {
             return Err(before(created, final_leaf, e));
         }
         // All pre-call checks are complete. Any return from the rename invocation loses cleanup authority.
-        if let Err(e) = rename(&created.file, &created.parent.file, &units) {
+        if let Err(e) = rename(&created.file, &units) {
             return Err(ambiguous(created, final_leaf, e));
         }
         let id = created.identity.clone();
@@ -724,6 +727,58 @@ mod windows {
             );
         }
         #[test]
+        fn same_directory_publish_with_retained_fresh_root_preserves_identity_and_foreign_target() {
+            let tmp = tempfile::tempdir().unwrap();
+            let fresh_path = tmp.path().join("retained-parent");
+            let fresh = crate::app_install::FreshRoot::create_new(&fresh_path).unwrap();
+            let path = std::fs::canonicalize(&fresh_path).unwrap();
+            // Match the host: caller's read-data directory HANDLE and the original
+            // FreshRoot list/DELETE HANDLE both remain live throughout publication.
+            let parent = OpenOptions::new()
+                .read(true)
+                .custom_flags(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT)
+                .open(&path)
+                .unwrap();
+            assert_ne!(std::env::current_dir().unwrap(), path);
+            std::fs::write(path.join("foreign.txt"), b"foreign bytes").unwrap();
+            let mut created = CreatedRelativeFile::create(&parent, "stage.partial").unwrap();
+            created
+                .file_mut()
+                .write_all(b"same directory original")
+                .unwrap();
+            let original = created.identity().clone();
+            let mut published = created.publish_no_replace("final.txt").unwrap();
+            fresh.verify().unwrap();
+            published.verify_current(&path).unwrap();
+            assert_eq!(published.identity(), &original);
+            assert_eq!(published.path(), path.join("final.txt"));
+            let mut bytes = Vec::new();
+            published.reader_mut().seek(SeekFrom::Start(0)).unwrap();
+            published.reader_mut().read_to_end(&mut bytes).unwrap();
+            assert_eq!(bytes, b"same directory original");
+            assert!(!path.join("stage.partial").exists());
+            assert_eq!(
+                std::fs::read(path.join("foreign.txt")).unwrap(),
+                b"foreign bytes"
+            );
+            let mut collision = CreatedRelativeFile::create(&parent, "collision.partial").unwrap();
+            collision
+                .file_mut()
+                .write_all(b"collision original")
+                .unwrap();
+            let PublishError::BeforePublish { created, .. } =
+                collision.publish_no_replace("foreign.txt").unwrap_err()
+            else {
+                panic!("existing target must be refused before native rename");
+            };
+            assert_eq!(created.cancel_cleanup(), CleanupOutcome::RemovedOriginal);
+            assert_eq!(
+                std::fs::read(path.join("foreign.txt")).unwrap(),
+                b"foreign bytes"
+            );
+            fresh.verify().unwrap();
+        }
+        #[test]
         fn collision_before_publish_retains_cleanup_capability_only_for_original_stage() {
             let tmp = tempfile::tempdir().unwrap();
             let path = std::fs::canonicalize(tmp.path()).unwrap();
@@ -809,7 +864,7 @@ mod windows {
             let parent = parent(&path);
             let mut c = CreatedRelativeFile::create(&parent, "stage.partial").unwrap();
             c.file_mut().write_all(b"moved original").unwrap();
-            rename(&c.file, &c.parent.file, &leaf("moved.partial").unwrap()).unwrap();
+            rename(&c.file, &leaf("moved.partial").unwrap()).unwrap();
             std::fs::write(path.join("stage.partial"), b"substitute user bytes").unwrap();
             assert!(c.verify_current(&path).is_err());
             assert_eq!(c.cancel_cleanup(), CleanupOutcome::Unconfirmed);

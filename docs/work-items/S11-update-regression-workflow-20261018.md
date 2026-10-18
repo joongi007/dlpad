@@ -31,3 +31,5 @@ TMP/TEMP, 시험 profile/library, case parent는 checkout의 무시된 `.local-t
 고정 실행은 `python scripts/ci_app_update_fixture.py --root "$env:GITHUB_WORKSPACE" --directory ci-update-captures --phase build --seconds 600`, 이어 `--phase run --owned-parent "$env:DLPAD_UPDATE_CASE_PARENT" --seconds 450`이다. 기존 capture의 원 Job0/readers/raw hash/정확한 CASE_PASS 정책을 그대로 사용한다. artifact에는 capture 원본, compiler copy manifest, 이번 실행의 합성 runtime root를 함께 보존한다. 다중 path upload이므로 artifact 내부 capture 경로는 `ci-update-captures/`이며 기존 단일 path main CI updater artifact와 구분한다.
 
 Windows hosted 실행 시간은 아직 측정하지 않았다. cold 준비·다운로드를 포함한 3~10분 예상은 추정이며, phase 상한은 build600초/run450초(합17.5분), 전체 job은25분이다. 원격 실행/성공은 Root의 별도 commit/push/dispatch와 실제 결과 검토 뒤 기록한다. 이 workflow의 성공만으로 fixed7 전체 CI나 installer/GUI/metadata 공개 인수를 주장하지 않는다.
+
+동일 디렉터리 publication 수정을 진단할 때 retained-parent·collision·source 교체 실패 회귀를 함께 실행하도록 engine `created_relative_file` lib test를 추가했다. 전체 릴리스 gate 대체는 아니다.
