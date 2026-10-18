@@ -67,3 +67,9 @@ quiet10.0077초 참고 관측: 부모 CPUdelta0s(계측 해상도 내), working 
 최종 Release4exe의 AMD64/GUI2·console3 구분과 OS DLL allowlist 검증을 통과했다(`final-runtime.json`). 최초 검증도우미가 console helper를 GUI2로 검사해 실패했고 정확한console3계약으로재검증했다. 제품PE오류가 아니다. 검수용 exact CPU copy는 `.local-tools/update-activation-20261018/review-v0.1.1/dlpad.exe`이며 SHA는검증Release와동일하다. 기존앱을종료한뒤실행하며 CI 설치ZIP/공개릴리스라고표현하지않는다. 새 capture 출력은 `.gitignore`의 `/ci-update-captures/`로명시해CI source상태검사와분리했다.
 
 2026-10-18 후속 사용자 응답으로 main·v0.1.1 태그·설치파일 공개를 명시 승인받았다. 기존 거절은 승인 전 이력이다. 9fe2045 소스와 새태그를 normal atomic push했고 원격 main·태그를 대조했다. 비공개 운영키 외부 공급은 포함하지 않는다. 새 CI·패키지 검수·로컬 서명 후 공개 metadata와 설치ZIP 공개를 진행한다.
+
+2026-10-19 공개 인수: Windows v0.1.2/source9ed25f1297b59bfc922e0659279a56a227614302의 전체 CI39138176097과 mainCI39137703892 성공, 같은 run 원build/notice/7compile lifecycle/패키지·manifest·fixture7를 Root가 대조했다. 실제 설치기 install/verify/Launch→고정parent→UI→자연종료와 설치CPU Light/Dark/800·960/200%/Dark 복원/원Job0·사용자desktop불변을 검수했다. 공개release416523660와 정확7개 무인증다운로드 hash일치. 운영키는 로컬 DPAPI만 사용했고 공개metadata3파일만 게시했다. CPU11,094,528B이며 공개0.1.0보다664,064B 증가(약0.63MiB); 추가crate/외부런타임0이다. 직전0.1.1 후보 대비12,288B 증가다. 부모·UI quiet sample은 참고 관측이며 privateRSS/정식 성능인수로 확대하지 않는다.
+
+공개 릴리스: [v0.1.2](https://github.com/joongi007/dlpad/releases/tag/v0.1.2). v0.1.0은 첫1회수동설치, 이후 설정→앱업데이트→미리보기버전에서 새 서명버전을 조회한다. 고정부모 자체·키·protocol/epoch는 이 UI업데이트에포함되지않아수동설치가필요하다. physicalIME/OSDPI/스크린리더/다른OS는 이번검수로 완료처리하지않는다. [설명 스크롤 후속](S11-update-notes-scroll-followup-20261019.md).
+
+실제 operational public A0.1.1→B0.1.2 시험은 진행 중이다. 첫 public-transition-v1은 준비 중 동적UIA관측의 ElementNotAvailableException으로FAIL, 원Job2를소유cleanup으로0·desktop불변을확인했다. Ready/B/cold통과로기록하지않는다. 관측도우미를보강하고 원실패·원코드를보존한다. 제품실패확정과구별한다.

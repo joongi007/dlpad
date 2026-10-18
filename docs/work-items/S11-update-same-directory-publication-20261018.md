@@ -1,6 +1,6 @@
 # S11: 동일 디렉터리 원 HANDLE publication
 
-- 상태: in-progress
+- 상태: completed
 - 분류: bug
 - 우선순위: P0
 - 요구사항: R10, R13
@@ -29,3 +29,7 @@ Microsoft [FILE_RENAME_INFORMATION 계약](https://learn.microsoft.com/en-us/win
 ## 검증과 handoff
 
 수정 파일 rustfmt 완료. native target 함수 동작은 Root가 실제 MSVC regression과 hosted 실행으로 검증한다. before-failure는 실제 Windows Server2022 hosted 증거이며 로컬 Win11에서 before-failure를 새로 재현했다고 주장하지 않는다. 운영 key·계정·영상/사용자 Documents를 사용하지 않았고 원 단계 오류를 숨기지 않았다.
+
+Root 통합 검증: 9ed25f1297b59bfc922e0659279a56a227614302, Windows full fmt/strict workspace+CPU lint/test/release PASS(1,838 passed/0 failed/44 ignored, filtered child1 포함), 진단2 PASS, 로컬 전환7case PASS. 실제 Windows2022 독립 run39137703881도 retained-parent/collision lib regression 및 전환7case PASS; artifact 원 receipt·stdout/stderr SHA와 CASE_PASS를 대조했다. 원 ZIP digest d4961d5260079803d82072944f5d108246db68a660606acde243f9a9d334b01d. v0.1.2 전체 릴리스 run39138176097의 package/install/UI/공개 인수는 별도 진행 중.
+
+최종 2026-10-19: source9ed의 전체 release CI39138176097, 동일원본패키지 검증, 실제 private Windows 설치/재검증/앱실행과 설치CPU GUI를 Root가 검수했다. [v0.1.2](https://github.com/joongi007/dlpad/releases/tag/v0.1.2)를 공개했고 정확7개 공개다운로드의 원SHA가 일치한다. same-directory publication 수정은 이 Windows 범위에서 인수했다. 기존 failed v0.1.1 태그는 이동·삭제하지 않았다.

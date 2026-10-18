@@ -1,6 +1,12 @@
 # CI/CD와 배포 계획
 
-## 현재 공개 상태 — 2026-10-18
+## 현재 공개 상태 — 2026-10-19
+
+사용자의 공개 승인에 따라 [Windows v0.1.2 preview](https://github.com/joongi007/dlpad/releases/tag/v0.1.2)를 제공합니다. [v0.1.2 태그 릴리스 실행](https://github.com/joongi007/dlpad/actions/runs/39138176097)은 정확한 source `9ed25f1297b59bfc922e0659279a56a227614302`의 전체 CI와 같은 실행 원본 설치형·포터블 ZIP 패키징을 연결합니다. 공개 업데이트 메타데이터의 Ed25519 서명 검증과 Windows Authenticode 코드 서명은 별개이며, 이번 preview의 실행 파일에는 Authenticode 서명이 없습니다. 설정 → 앱 업데이트 → 조회 채널의 **미리보기 버전**에서 사용자 선택으로 새 서명 버전을 다운로드하고 재시작합니다. v0.1.0 사용자는 v0.1.2를 한 번 수동 설치해야 합니다. 실제 검수와 제한은 [업데이트 인수](work-items/S11-update-activation-20261018.md)를 확인하세요.
+
+고정 부모 실행 파일의 보안 패치·프로토콜/호환성 epoch·신뢰 키 교체는 현재 UI 업데이트 범위 밖이며 수동 설치가 필요합니다. 운영 비공개키는 GitHub에 공급하지 않고, 로컬 서명 후 공개 메타데이터만 게시합니다. 공개키는 `crates/engine/src/app_update/release-public-key.json`이며 내려받은 공개키 파일을 앱의 새 신뢰 기준으로 채택하지 않습니다.
+
+### 이전 v0.1.0 공개 인수
 
 사용자의 공개 승인에 따라 [소개 페이지](https://joongi007.github.io/dlpad/)와 [Windows v0.1.0 preview](https://github.com/joongi007/dlpad/releases/tag/v0.1.0)를 게시했다. [태그 기반 전체 검증·동일 실행 ZIP·draft 생성](https://github.com/joongi007/dlpad/actions/runs/39101008422)과 [릴리스 갱신 relay → main Pages 배포](https://github.com/joongi007/dlpad/actions/runs/39103421782)이 실제 성공했다. 설치형·포터블 ZIP, SHA256SUMS, release-binding.json의 원본 CI 일치와 인증 없는 공개 다운로드 해시를 대조했다. 이번 a98 원 ZIP의 격리 Windows 설치·재검증과 설치 앱의 Light/Dark·재시작·자연 종료도 Root가 확인했다. 코드 서명 없는 preview이며 운영 서명키·앱 자동 교체는 제공하지 않는다. [공개 인수 기록](work-items/S11-github-publication-20261018.md).
 
@@ -96,10 +102,10 @@ Root는 artifact12113907821의 원 SHA를 대조하고 exact installer7/portable
 v0.1.0의 실제 published run39102954680은 사이트 build 성공 뒤 github-pages 환경이 tag ref를 거절했다. main 전용 환경 정책은 유지한다. pages-release.yml은 공개 이벤트에서 pages.yml의 main dispatch만 요청하며, 사이트 workflow는 main만 배포한다. 운영 서명키·환경 보호 규칙을 변경하지 않는다. 실제 relay hosted 회귀와 공개 release.json 확인은 [교정 작업](work-items/S11-pages-release-main-routing-20261018.md)에 기록한다.
 
 
-## Windows updater 지원 소스0.1.1 (2026-10-18)
+## Windows updater 지원 v0.1.2 (2026-10-19)
 
 고정 운영 공개키·부모/자식 수명·DPAPI 선택 기록·실패 복귀를 구현했다. 실제 상태/명령은 [통합 작업](work-items/S11-update-activation-20261018.md)에 기록한다. 과거 단락의 미구현 표시는 당시 단계이며 공개v0.1.0의 기능 설명이다. 기존 fixed7 원본 capture graph는 유지하고 기본OFF `app-update-fixture` 별도 bin/독립 CI capture로 signed A→B/cold B·시작 실패·crash·hash 오류·취소·busy·stale를 검증한다. 합성 키와 시험 bin은 제품 ZIP에 포함하지 않는다.
 
-선택적 release-signing job은 생성한 공개키가 저장소 `release-public-key.json`과 정확히 같아야 metadata를 올린다. 운영 비공개키의 GitHub 공급은 아직 하지 않았다. 로컬 DPAPI 복호화·서명 후 공개 metadata 세 파일만 해당 draft에 추가하는 공급 경로를 제공한다. 앱의 Ed25519 신뢰와 Authenticode는 다르다. 첫 지원 버전은 수동 설치하며 기존 v0.1.0 태그/파일을 덮어쓰지 않는다.
+선택적 release-signing job은 생성한 공개키가 저장소 `crates/engine/src/app_update/release-public-key.json`과 정확히 같아야 metadata를 올린다. 운영 비공개키의 GitHub 공급은 아직 하지 않았다. 로컬 DPAPI 복호화·서명 후 공개 metadata 세 파일만 해당 draft에 추가하는 공급 경로를 제공한다. 앱의 Ed25519 신뢰와 Authenticode는 다르다. 첫 지원 버전은 수동 설치하며 기존 v0.1.0 태그/파일을 덮어쓰지 않는다.
 
 프로필 epoch1에서는 후보의 읽기 전용 사전 검사와 역방향 호환성으로 복귀하고, 실행 후 사용자 변경을 과거 DB snapshot으로 복원하지 않는다. 위 일반 릴리스 시험의 backup 목표가 자동 DB overwrite 정책을 뜻하지 않는다.

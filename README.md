@@ -17,7 +17,7 @@ URL 입력부터 영상 다운로드, 구간 저장, 파일 확인까지 지원�
 
 ## 현재 상태와 실행
 
-현재 **Windows 64비트 미리보기 v0.1.0**을 [GitHub Releases](https://github.com/joongi007/dlpad/releases/tag/v0.1.0)에서 받을 수 있습니다. 설치형·포터블 ZIP을 제공합니다. 코드 서명 없는 개발 preview이며 앱 자동 업데이트는 제공하지 않습니다. 개발 검수 번호와 Cargo 버전은 별개입니다. [소스 checkout 범위](docs/SOURCE-CHECKOUT.md), [현재 P0](docs/validation/P0-current-20261016.md).
+현재 **Windows 64비트 미리보기 v0.1.2**를 [GitHub Releases](https://github.com/joongi007/dlpad/releases/tag/v0.1.2)에서 받을 수 있습니다. 설치형·포터블 ZIP과 Ed25519로 서명한 앱 업데이트 메타데이터를 제공합니다. Windows Authenticode 코드 서명이 없는 개발 preview입니다. **v0.1.0 사용자는 v0.1.2를 한 번 수동 설치**해야 합니다. 개발 검수 번호와 Cargo 버전은 별개입니다. [소스 checkout 범위](docs/SOURCE-CHECKOUT.md), [현재 P0](docs/validation/P0-current-20261016.md).
 
 Windows x64의 Rust MSVC toolchain과 C++ 빌드 도구가 준비된 환경에서 앱을 빌드합니다. 정확한 Rust 버전은 `rust-toolchain.toml`로 고정합니다.
 
@@ -37,11 +37,11 @@ python3 scripts/build_site.py --output /tmp/dlpad-site-preview
 
 빌드 출력은 새 디렉터리여야 하며 기존 폴더를 지우거나 덮어쓰지 않습니다. 정확한 `vX.Y.Z` 태그와 Cargo 버전 일치 → Windows 전체 CI → 같은 실행의 원본으로 ZIP 패키징 → 미공개 preview draft 생성을 자동화했습니다. [v0.1.0 릴리스 실행](https://github.com/joongi007/dlpad/actions/runs/39101008422)이 실제 성공했으며 파일·체크섬을 대조한 뒤 공개했습니다. 공개 Release 이벤트를 받은 별도 workflow가 main의 사이트 배포를 요청해 다운로드 링크를 갱신하도록 구성했습니다. 후속 버전도 draft 검수 후 게시합니다.
 
-개발 소스 **0.1.2**에는 Windows 앱 업데이트를 구현했습니다. 설정 → 앱 업데이트에서 채널·새 버전 확인 → 서명된 버전 다운로드 → 작업 종료 후 재시작을 선택합니다. 기존 버전을 보존하고 새 버전 시작 실패 시 이전 선택으로 돌아갑니다. 공개 **v0.1.0 사용자는 첫 지원 버전을 한 번 수동 설치**해야 합니다. 공개된 새 서명 metadata가 없는 경우에는 릴리스 링크를 안내합니다. 현재 통합 시험과 배포 상태는 [업데이트 작업](docs/work-items/S11-update-activation-20261018.md), 운영키·서명 공급은 [운영 안내](docs/UPDATE-SIGNING.md)를 확인하세요.
+**v0.1.2부터 Windows 앱 업데이트를 지원합니다.** 설정 → 앱 업데이트의 조회 채널에서 **미리보기 버전**을 선택하고 새 버전 확인 → 서명된 버전 다운로드 → 작업 종료 후 재시작을 선택합니다. 기존 버전을 보존하고 새 버전 시작 실패 시 이전 선택으로 돌아갑니다. 더 새로운 서명된 버전이 없으면 업데이트를 적용하지 않으며, 서명 메타데이터가 없는 릴리스는 수동 설치로 안내합니다. 고정 부모 실행 파일의 보안 패치·프로토콜/호환성 epoch·신뢰 키 교체는 현재 앱 업데이트 범위에 포함되지 않아 수동 설치가 필요합니다. 통합 시험과 제한은 [업데이트 작업](docs/work-items/S11-update-activation-20261018.md), 서명 공급은 [운영 안내](docs/UPDATE-SIGNING.md)를 확인하세요.
 
 ## 검증과 CI
 
-PR·push에서 문서·Python 정책 검사와 Windows Rust 포맷·린트·테스트·release 빌드를 실행합니다. 개발 실행 파일과 로그를 artifact로 보관합니다. [v0.1.0 전체 검증·패키징](https://github.com/joongi007/dlpad/actions/runs/39101008422), [CI/CD 범위](docs/CICD.md). 공개 설치형·포터블 ZIP은 같은 CI의 원본 실행 파일을 재사용하며 재빌드하지 않습니다. Windows Authenticode 코드 서명과 Linux/macOS 업데이트는 후속입니다. 개발 소스의 Windows 업데이트는 별도 실제 전환·복귀 시험으로 검증합니다.
+PR·push에서 문서·Python 정책 검사와 Windows Rust 포맷·린트·테스트·release 빌드를 실행합니다. 개발 실행 파일과 로그를 artifact로 보관합니다. [v0.1.0 전체 검증·패키징](https://github.com/joongi007/dlpad/actions/runs/39101008422), [CI/CD 범위](docs/CICD.md). 공개 설치형·포터블 ZIP은 같은 CI의 원본 실행 파일을 재사용하며 재빌드하지 않습니다. Windows Authenticode 코드 서명과 Linux/macOS 업데이트는 후속입니다. Windows 업데이트 전환·복귀는 별도 합성 회귀 시험으로 검사하며, [v0.1.2 릴리스 실행](https://github.com/joongi007/dlpad/actions/runs/39138176097)의 전체 CI·동일 실행 패키징과 구분합니다.
 
 ```sh
 python3 scripts/check_docs.py --source-only
