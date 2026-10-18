@@ -16,7 +16,13 @@ mod installer_journal_choice;
 #[cfg(windows)]
 mod installer_launch;
 #[cfg(windows)]
+mod installer_os;
+#[cfg(windows)]
 mod installer_tools;
+#[cfg(windows)]
+mod installer_uninstall;
+#[cfg(windows)]
+mod installer_uninstall_catalog;
 #[cfg(windows)]
 #[allow(dead_code)]
 mod managed;
@@ -507,7 +513,6 @@ mod native {
     use dlpad_engine::app_install::{
         LocalInspectionRequest, LocalJournalReport, LocalJournalRequest, LocalRemovalReport,
         LocalRemovalRequest, inspect_local_existing_bundle, prepare_local_journal_bundle,
-        remove_local_journal_bundle,
     };
     use folder_picker::{FolderPicker, FolderPickerCloser};
     use installer_catalog as text;
@@ -575,9 +580,15 @@ mod native {
         Prepare,
         Verify,
         Remove,
+        Register,
     }
     enum Report {
-        Journal(LocalJournalReport, Option<String>),
+        Journal(
+            LocalJournalReport,
+            Option<String>,
+            Option<Result<(), io::ErrorKind>>,
+        ),
+        ShellRegistration(Result<(), io::ErrorKind>, bool),
         ToolPathsRejected,
         Removal(LocalRemovalReport),
     }
@@ -593,6 +604,7 @@ mod native {
         phase: admission::Phase,
         resolved_journal: Option<PathBuf>,
         verified_report: Option<LocalJournalReport>,
+        shell_registered: bool,
     }
     struct AdmissionWorker {
         cancel: Arc<AtomicBool>,
@@ -1160,6 +1172,7 @@ mod native {
         closing: bool,
         verified: bool,
         remove_eligible: bool,
+        shell_registered: bool,
         confirmation: Option<LocalRemovalRequest>,
     }
     fn wide(s: &str) -> Vec<u16> {
@@ -1174,6 +1187,7 @@ mod native {
                 Operation::Verify => (text::VERIFYING_HEADING, text::VERIFYING_INTRO),
                 Operation::Prepare => (text::INSTALLING_HEADING, text::INSTALLING),
                 Operation::Remove => (text::REMOVING_HEADING, text::REMOVING),
+                Operation::Register => (text::SHELL_REGISTER_HEADING, text::SHELL_REGISTERING),
             }
         } else if admission_busy(state) && !failed && !state.closing {
             (text::CHECKING_HEADING, text::CHECKING_INTRO)
@@ -1223,12 +1237,24 @@ mod native {
             }
             EnableWindow(
                 state.buttons[0],
-                (!state.verified
-                    && state.admission_phase.permits_install()
+                (((!state.verified && state.admission_phase.permits_install())
+                    || (state.verified
+                        && state.packaged_source.is_some()
+                        && !state.shell_registered))
                     && !active
                     && !confirming
                     && !state.closing) as i32,
             );
+            let install_label = wide(if state.verified && state.packaged_source.is_some() {
+                if state.shell_registered {
+                    text::SHELL_REGISTERED_BUTTON
+                } else {
+                    text::SHELL_REGISTER_BUTTON
+                }
+            } else {
+                text::INSTALL
+            });
+            SetWindowTextW(state.buttons[0], install_label.as_ptr());
             EnableWindow(
                 state.buttons[1],
                 ((active || confirming || state.admission_worker.is_some())
@@ -1241,7 +1267,11 @@ mod native {
             );
             EnableWindow(
                 state.buttons[3],
-                (!active && !state.closing && (confirming || state.remove_eligible)) as i32,
+                (!active
+                    && !state.closing
+                    && (confirming
+                        || state.remove_eligible
+                        || (state.verified && state.shell_registered))) as i32,
             );
             EnableWindow(
                 state.picker_button,
@@ -1255,6 +1285,8 @@ mod native {
             );
             let label = wide(if confirming {
                 text::CONFIRM_REMOVE
+            } else if state.shell_registered {
+                text::SHELL_REMOVE_GUIDE_BUTTON
             } else {
                 text::REMOVE
             });
@@ -1264,7 +1296,7 @@ mod native {
             } else if let Some(worker) = &state.worker {
                 match worker.operation {
                     Operation::Prepare => text::CANCEL_INSTALL,
-                    Operation::Verify => text::CANCEL,
+                    Operation::Verify | Operation::Register => text::CANCEL,
                     Operation::Remove => text::CANCEL_REMOVE,
                 }
             } else if launch_busy(state) {
@@ -1345,6 +1377,7 @@ mod native {
                 phase,
                 resolved_journal,
                 verified_report,
+                shell_registered,
             }) = result
                 && joined
                 && !worker.cancel.load(Ordering::Acquire)
@@ -1376,7 +1409,8 @@ mod native {
                         .is_some_and(|r| r.kind.is_none() && r.current_consistency_verified)
                 {
                     state.verified = true;
-                    state.remove_eligible = true;
+                    state.shell_registered = shell_registered;
+                    state.remove_eligible = !shell_registered;
                 }
                 if worker.announce && state.worker.is_none() && !launch_busy(state) {
                     status(
@@ -1493,11 +1527,24 @@ mod native {
                         }
                         Err(_) => (admission::Phase::Unavailable, None, None),
                     };
+                    let shell_registered = verified_report.as_ref().is_some_and(|report| {
+                        report.kind.is_none() && report.current_consistency_verified
+                    }) && journal.as_ref().is_some_and(|journal| {
+                        crate::installer_os::is_registered(
+                            &LocalInspectionRequest {
+                                bundle_root: snapshot.target.clone(),
+                                journal_root: journal.clone(),
+                            },
+                            &flag,
+                            deadline,
+                        )
+                    });
                     let _ = tx.try_send(AdmissionResult {
                         snapshot,
                         phase,
                         resolved_journal: journal,
                         verified_report,
+                        shell_registered,
                     });
                 }) {
                 Ok(handle) => {
@@ -1531,11 +1578,16 @@ mod native {
     fn invalidate(state: &mut State) {
         state.verified = false;
         state.remove_eligible = false;
+        state.shell_registered = false;
         state.confirmation = None;
         sync_stage_copy(state, false);
     }
     fn confirm_remove(hwnd: HWND, state: &mut State) {
         if state.worker.is_some() || launch_busy(state) || state.closing || state.picker_active {
+            return;
+        }
+        if state.verified && state.shell_registered {
+            status(state, text::SHELL_REMOVE_GUIDE);
             return;
         }
         if state.confirmation.is_some() {
@@ -1808,7 +1860,13 @@ mod native {
         })
     }
     enum Request {
-        Prepare(LocalJournalRequest, [bool; 3], Option<std::path::PathBuf>),
+        Prepare(
+            LocalJournalRequest,
+            [bool; 3],
+            Option<std::path::PathBuf>,
+            bool,
+        ),
+        Register(LocalInspectionRequest),
         Verify(LocalInspectionRequest),
         Remove(LocalRemovalRequest),
     }
@@ -1850,6 +1908,8 @@ mod native {
     fn start(hwnd: HWND, state: &mut State, operation: Operation) {
         if (operation == Operation::Prepare
             && (state.verified || !state.admission_phase.permits_install()))
+            || (operation == Operation::Register
+                && (!state.verified || state.packaged_source.is_none() || state.shell_registered))
             || admission_busy(state)
             || state.worker.is_some()
             || launch_busy(state)
@@ -1869,7 +1929,12 @@ mod native {
                 } else {
                     None
                 };
-                Ok(Request::Prepare(request, selected, data))
+                Ok(Request::Prepare(
+                    request,
+                    selected,
+                    data,
+                    state.packaged_source.is_some(),
+                ))
             }),
             Operation::Verify => request_roots(state).map(|r| {
                 Request::Verify(LocalInspectionRequest {
@@ -1878,6 +1943,12 @@ mod native {
                 })
             }),
             Operation::Remove => state.confirmation.take().ok_or(()).map(Request::Remove),
+            Operation::Register => request_roots(state).map(|r| {
+                Request::Register(LocalInspectionRequest {
+                    bundle_root: r.bundle_root,
+                    journal_root: r.journal_root,
+                })
+            }),
         } {
             Ok(r) => r,
             Err(()) => {
@@ -1916,7 +1987,7 @@ mod native {
             .name("dlpad-install-worker".into())
             .spawn(move || {
                 let report = match request {
-                    Request::Prepare(r, selected, data) => {
+                    Request::Prepare(r, selected, data, register_shell) => {
                         if data.as_ref().is_some_and(|data| {
                             !crate::installer_tools::tool_root_is_disjoint(
                                 data,
@@ -1931,15 +2002,49 @@ mod native {
                                     &data, &selected, &flag, deadline,
                                 )
                             });
-                            Report::Journal(app, summary)
+                            let shell = if register_shell
+                                && app.kind.is_none()
+                                && app.current_consistency_verified
+                            {
+                                Some(crate::installer_os::register(
+                                    &r.bundle_root,
+                                    &r.journal_root,
+                                    &flag,
+                                    deadline,
+                                ))
+                            } else {
+                                None
+                            };
+                            Report::Journal(app, summary, shell)
                         }
                     }
                     Request::Verify(r) => {
-                        Report::Journal(inspect_local_existing_bundle(&r, &flag, deadline), None)
+                        let app = inspect_local_existing_bundle(&r, &flag, deadline);
+                        let shell = (app.kind.is_none()
+                            && app.current_consistency_verified
+                            && crate::installer_os::is_registered(&r, &flag, deadline))
+                        .then_some(Ok(()));
+                        Report::Journal(app, None, shell)
                     }
-                    Request::Remove(r) => {
-                        Report::Removal(remove_local_journal_bundle(&r, &flag, deadline))
+                    Request::Register(r) => {
+                        let result = crate::installer_os::register(
+                            &r.bundle_root,
+                            &r.journal_root,
+                            &flag,
+                            deadline,
+                        );
+                        let verified = result.is_ok() || {
+                            let app = inspect_local_existing_bundle(&r, &flag, deadline);
+                            app.kind.is_none() && app.current_consistency_verified
+                        };
+                        Report::ShellRegistration(result, verified)
                     }
+                    Request::Remove(r) => Report::Removal(crate::installer_os::remove(
+                        &r.bundle_root,
+                        &r.journal_root,
+                        &flag,
+                        deadline,
+                    )),
                 };
                 // One final value fits the empty one-slot queue; no intermediate samples.
                 let _ = tx.try_send(report);
@@ -1967,6 +2072,7 @@ mod native {
             state,
             match operation {
                 Operation::Verify => text::VERIFYING,
+                Operation::Register => text::SHELL_REGISTERING,
                 Operation::Prepare => text::INSTALLING,
                 Operation::Remove => text::REMOVING,
             },
@@ -2046,7 +2152,30 @@ mod native {
             }
         }
     }
+    fn registration_completed(
+        state: &mut State,
+        result: Result<(), io::ErrorKind>,
+        verified: bool,
+    ) {
+        state.verified = verified;
+        state.shell_registered = result.is_ok();
+        state.remove_eligible = false;
+        if verified {
+            state.admission_phase = admission::Phase::Existing;
+        }
+        status(
+            state,
+            if result.is_ok() {
+                text::SHELL_REGISTERED
+            } else {
+                text::SHELL_REGISTER_FAILED
+            },
+        );
+    }
     fn removal_message(r: &LocalRemovalReport) -> &'static str {
+        if r.kind == Some(io::ErrorKind::Unsupported) && !r.mutation_may_have_occurred {
+            return text::SHELL_REMOVE_GUIDE;
+        }
         if r.kind.is_none()
             && r.outer_namespace_absence_confirmed
             && r.accepted_root_dispositions == 4
@@ -2214,7 +2343,7 @@ mod native {
             return;
         }
         match report {
-            Ok(Report::Journal(r, tool_summary)) if joined => {
+            Ok(Report::Journal(r, tool_summary, shell)) if joined => {
                 let summary = wide(tool_summary.as_deref().unwrap_or(""));
                 unsafe {
                     SetWindowTextW(state.tools_result, summary.as_ptr());
@@ -2261,7 +2390,27 @@ mod native {
                     }
                     None => text::FAILED,
                 };
-                status(state, message);
+                if let Some(result) = shell {
+                    state.shell_registered = result.is_ok();
+                    if state.shell_registered {
+                        state.remove_eligible = false;
+                    }
+                    status(
+                        state,
+                        if result.is_ok() && w.operation == Operation::Verify {
+                            text::VERIFIED
+                        } else if result.is_ok() {
+                            text::SHELL_REGISTERED
+                        } else {
+                            text::SHELL_REGISTER_FAILED
+                        },
+                    );
+                } else {
+                    status(state, message);
+                }
+            }
+            Ok(Report::ShellRegistration(result, verified)) if joined => {
+                registration_completed(state, result, verified);
             }
             Ok(Report::ToolPathsRejected) if joined => {
                 invalidate(state);
@@ -3711,7 +3860,15 @@ mod native {
                     return 0;
                 }
                 match w & 0xffff {
-                    201 => start(hwnd, state, Operation::Prepare),
+                    201 => start(
+                        hwnd,
+                        state,
+                        if state.verified && state.packaged_source.is_some() {
+                            Operation::Register
+                        } else {
+                            Operation::Prepare
+                        },
+                    ),
                     202 => stop(state, false),
                     203 => recheck(hwnd, state),
                     212 => start_launch(hwnd, state),
@@ -4110,6 +4267,7 @@ mod native {
                     closing: false,
                     verified: false,
                     remove_eligible: false,
+                    shell_registered: false,
                     confirmation: None,
                 };
                 ShowWindow(state.tools_result, SW_HIDE);
@@ -4391,8 +4549,24 @@ mod native {
                 closing: false,
                 verified: false,
                 remove_eligible: false,
+                shell_registered: false,
                 confirmation: None,
             };
+            // Registration completion must restore real HWND actions after start invalidates them.
+            registration_completed(&mut state, Ok(()), true);
+            controls(&state, false);
+            assert_ne!(unsafe { IsWindowEnabled(state.launch_button) }, 0);
+            assert_eq!(unsafe { IsWindowEnabled(state.buttons[0]) }, 0);
+            confirm_remove(window.parent, &mut state);
+            assert!(state.worker.is_none() && state.confirmation.is_none());
+            registration_completed(&mut state, Err(io::ErrorKind::PermissionDenied), true);
+            controls(&state, false);
+            assert_ne!(unsafe { IsWindowEnabled(state.buttons[0]) }, 0);
+            registration_completed(&mut state, Err(io::ErrorKind::InvalidData), false);
+            controls(&state, false);
+            assert_eq!(unsafe { IsWindowEnabled(state.launch_button) }, 0);
+            invalidate(&mut state);
+            state.admission_phase = admission::Phase::Unknown;
             // Use the real packaged base, with an existing historical generation.
             let base = packaged_journal(&target).unwrap();
             std::fs::create_dir(&base).unwrap();
@@ -4759,7 +4933,11 @@ mod native {
     }
 }
 fn main() {
-    let args: Vec<_> = std::env::args_os().skip(1).take(11).collect();
+    let args: Vec<_> = std::env::args_os().skip(1).take(33).collect();
+    #[cfg(windows)]
+    if let Some(code) = installer_uninstall::maybe_run(&args) {
+        std::process::exit(code);
+    }
     let resolved = if args.is_empty() {
         std::env::current_exe()
             .map_err(|_| ())

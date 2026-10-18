@@ -1,6 +1,6 @@
 # ADR-0012: 서명된 앱 업데이트 후보와 설치 권한 분리
 
-- 상태: Proposed, 검증/저장/조회 경계 구현·Windows 회귀 통과, 운영 교체 미완료
+- 상태: Accepted, Windows 검증·저장·전환 경계; 2026-10-18 ADR-0013과 통합
 - 날짜: 2026-10-18
 - 관련: [설치 기반](0005-app-install-foundation.md), [설치/앱 수명](0009-installer-launch-supervision.md), [업데이트 작업](../work-items/S11-app-updater.md)
 
@@ -16,7 +16,10 @@ payload schema1의 domain은 `dlpad.app-update.v1`, target은 `x86_64-pc-windows
 
 검증된 후보는 파일 생성·실행 권한이 아니다. 명시적인 패키지 저장은 기존 사용자 선택 parent의 원 HANDLE과 canonical 경로에서 새 staging 파일을 create-only로 만들고 flush/sync, 원 reader hash, identity를 확인한다. 기존 최종 파일을 덮어쓰지 않는 publication 뒤 다시 hash/identity를 확인하고 readonly reader·parent pin을 보유한다. 실패 정리는 원 created capability만 사용하며 불명확한 publication을 성공/삭제 권한으로 바꾸지 않는다. 이 저장 경로는 Windows 전용이며 다른 OS에서는 미지원이다. 사용자 미디어·외부 도구·이전 앱 설치를 변경하지 않는다.
 
-## 남은 인수와 결정
+## 현재 결정과 과거 단계별 인수
+
+운영 공개키를 고정했고 서명된 다운로드·새 UI 실행·선택 확정·복귀는 [ADR-0013](0013-windows-update-bootstrap.md)과 [현재 인수](../work-items/S11-update-activation-20261018.md)에 따른다. 아래 미완료/Proposed 기록은 당시 단계의 검증 범위다. 비공개키의 외부 공급과 고정 부모/키 교체는 별도다.
+
 
 운영 trust key 고정/보관·교체, signed metadata 자동 생성, native 설정의 확인/다운로드/오류·취소 UI, owned worker 수명, 설치기 전환, 기존 버전 보존·실패 복구를 완성해야 한다. 기존 journal generation/suffix는 업데이트 revision이 아니다. 실제 공개와 비밀 외부 전송은 사용자 지정 별도 승인 범위를 유지한다. 운영 키 없이 임의의 후보 키나 테스트 키를 기본 신뢰하지 않는다.
 

@@ -471,3 +471,8 @@ Prepared update bundle은 원 StagedPackage를 전체 재검증하고 Windows pr
 Stable update parent는 원 bootstrap 파일에서 순차적으로 하나의 UI 자식을 소유하는 감독자다. Candidate profile preflight는 원 root identity와 epoch1을 대조하는 읽기 행동이며 migration이 아니다. ReadyForCommit, Commit, RuntimeReady는 각각 사전 검사 종료, 부작용 시작 승인, 실제 프레임/시작 복구 확인이다. Prepared generation은 부모가 보유한 원 설치 capability의 세대이고 UI가 전달하는 경로 권한이 아니다.
 
 Selection journal은 DPAPI로 인증한 로컬 current/previous·최고/실패 sequence 관측이다. Installed image evidence를 경로 실행 권한으로 해석하지 않고 원 bundle·native128bitID·해시를 재검증한 실행 pin이 필요하다. Rollback은 현재 사용자 파일을 과거 백업으로 복원하는 동작이 아니다. epoch1의 역방향 읽기 호환성을 유지하며 이전 검증된 실행 선택으로 돌아간다. [구현/검증 결정](docs/adr/0013-windows-update-bootstrap.md), [운영 서명](docs/UPDATE-SIGNING.md)을 따른다. 실제 Windows signed fixture 7case로 전환·cold start·실패 복귀를 확인했다. 제품 release/공개 공급 상태는 현재 작업을 따르며 공개 v0.1.0이 자동 업데이트를 제공한다는 의미는 아니다.
+
+
+## Windows 설치 목록과 제거 진입 (구현 중)
+
+Windows shell registration은 현재 사용자 HKCU의 앱 항목·시작 메뉴 shortcut·별도 private 제거 지원 자료의 연계다. 내부 bundle의 Registered 단계와 구분한다. installation ID는 원 baseline bundle identity/path/SID를 구분하며 OS 항목의 path·같은 이름만으로 삭제/실행 권한을 만들지 않는다. shortcut은 고정 baseline 부모를 실행해 signed UI 선택을 유지한다. 초기 DisplayVersion은 검증된 baseline 버전이고 UI 업데이트로 자동 바뀌었다고 주장하지 않는다. [후보 계약](docs/adr/0014-windows-shell-registration.md).

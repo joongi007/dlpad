@@ -73,8 +73,8 @@ pub const TOOLS_DATA_UNAVAILABLE: &str =
 
 pub const TOOL_PATHS_REJECTED: &str = "도구 저장 위치가 원본·앱 설치·단계 기록 위치와 겹칩니다. 서로 다른 경로를 사용하세요. 설치를 시작하지 않았습니다.";
 
-pub const PACKAGED_TITLE: &str = "dlpad 개발용 설치";
-pub const PACKAGED_INTRO: &str = "포함된 앱을 새 폴더에 설치합니다. 서명되지 않은 개발 후보입니다. 설치 위치를 입력하거나 상위 폴더를 선택하세요.";
+pub const PACKAGED_TITLE: &str = "dlpad 설치";
+pub const PACKAGED_INTRO: &str = "현재 사용자용으로 설치하고 Windows 앱 목록과 시작 메뉴에 등록합니다. 설치 위치를 선택하세요. 코드 서명 없는 미리보기 버전입니다.";
 pub const PACKAGED_IDLE: &str = "설치 위치를 지정한 뒤 설치를 누르세요. 설치 기록 위치는 자동으로 정하며 기존 폴더는 덮어쓰지 않습니다.";
 
 pub const TARGET_PICKER: &str = "상위 폴더 선택";
@@ -155,3 +155,14 @@ pub const VERIFYING_INTRO: &str =
     "앱 파일과 설치 기록이 일치하는지 확인합니다. 완료되면 아래 앱 실행을 누르세요.";
 pub const INSTALLING_HEADING: &str = "앱 설치 중";
 pub const REMOVING_HEADING: &str = "앱 제거 중";
+
+pub const SHELL_REGISTER_BUTTON: &str = "Windows 등록";
+pub const SHELL_REGISTERED_BUTTON: &str = "등록 완료";
+pub const SHELL_REGISTER_HEADING: &str = "Windows에 앱 등록 중";
+pub const SHELL_REGISTERING: &str = "앱 목록과 시작 메뉴에 등록하고 있습니다.";
+pub const SHELL_REGISTERED: &str =
+    "Windows 앱 목록과 시작 메뉴에 등록했습니다. 앱을 실행할 수 있습니다.";
+pub const SHELL_REGISTER_FAILED: &str = "앱 파일은 보존되어 있습니다. Windows 등록에 실패했습니다. Windows 등록을 눌러 다시 시도하세요.";
+
+pub const SHELL_REMOVE_GUIDE_BUTTON: &str = "제거 방법";
+pub const SHELL_REMOVE_GUIDE: &str = "Windows 설정 → 앱 → 설치된 앱에서 dlpad를 찾아 제거하세요. 영상, 설정과 다운로드 도구는 보존됩니다.";

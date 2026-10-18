@@ -354,3 +354,14 @@ pub use update_prepare::{
     PreparedUpdateBundle, UpdatePreparationError, UpdatePreparationFailure,
     UpdatePreparationRequest, prepare_staged_update,
 };
+
+/// Windows installed-app/Start Menu integration; distinct from bundle registration.
+#[cfg(windows)]
+pub mod os_registration;
+
+#[cfg(windows)]
+pub use os_registration::{
+    OwnedUninstallCopy, ShellCleanupFailure, ShellCleanupOutcome, ShellRegistration,
+    ShellRegistrationInspection, inspect_local_windows_shell, prepare_current_uninstall_copy,
+    register_local_windows_shell, verify_uninstall_handoff_files,
+};
