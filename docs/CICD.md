@@ -109,3 +109,8 @@ v0.1.0의 실제 published run39102954680은 사이트 build 성공 뒤 github-p
 선택적 release-signing job은 생성한 공개키가 저장소 `crates/engine/src/app_update/release-public-key.json`과 정확히 같아야 metadata를 올린다. 운영 비공개키의 GitHub 공급은 아직 하지 않았다. 로컬 DPAPI 복호화·서명 후 공개 metadata 세 파일만 해당 draft에 추가하는 공급 경로를 제공한다. 앱의 Ed25519 신뢰와 Authenticode는 다르다. 첫 지원 버전은 수동 설치하며 기존 v0.1.0 태그/파일을 덮어쓰지 않는다.
 
 프로필 epoch1에서는 후보의 읽기 전용 사전 검사와 역방향 호환성으로 복귀하고, 실행 후 사용자 변경을 과거 DB snapshot으로 복원하지 않는다. 위 일반 릴리스 시험의 backup 목표가 자동 DB overwrite 정책을 뜻하지 않는다.
+
+
+## Pages 릴리스 조회 인증 (2026-10-19)
+
+공유 hosted runner의 무인증 REST 한도로 Pages run39142717714가 HTTP403으로 실패했다. 사이트 workflow는 기존 `contents: read`의 일시적 `github.token`으로 github.com의 현재 저장소 공개/미공개 release 목록을 조회하고 runner 임시 JSON을 기존 bounded builder에 전달한다. builder는 draft를 제외하며 정확한 공개 ZIP URL과 크기를 검증한다. token·원 API JSON은 사이트 allowlist 또는 artifact에 포함하지 않는다. 기존 사용자 GCM/운영 서명키·새 secrets는 사용하지 않는다. [실제 교정과 검증](work-items/S11-pages-authenticated-discovery-20261019.md).

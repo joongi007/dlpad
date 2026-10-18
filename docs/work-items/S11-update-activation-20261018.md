@@ -1,6 +1,6 @@
 # S11: Windows 앱 업데이트 전환과 복구
 
-- 상태: in-progress, 사용자 공개 승인 후 CI·배포 인수 중
+- 상태: completed (Windows v1 UI 업데이트 범위)
 - 분류: feature
 - 우선순위: P1
 - 요구사항: R08, R10, R11
@@ -73,3 +73,5 @@ quiet10.0077초 참고 관측: 부모 CPUdelta0s(계측 해상도 내), working 
 공개 릴리스: [v0.1.2](https://github.com/joongi007/dlpad/releases/tag/v0.1.2). v0.1.0은 첫1회수동설치, 이후 설정→앱업데이트→미리보기버전에서 새 서명버전을 조회한다. 고정부모 자체·키·protocol/epoch는 이 UI업데이트에포함되지않아수동설치가필요하다. physicalIME/OSDPI/스크린리더/다른OS는 이번검수로 완료처리하지않는다. [설명 스크롤 후속](S11-update-notes-scroll-followup-20261019.md).
 
 실제 operational public A0.1.1→B0.1.2 시험은 진행 중이다. 첫 public-transition-v1은 준비 중 동적UIA관측의 ElementNotAvailableException으로FAIL, 원Job2를소유cleanup으로0·desktop불변을확인했다. Ready/B/cold통과로기록하지않는다. 관측도우미를보강하고 원실패·원코드를보존한다. 제품실패확정과구별한다.
+
+최종 실제 public 전환 인수: `public-update-gui/public-transition-v2/` 원 runner exit0/70.752s. 정식 GitHub 공급·compiled 운영키로 signature→download→prepare→Ready(각0.007/0.936/3.175/7.853초 관측)를 거쳐 A0.1.1 UI자연exit0→같은원parent의 B0.1.2 UI를 admit했다. 원parent23432, A14276→B17928 생성시각이Aexit이후이고 원Job/privateHWNDnonce·profile하위경로·원B SHA376e를대조했다. 다시원A실행(parent7668)에서도같은프로필의B28808을query/download없이선택했다. 두실행의UI/parent4process모두자연exit0·두Job0·privateDesktop종료·입력Default불변. 원A SHA65c9/11,082,240B와 B11,094,528B 재확인; readonly SQLite의Dark 유지/library_entries0이다. Root와별도agent가원JSON/Ready·Dark200·coldPNG를독립검수해 각 root-review.json/independent-review.json을작성했다. raw REVIEW_REQUIRED/v1 FAIL을덮어쓰지않았다. 이증거는A0.1.1 고정부모+B0.1.2 UI이며 부모자체업그레이드나독립DPAPI해독을뜻하지않는다. public 실패복귀는여기서시험하지않았고별도signedfixture7에서검증했다.

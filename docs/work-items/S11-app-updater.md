@@ -1,6 +1,6 @@
 # S11: 기능 완성과 Git·CI/CD 이후 앱 updater
 
-- 상태: in-progress
+- 상태: completed (Windows v1 UI 업데이트 범위)
 - 분류: feature
 - 우선순위: P1
 - 요구사항: R05, R08, R10, R11
@@ -64,3 +64,5 @@ Root Linux targeted `cargo test -p dlpad-engine --lib --locked --offline app_upd
 ## 별도 새 설치 준비 인수
 
 [별도 설치 준비](S11-update-bundle-preparation-20261018.md)를 구현했다. 원 ZIP 검증→7member 원 owned 파일 전개→readonly seal→기존 journal-aware 새 고정 bundle을 연결했으며 A/프로필/도구/미디어를 변경하지 않는다. Root 실제 Windows engine strict lint, app_update51PASS, 준비7PASS와 실제49c ZIP을 합성 test-only 키로 staging/새 bundle 준비한1PASS를 확인했다. 운영키·새 프로세스 실행·global launcher 전환·실패 복귀 인수는 여전히 남는다. 현재 native 화면의 수동 설치 범위를 자동 교체 완료로 바꾸지 않는다.
+
+최종 최신 인수는 [실제 public 전환/cold 검증](S11-update-activation-20261018.md)에 기록했다. Windows v0.1.2 공개 설치·공식 운영 서명 공급·현재 부모 아래 새 UI 전환·다음 실행 선택까지 완료했다. 고정부모/키/epoch 수동설치, Authenticode 및 다른OS와 설명스크롤 개선은 후속 범위다.
