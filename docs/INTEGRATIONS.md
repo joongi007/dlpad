@@ -91,3 +91,10 @@ CPU/accessible native 후보에 이번 요청의 Netscape 파일 경로 입력�
 시작 DLPAD_YTDLP/DLPAD_FFMPEG/DLPAD_DENO 환경값은 빈값도 저장된 수동 경로보다 우선한다. 그 뒤 저장된 Manual, 검증된 managed 활성 경로를 적용하며 사용자 편집의 revision을 보존한다. 명시적 managed 사용은 선택한 slot만 Automatic으로 저장하고 다른 slot의 미저장 draft를 함께 저장하지 않는다. Automatic 선택 후 저장은 현재 입력을 검증된 managed 경로나 빈값으로 바꾼다. UI yt-dlp PATH 연결은 아직 미구현이며 문서 앞부분의 일반 발견 목표를 GUI 완료로 해석하지 않는다.
 
 worker는 요청 channel1/result1/최신 pending1로 제한한다. 종료 중 active Store upsert가 끝나기 전에 Saved/ACK를 주장하지 않으며 unsent 최신 요청을 버린다. 원본 도구 파일을 저장 worker가 열거나 실행·복사·삭제하지 않는다. Cargo/feature/lock 의존성은 추가하지 않았다. 실제 Windows 저장 실패/locked upsert/재조회 회귀는 통과했고 실제 GUI 저장·재실행은 [진행 중](work-items/S04-manual-tool-preferences-20261011.md)이다.
+
+
+## 앱 업데이트와 외부 도구 업데이트
+
+앱 업데이트는 yt-dlp/FFmpeg/Deno 관리와 별개다. Windows CPU 앱0.1.1은 저장소에 고정한 Ed25519 운영 공개키로 원 metadata bytes를 검증하고 공식 GitHub HTTPS 공급만 사용한다. 공개 릴리스 조회나 내려받은 public-key 파일은 실행 신뢰가 아니다. 쿠키·인증·임의 proxy·사용자 URL override를 공급에 넣지 않는다. 서명·버전·단조 sequence·채널·만료·원 ZIP 크기/해시/멤버를 확인한 뒤 별도 새 bundle을 준비한다.
+
+[서명 운영](UPDATE-SIGNING.md)의 로컬 DPAPI 키는 외부로 전송하지 않았다. CI의 비밀키 자동 공급은 별도이며 미설정 시 unsigned preview를 앱이 자동 실행하지 않는다. 최초 v0.1.0→업데이트 지원 버전은 수동 설치한다. 이후에도 고정 부모 자체의 키·epoch·보안 패치는 수동 설치 대상이다. 사용자 미디어·외부 설치 도구를 업데이트 cache처럼 정리하지 않는다.

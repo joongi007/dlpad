@@ -43,3 +43,6 @@ id_ed25519
 /ci-graph-format.json
 /windows-development-build-inputs.txt
 /native-build.log
+
+# Independent updater fixture capture (not the product fixed-seven graph).
+/ci-update-captures/

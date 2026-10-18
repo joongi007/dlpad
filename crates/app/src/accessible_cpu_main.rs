@@ -20,6 +20,9 @@ mod accessible_tools;
 mod accesskit_value_tests;
 #[allow(dead_code)]
 mod app_icon;
+mod app_update_client;
+#[cfg(windows)]
+mod app_update_entry;
 #[allow(dead_code)]
 mod catalog;
 mod diagnostic_path_picker;
@@ -79,6 +82,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map(std::path::PathBuf::from)
         .map(Ok)
         .unwrap_or_else(dlpad_engine::location::default_data_dir)?;
+    #[cfg(windows)]
+    let update_child = dlpad_engine::app_update::bootstrap::child_entry()?;
     let guard = match dlpad_engine::instance::InstanceGuard::acquire(&root) {
         Ok(guard) => guard,
         Err(dlpad_engine::instance::InstanceError::AlreadyRunning) => {
@@ -87,6 +92,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Err(error) => return Err(error.into()),
     };
+    #[cfg(windows)]
+    match update_child {
+        Some(child) => app_update_entry::accept_child(child, guard.root())?,
+        None => {
+            let data = guard.root().to_path_buf();
+            drop(guard);
+            let keys = dlpad_engine::app_update::trust::keys();
+            dlpad_engine::app_update::host::run(
+                &data,
+                &keys,
+                dlpad_engine::app_update::trust::KEY_ID,
+                env!("CARGO_PKG_VERSION"),
+            )?;
+            return Ok(());
+        }
+    }
     software_host::run(guard.root().to_path_buf())?;
     drop(guard);
     Ok(())

@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "algorithm": "Ed25519",
+  "key_id": "dlpad-release-20261018-v1",
+  "public_key_hex": "3597dff2cbee2d4a2fae1baacdc5cddda8db629335f08fcfe96251a82a345e2d"
+}

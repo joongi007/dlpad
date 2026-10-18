@@ -76,12 +76,31 @@ struct Metadata {
 }
 
 /// A signed, policy-checked observation. It is neither installation nor publisher Authenticode authority.
-#[derive(Debug)]
 pub struct VerifiedCandidate {
     metadata: Metadata,
     digest: [u8; 32],
+    signed_payload: Box<[u8]>,
+    signature_hex: String,
+}
+impl std::fmt::Debug for VerifiedCandidate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("VerifiedCandidate")
+            .field("metadata", &self.metadata)
+            .field("digest", &self.digest)
+            .finish_non_exhaustive()
+    }
 }
 impl VerifiedCandidate {
+    /// Original public evidence for later signature verification, never a launch capability.
+    pub fn signed_payload(&self) -> &[u8] {
+        &self.signed_payload
+    }
+    pub fn signature_hex(&self) -> &str {
+        &self.signature_hex
+    }
+    pub fn key_id(&self) -> &str {
+        &self.metadata.key_id
+    }
     pub fn version(&self) -> &str {
         &self.metadata.version
     }
@@ -279,7 +298,12 @@ pub fn verify_metadata(
     {
         return Err(Error::Policy);
     }
-    Ok(VerifiedCandidate { metadata, digest })
+    Ok(VerifiedCandidate {
+        metadata,
+        digest,
+        signed_payload: payload.into(),
+        signature_hex: signature_hex.into(),
+    })
 }
 
 #[cfg(test)]

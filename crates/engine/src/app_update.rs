@@ -15,3 +15,14 @@ pub mod discovery;
 pub mod transport;
 
 pub mod bundle;
+
+pub mod bootstrap;
+pub mod download;
+pub mod profile;
+
+pub mod activation_journal;
+pub mod control;
+
+pub mod trust;
+
+pub mod host;

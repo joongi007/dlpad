@@ -944,7 +944,7 @@ dependencies = [
 
 [[package]]
 name = "dlpad"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "bytemuck",
  "dlpad-core",
@@ -963,7 +963,7 @@ dependencies = [
 
 [[package]]
 name = "dlpad-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "quick-xml",
  "serde",
@@ -972,7 +972,7 @@ dependencies = [
 
 [[package]]
 name = "dlpad-engine"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "directories",
  "dlpad-core",

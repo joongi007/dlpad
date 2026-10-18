@@ -37,11 +37,11 @@ python3 scripts/build_site.py --output /tmp/dlpad-site-preview
 
 빌드 출력은 새 디렉터리여야 하며 기존 폴더를 지우거나 덮어쓰지 않습니다. 정확한 `vX.Y.Z` 태그와 Cargo 버전 일치 → Windows 전체 CI → 같은 실행의 원본으로 ZIP 패키징 → 미공개 preview draft 생성을 자동화했습니다. [v0.1.0 릴리스 실행](https://github.com/joongi007/dlpad/actions/runs/39101008422)이 실제 성공했으며 파일·체크섬을 대조한 뒤 공개했습니다. 공개 Release 이벤트를 받은 별도 workflow가 main의 사이트 배포를 요청해 다운로드 링크를 갱신하도록 구성했습니다. 후속 버전도 draft 검수 후 게시합니다.
 
-설정 → 앱 업데이트에서 현재 버전과 안정/미리보기 채널을 조회할 수 있습니다. 서명 metadata 검증·제한된 전송·Windows owned 저장·별도 새 설치 준비까지 구현·검증했으며, 운영키 고정과 실행 중인 앱 자동 교체·실패 복구는 아직 제공하지 않습니다. [현재 업데이트 범위](docs/work-items/S11-app-updater.md).
+개발 소스 **0.1.1**에는 Windows 앱 업데이트를 구현했습니다. 설정 → 앱 업데이트에서 채널·새 버전 확인 → 서명된 버전 다운로드 → 작업 종료 후 재시작을 선택합니다. 기존 버전을 보존하고 새 버전 시작 실패 시 이전 선택으로 돌아갑니다. 공개 **v0.1.0 사용자는 첫 지원 버전을 한 번 수동 설치**해야 합니다. 공개된 새 서명 metadata가 없는 경우에는 릴리스 링크를 안내합니다. 현재 통합 시험과 배포 상태는 [업데이트 작업](docs/work-items/S11-update-activation-20261018.md), 운영키·서명 공급은 [운영 안내](docs/UPDATE-SIGNING.md)를 확인하세요.
 
 ## 검증과 CI
 
-PR·push에서 문서·Python 정책 검사와 Windows Rust 포맷·린트·테스트·release 빌드를 실행합니다. 개발 실행 파일과 로그를 artifact로 보관합니다. [v0.1.0 전체 검증·패키징](https://github.com/joongi007/dlpad/actions/runs/39101008422), [CI/CD 범위](docs/CICD.md). 공개 설치형·포터블 ZIP은 같은 CI의 원본 실행 파일을 재사용하며 재빌드하지 않습니다. 운영 코드 서명과 앱 자동 교체는 후속입니다.
+PR·push에서 문서·Python 정책 검사와 Windows Rust 포맷·린트·테스트·release 빌드를 실행합니다. 개발 실행 파일과 로그를 artifact로 보관합니다. [v0.1.0 전체 검증·패키징](https://github.com/joongi007/dlpad/actions/runs/39101008422), [CI/CD 범위](docs/CICD.md). 공개 설치형·포터블 ZIP은 같은 CI의 원본 실행 파일을 재사용하며 재빌드하지 않습니다. Windows Authenticode 코드 서명과 Linux/macOS 업데이트는 후속입니다. 개발 소스의 Windows 업데이트는 별도 실제 전환·복귀 시험으로 검증합니다.
 
 ```sh
 python3 scripts/check_docs.py --source-only

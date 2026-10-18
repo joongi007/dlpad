@@ -7,6 +7,10 @@
 - 담당/수정 범위: Root 공유 Cargo/lock/lib·UI·통합, updater_audit isolated worktree의 engine/app_update metadata·staging, update_transport /tmp의 HTTP adapter. 파일 동시 수정 없음
 - 선행 작업: 사용자 요청 기능 완성·검증, 정상 Git 및 사용자 저장소에 반영, CI/CD 연결·실제 성공
 
+## 현재 상태 (2026-10-18)
+
+소개·자동 릴리스·v0.1.0 공개 이후 Windows0.1.1 업데이트 전환을 구현하고 실제 통합 인수 중이다. [현재 작업/검증](S11-update-activation-20261018.md), [부모·복귀 결정](../adr/0013-windows-update-bootstrap.md), [운영 서명](../UPDATE-SIGNING.md)을 먼저 읽는다. 아래 날짜별 구현·미완료 기록은 당시 결과를 보존한다. 공개v0.1.0에는 updater가 없으므로 최초 지원 버전은 수동 설치가 필요하다.
+
 ## 사용자 결과
 
 2026-10-03 사용자가 기능을 모두 만든 뒤 Git과 CI/CD에 올리고, 그 이후 앱 updater를 만들도록 순서를 지정했다. 이 작업은 앱 자체 업데이트이며 외부 사용자 도구 설치를 임의로 덮어쓰는 권한이 아니다.

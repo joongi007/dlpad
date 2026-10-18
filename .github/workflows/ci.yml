@@ -64,6 +64,8 @@ jobs:
         run: python3 scripts/test_ci_whole_orchestrate.py
       - name: Validate bounded CI raw capture failure paths
         run: python3 scripts/test_ci_capture_operation.py
+      - name: Validate isolated app-update fixture capture policy
+        run: python3 scripts/test_ci_app_update_fixture.py
       - name: Validate CI-private compiler copy policy
         run: python3 scripts/test_prepare_ci_msvc.py
       - name: Validate unsigned update metadata rejection policy
@@ -78,6 +80,7 @@ jobs:
         run: |
           python3 scripts/test_sign_app_update.py
           python3 scripts/test_release_version.py
+          python3 scripts/test_sign_local_app_update.py
       - name: Validate installer payload and ZIP failure paths
         run: python3 -m unittest discover -s scripts -p 'test_*install_payload.py'
       - name: Validate installer icon and manifest resources
@@ -126,6 +129,9 @@ jobs:
       - name: Validate Windows capture process ownership and diagnostics
         if: runner.os == 'Windows'
         run: python scripts/test_ci_capture_operation.py
+      - name: Validate local update-key protection with synthetic data
+        if: runner.os == 'Windows'
+        run: python scripts/test_windows_update_key.py
       - name: Fetch exact lock dependencies
         run: cargo fetch --locked
       - name: Link the Windows C runtime into standalone candidates
@@ -205,6 +211,14 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: python scripts/ci_capture_operation.py --root "$GITHUB_WORKSPACE" --directory ci-captures --name companion-release
+      - name: Build isolated signed app-update regression fixture
+        if: runner.os == 'Windows'
+        shell: bash
+        run: python scripts/ci_app_update_fixture.py --root "$GITHUB_WORKSPACE" --directory ci-update-captures --phase build --seconds 300
+      - name: Verify signed update activation and recovery
+        if: runner.os == 'Windows'
+        shell: bash
+        run: python scripts/ci_app_update_fixture.py --root "$GITHUB_WORKSPACE" --directory ci-update-captures --phase run --owned-parent "$RUNNER_TEMP" --seconds 450
       - name: Bind Windows source and raw operation lifecycles
         if: runner.os == 'Windows'
         shell: bash
@@ -283,6 +297,14 @@ jobs:
           path: ${{ env.DLPAD_PREVIEW_OUTPUT }}
           if-no-files-found: error
           retention-days: 14
+      - name: Preserve isolated updater regression evidence
+        if: always() && runner.os == 'Windows'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: windows-update-regression-${{ github.sha }}
+          path: ci-update-captures/
+          if-no-files-found: warn
+          retention-days: 7
       - name: Preserve build evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

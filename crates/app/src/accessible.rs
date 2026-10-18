@@ -445,6 +445,14 @@ struct LocationOutputIntent {
     original: Option<(String, PathBuf)>,
 }
 
+#[derive(Clone, Copy, Default, PartialEq, Eq)]
+enum UpdateRecoveryNotice {
+    #[default]
+    Unseen,
+    Visible,
+    Dismissed,
+}
+
 pub(crate) struct Candidate {
     scroll_trace_remaining: u16,
     scroll_trace_armed: bool,
@@ -477,6 +485,7 @@ pub(crate) struct Candidate {
     settings: bool,
     settings_section: SettingsSection,
     app_update_panel: Option<crate::accessible_app_update::AppUpdatePanel>,
+    update_recovery_notice: UpdateRecoveryNotice,
     network_reveal: NetworkReveal,
     diagnostic_open_reveal: DiagnosticOpenReveal,
     start_condition_reveal_frame: Option<u64>,
@@ -521,6 +530,110 @@ impl Candidate {
 }
 
 impl Candidate {
+    #[allow(
+        dead_code,
+        reason = "The native host publishes runtime readiness after a successful frame"
+    )]
+    pub(crate) fn update_frame_ready(&self) -> bool {
+        self.ready
+    }
+    fn observe_update_recovery(&mut self, snapshot: &crate::app_update_client::Snapshot) {
+        if self.update_recovery_notice == UpdateRecoveryNotice::Unseen
+            && snapshot.runtime_ready
+            && snapshot.phase == crate::app_update_client::Phase::Failed
+            && snapshot.generation == 0
+            && snapshot.error == Some(13)
+        {
+            self.update_recovery_notice = UpdateRecoveryNotice::Visible;
+        }
+    }
+    fn show_update_recovery_notice(&mut self, ctx: &egui::Context) {
+        if self.update_recovery_notice != UpdateRecoveryNotice::Visible {
+            return;
+        }
+        egui::TopBottomPanel::top("update-recovery-notice")
+            .frame(
+                egui::Frame::side_top_panel(&ctx.style()).inner_margin(egui::Margin::symmetric(
+                    crate::ui_tokens::PAGE_MARGIN as i8,
+                    8,
+                )),
+            )
+            .show(ctx, |ui| {
+                ui.horizontal_wrapped(|ui| {
+                    ui.label(c::APP_UPDATE_RECOVERED);
+                    if crate::ui_components::secondary(ui, c::APP_UPDATE_RECOVERY_CONFIRM, true)
+                        .clicked()
+                    {
+                        self.update_recovery_notice = UpdateRecoveryNotice::Dismissed;
+                    }
+                });
+            });
+    }
+    fn app_update_busy(&self) -> bool {
+        crate::app_update_client::handle().is_some_and(|client| client.busy())
+            || self
+                .app_update_panel
+                .as_ref()
+                .is_some_and(|panel| panel.busy())
+    }
+    fn app_update_stopped(&self) -> bool {
+        crate::app_update_client::handle().is_none_or(|client| client.stopped())
+            && self
+                .app_update_panel
+                .as_ref()
+                .is_none_or(|panel| panel.stopped())
+    }
+    fn update_tasks_idle(&self) -> bool {
+        self.worker.is_none()
+            && !self.path_picker.busy()
+            && !self.tool_path_picker.busy()
+            && !self.tool_preferences.busy()
+            && !self.appearance.busy()
+            && !self.media.busy()
+            && !self.media.closing()
+            && !self.media.fatal()
+            && !self.local_export_blocks()
+            && self.local_export_close_ready()
+            && self.tools.as_ref().is_none_or(|panel| !panel.busy())
+            && self.library.as_ref().is_none_or(|panel| !panel.busy())
+            && self.history.as_ref().is_none_or(|panel| !panel.busy())
+            && self.diagnostics.as_ref().is_none_or(|panel| !panel.busy())
+    }
+    fn stop_app_update(&mut self) {
+        // The client is installed before this lazy panel is ever constructed.
+        if let Some(client) = crate::app_update_client::handle() {
+            client.begin_shutdown();
+        }
+        if let Some(panel) = &mut self.app_update_panel {
+            panel.request_stop();
+        }
+    }
+    fn begin_update_close_wait(&mut self) {
+        self.close_wait = true;
+        self.path_picker.cancel();
+        self.tool_path_picker.cancel();
+        self.media.request_stop();
+        self.stop_local_export();
+        self.stop_app_update();
+        self.appearance.request_stop();
+        self.tool_preferences.request_stop();
+        self.metrics.request_stop();
+        if let Some(panel) = &mut self.tools {
+            panel.request_stop();
+        }
+        if let Some(panel) = &mut self.history {
+            panel.request_stop();
+        }
+        if let Some(panel) = &mut self.library {
+            panel.request_stop();
+        }
+        if let Some(panel) = &mut self.diagnostics {
+            panel.request_stop();
+        }
+        if let Some(worker) = &self.worker {
+            worker.request_stop(false);
+        }
+    }
     #[cfg(all(windows, feature = "cpu"))]
     #[allow(dead_code, reason = "Used by the native CPU window host")]
     pub(crate) fn set_folder_picker_owner(&mut self, owner: std::sync::Arc<winit::window::Window>) {
@@ -536,9 +649,11 @@ impl Candidate {
             || self.diagnostics.as_ref().is_some_and(|p| p.picker_busy())
             || !self.media.stopped()
             || !self.local_export_close_ready()
+            || !self.app_update_stopped()
     }
     #[allow(dead_code, reason = "Used by the native CPU window host")]
     pub(crate) fn cancel_folder_picker(&mut self) {
+        self.stop_app_update();
         self.path_picker.cancel();
         self.tool_path_picker.cancel();
         if let Some(panel) = &self.diagnostics {
@@ -626,7 +741,11 @@ impl Candidate {
         }
     }
     fn apply_managed_tool(&mut self, tool: crate::managed::ToolId, path: &Path) {
-        if self.close_wait || self.worker.is_some() || self.local_export_blocks() {
+        if self.close_wait
+            || self.worker.is_some()
+            || self.local_export_blocks()
+            || self.app_update_busy()
+        {
             return;
         }
         let Some(path) = path.to_str() else {
@@ -641,7 +760,11 @@ impl Candidate {
     }
 
     fn apply_restored_managed_tools(&mut self, tools: Vec<(crate::managed::ToolId, PathBuf)>) {
-        if self.close_wait || self.worker.is_some() || self.local_export_blocks() {
+        if self.close_wait
+            || self.worker.is_some()
+            || self.local_export_blocks()
+            || self.app_update_busy()
+        {
             return;
         }
         for (tool, path) in tools {
@@ -729,6 +852,7 @@ impl Candidate {
             settings: std::env::args().any(|a| a == "--settings"),
             settings_section: SettingsSection::General,
             app_update_panel: None,
+            update_recovery_notice: UpdateRecoveryNotice::Unseen,
             network_reveal: NetworkReveal::default(),
             diagnostic_open_reveal: DiagnosticOpenReveal::default(),
             start_condition_reveal_frame: None,
@@ -780,6 +904,7 @@ impl Candidate {
     }
     fn can_recover(&self) -> bool {
         !self.close_wait
+            && !self.app_update_busy()
             && !self.path_picker.busy()
             && !self.tool_path_picker.busy()
             && self.worker.is_none()
@@ -1004,7 +1129,7 @@ impl Candidate {
         Ok(options)
     }
     fn start(&mut self, resume: bool) {
-        if self.path_picker.busy() || self.tool_path_picker.busy() {
+        if self.app_update_busy() || self.path_picker.busy() || self.tool_path_picker.busy() {
             return;
         }
         if self.media.busy()
@@ -1061,6 +1186,7 @@ impl Candidate {
 }
 impl Drop for Candidate {
     fn drop(&mut self) {
+        self.stop_app_update();
         self.appearance.request_stop();
         if let Some(panel) = &mut self.app_update_panel {
             panel.request_stop();
@@ -1226,7 +1352,7 @@ impl Candidate {
         }
     }
     fn open_tools(&mut self) {
-        if self.close_wait {
+        if self.close_wait || self.app_update_busy() {
             return;
         }
         self.tools_open = true;
@@ -1239,6 +1365,7 @@ impl Candidate {
         }
     }
     fn show_settings_navigation(&mut self, ui: &mut egui::Ui) {
+        let update_busy = self.app_update_busy();
         ui.horizontal_wrapped(|ui| {
             for (section, label) in [
                 (SettingsSection::General, c::SETTINGS_GENERAL),
@@ -1256,11 +1383,17 @@ impl Candidate {
                     .scope_builder(
                         egui::UiBuilder::new().id(("settings-navigation", key)),
                         |ui| {
-                            crate::ui_components::navigation_choice(
-                                ui,
-                                self.settings_section == section,
-                                label,
+                            ui.add_enabled_ui(
+                                section != SettingsSection::Tools || !update_busy,
+                                |ui| {
+                                    crate::ui_components::navigation_choice(
+                                        ui,
+                                        self.settings_section == section,
+                                        label,
+                                    )
+                                },
                             )
+                            .inner
                         },
                     )
                     .inner
@@ -1321,6 +1454,7 @@ impl Candidate {
         ui.weak(c::SETTINGS_DEFAULT_SAVE_HELP);
         let enabled = self.ready
             && !self.close_wait
+            && !self.app_update_busy()
             && self.worker.is_none()
             && !self.local_export_blocks()
             && !self.path_picker.busy()
@@ -1361,6 +1495,7 @@ impl Candidate {
         ui.label(c::SETTINGS_SAVE_LOCATION_HELP);
         let enabled = self.ready
             && !self.close_wait
+            && !self.app_update_busy()
             && self.worker.is_none()
             && !self.local_export_blocks()
             && !self.path_picker.busy()
@@ -1442,6 +1577,7 @@ impl Candidate {
     }
     fn tool_recovery_enabled(&self) -> bool {
         !self.close_wait
+            && !self.app_update_busy()
             && !self.local_export_blocks()
             && self.worker.is_none()
             && !self.path_picker.busy()
@@ -1674,6 +1810,9 @@ impl Candidate {
         None
     }
     fn download_disabled_reason(&self) -> Option<&'static str> {
+        if self.app_update_busy() {
+            return Some(c::APP_UPDATE_PREPARING);
+        }
         if !self.ready {
             return Some(if self.worker.is_some() {
                 c::RECOVERY_CHECKING
@@ -1804,6 +1943,9 @@ impl Candidate {
         self.local_export.request_stop();
     }
     fn local_export_disabled_reason(&self) -> Option<&'static str> {
+        if self.app_update_busy() {
+            return Some(c::APP_UPDATE_PREPARING);
+        }
         if self.local_export_blocks()
             || self.close_wait
             || !self.ready
@@ -1987,7 +2129,15 @@ impl Candidate {
         );
     }
     fn show_ui_contents(&mut self, ctx: &egui::Context) {
+        if let Some(client) = crate::app_update_client::handle() {
+            client.bind_context(ctx);
+            if let Some(snapshot) = client.snapshot() {
+                self.observe_update_recovery(&snapshot);
+            }
+        }
+        let update_busy = self.app_update_busy();
         if self.close_wait {
+            self.stop_app_update();
             self.tool_preferences.request_stop();
         }
         self.tool_preferences
@@ -1998,7 +2148,8 @@ impl Candidate {
             self.tool_return_pending = false;
             self.skip_preview = false;
         }
-        if !self.close_wait && self.worker.is_none() && !self.local_export_blocks() {
+        if !self.close_wait && !update_busy && self.worker.is_none() && !self.local_export_blocks()
+        {
             let dropped = ctx.input(|input| input.raw.dropped_files.clone());
             if dropped.len() == 1 {
                 if let Some(path) = &dropped[0].path {
@@ -2018,10 +2169,10 @@ impl Candidate {
         if self.close_wait {
             self.media.request_stop();
         }
-        if self.hidden || self.worker.is_some() || self.local_export_blocks() {
+        if self.hidden || update_busy || self.worker.is_some() || self.local_export_blocks() {
             self.media.cancel();
         }
-        if self.hidden || self.worker.is_some() || self.local_export_blocks() {
+        if self.hidden || update_busy || self.worker.is_some() || self.local_export_blocks() {
             self.media.drain();
         } else {
             self.media.poll(
@@ -2050,8 +2201,20 @@ impl Candidate {
         }
         self.poll();
         self.appearance.poll(ctx);
-        if let Some(panel) = &mut self.app_update_panel {
+        let environment = crate::accessible_app_update::UpdateEnvironment {
+            startup_ready: self.ready,
+            task_idle: self.update_tasks_idle(),
+            closing: self.close_wait,
+        };
+        let restart_accepted = if let Some(panel) = &mut self.app_update_panel {
+            panel.set_environment(environment);
             panel.poll(ctx);
+            panel.take_restart_requested()
+        } else {
+            false
+        };
+        if restart_accepted {
+            self.begin_update_close_wait();
         }
         self.metrics.set_root(self.output_path());
         self.metrics.poll(ctx);
@@ -2069,7 +2232,11 @@ impl Candidate {
             if let Some(inspection) = inspection {
                 self.apply_managed_inspection(inspection);
             }
-            if !self.close_wait && self.worker.is_none() && !self.local_export_blocks() {
+            if !self.close_wait
+                && !update_busy
+                && self.worker.is_none()
+                && !self.local_export_blocks()
+            {
                 if let Some((tool, path)) = selected {
                     self.apply_managed_tool(tool, &path);
                 }
@@ -2090,6 +2257,7 @@ impl Candidate {
             if let Some(id) = history.take_resume()
                 && !self.close_wait
                 && self.ready
+                && !update_busy
                 && self.worker.is_none()
                 && !self.local_export_blocks()
             {
@@ -2135,10 +2303,7 @@ impl Candidate {
         if ctx.input(|i| i.viewport().close_requested())
             && (!self.tool_preferences.stopped()
                 || !self.appearance.stopped()
-                || self
-                    .app_update_panel
-                    .as_ref()
-                    .is_some_and(|panel| !panel.stopped())
+                || !self.app_update_stopped()
                 || !self.metrics.stopped()
                 || self.worker.is_some()
                 || self.tools.is_some()
@@ -2153,6 +2318,7 @@ impl Candidate {
             self.media.cancel();
             ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
             if self.worker.is_some()
+                || self.app_update_busy()
                 || self.tools.as_ref().is_some_and(|p| p.busy())
                 || self.history.as_ref().is_some_and(|p| p.busy())
                 || self.tool_preferences.busy()
@@ -2164,6 +2330,7 @@ impl Candidate {
                 self.close_prompt = true;
             } else {
                 self.close_wait = true;
+                self.stop_app_update();
                 self.stop_local_export();
                 self.appearance.request_stop();
                 if let Some(panel) = &mut self.app_update_panel {
@@ -2192,10 +2359,7 @@ impl Candidate {
             && !self.tool_path_picker.busy()
             && self.tool_preferences.stopped()
             && self.appearance.stopped()
-            && self
-                .app_update_panel
-                .as_ref()
-                .is_none_or(|panel| panel.stopped())
+            && self.app_update_stopped()
             && self.metrics.stopped()
             && self.tools.as_ref().is_none_or(|p| p.stopped())
             && self.history.as_ref().is_none_or(|p| p.stopped())
@@ -2396,6 +2560,7 @@ impl Candidate {
                         ui.add_space(8.0);
                     }
                     let active = self.worker.is_some()
+                        || update_busy
                         || self.tools.as_ref().is_some_and(|p| p.busy())
                         || self.history.as_ref().is_some_and(|p| p.busy())
                         || self.library.as_ref().is_some_and(|p| p.busy())
@@ -2495,6 +2660,7 @@ impl Candidate {
                     }
                 });
         }
+        self.show_update_recovery_notice(ctx);
         egui::CentralPanel::default()
             .frame(egui::Frame::central_panel(&ctx.style()).inner_margin(crate::ui_tokens::PAGE_MARGIN))
             .show(ctx, |ui| {
@@ -2549,6 +2715,7 @@ impl Candidate {
                                 tools.show(
                                     ui,
                                     self.ready
+                                        && !update_busy
                                         && self.worker.is_none()
                                         && !self.close_wait
                                         && self.library.as_ref().is_none_or(|p| !p.busy())
@@ -2563,6 +2730,7 @@ impl Candidate {
                         history.show(
                             ui,
                             self.worker.is_none()
+                                && !update_busy
                                 && !self.close_wait
                                 && self.library.as_ref().is_none_or(|p| !p.busy())
                                 && self.tools.as_ref().is_none_or(|p| !p.busy()),
@@ -2576,6 +2744,7 @@ impl Candidate {
                         library.show(
                             ui,
                             self.ready
+                                && !update_busy
                                 && self.worker.is_none()
                                 && !self.close_wait
                                 && !self.path_picker.busy()
@@ -2610,7 +2779,13 @@ impl Candidate {
                 }
                 if self.settings && self.settings_section == SettingsSection::AppUpdate {
                     let enabled = !self.close_wait;
+                    let environment = crate::accessible_app_update::UpdateEnvironment {
+                        startup_ready: self.ready,
+                        task_idle: self.update_tasks_idle(),
+                        closing: self.close_wait,
+                    };
                     let panel = self.app_update_panel.get_or_insert_with(crate::accessible_app_update::AppUpdatePanel::new);
+                    panel.set_environment(environment);
                     egui::ScrollArea::vertical()
                         .id_salt("settings-app-update-content")
                         .show(ui, |ui| panel.ui(ui, enabled));
@@ -2665,6 +2840,7 @@ impl Candidate {
                             self.start_condition_reveal_frame = None;
                         }
                         let active = self.worker.is_some()
+                            || update_busy
                             || self.tools.as_ref().is_some_and(|p| p.busy())
                             || self.history.as_ref().is_some_and(|p| p.busy())
                             || self.library.as_ref().is_some_and(|p| p.busy())
@@ -2999,6 +3175,7 @@ impl Candidate {
                     .clicked()
                     {
                         self.close_wait = true;
+                        self.stop_app_update();
                         self.stop_local_export();
                         self.appearance.request_stop();
                         if let Some(panel) = &mut self.app_update_panel {
@@ -4663,6 +4840,141 @@ mod tests {
             assert!(std::time::Instant::now() < deadline);
             thread::sleep(Duration::from_millis(5));
         }
+    }
+    #[test]
+    fn actual_recovered_update_notice_is_global_keyboard_dismissible_and_not_repeated() {
+        use egui::accesskit::{Action, ActionRequest, Role};
+        let fixture = Fixture::new();
+        let mut app = Candidate::new(fixture.0.clone());
+        wait_finished(&mut app);
+        let original_status = app.status.clone();
+        let mut notice = crate::app_update_client::Snapshot {
+            phase: crate::app_update_client::Phase::Failed,
+            generation: 1,
+            error: Some(13),
+            runtime_ready: true,
+            ..Default::default()
+        };
+        app.observe_update_recovery(&notice);
+        assert!(app.update_recovery_notice == UpdateRecoveryNotice::Unseen);
+        notice.generation = 0;
+        app.observe_update_recovery(&notice);
+        let ctx = egui::Context::default();
+        configure_context(&ctx, font_bytes());
+        ctx.enable_accesskit();
+        let draw = |app: &mut Candidate, events| {
+            ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(800.0, 600.0),
+                    )),
+                    focused: true,
+                    events,
+                    ..Default::default()
+                },
+                |ctx| app.show_ui(ctx),
+            )
+        };
+        let mut confirm = None;
+        for tab in 0..4 {
+            app.settings = tab == 3;
+            app.library_open = tab == 1;
+            app.history_open = tab == 2;
+            for _ in 0..3 {
+                let out = draw(&mut app, vec![]);
+                assert!(out.shapes.iter().any(|shape| matches!(&shape.shape,
+                    egui::epaint::Shape::Text(text) if text.galley.text() == c::APP_UPDATE_RECOVERED
+                        && shape.clip_rect.contains_rect(text.visual_bounding_rect()))));
+                for (id, node) in &out.platform_output.accesskit_update.as_ref().unwrap().nodes {
+                    if node.role() == Role::Button
+                        && node.label() == Some(c::APP_UPDATE_RECOVERY_CONFIRM)
+                    {
+                        assert!(node.supports_action(Action::Focus));
+                        confirm = Some(*id);
+                    }
+                }
+            }
+        }
+        draw(
+            &mut app,
+            vec![egui::Event::AccessKitActionRequest(ActionRequest {
+                action: Action::Focus,
+                target: confirm.expect("actual global confirmation button"),
+                data: None,
+            })],
+        );
+        draw(
+            &mut app,
+            vec![egui::Event::Key {
+                key: egui::Key::Enter,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: egui::Modifiers::NONE,
+            }],
+        );
+        assert!(app.update_recovery_notice == UpdateRecoveryNotice::Dismissed);
+        app.observe_update_recovery(&notice);
+        let out = draw(&mut app, vec![]);
+        assert!(!out.shapes.iter().any(|shape| matches!(&shape.shape,
+            egui::epaint::Shape::Text(text) if text.galley.text() == c::APP_UPDATE_RECOVERED)));
+        assert_eq!(
+            app.status, original_status,
+            "startup recovery status is independent"
+        );
+        assert!(
+            app.app_update_panel.is_none(),
+            "global notice keeps update panel lazy"
+        );
+    }
+    #[test]
+    fn accepted_update_close_wait_retains_owned_worker_until_ack_and_keeps_panel_lazy() {
+        struct Release(Arc<AtomicBool>);
+        impl Drop for Release {
+            fn drop(&mut self) {
+                self.0.store(true, Ordering::Release);
+            }
+        }
+        let fixture = Fixture::new();
+        let mut app = Candidate::new(fixture.0.clone());
+        wait_finished(&mut app);
+        assert!(app.update_frame_ready());
+        assert!(app.app_update_panel.is_none());
+        let release = Release(Arc::new(AtomicBool::new(false)));
+        let worker_release = release.0.clone();
+        app.spawn(move |cancel, _| {
+            while !cancel.load(Ordering::Acquire) {
+                thread::yield_now();
+            }
+            while !worker_release.load(Ordering::Acquire) {
+                thread::yield_now();
+            }
+            Completion::Recovery(Ok(RecoveryState::default()))
+        });
+        assert!(!app.update_tasks_idle());
+        app.begin_update_close_wait();
+        assert!(app.close_wait);
+        assert!(!app.can_recover());
+        let ctx = egui::Context::default();
+        let output = ctx.run(egui::RawInput::default(), |ctx| app.show_ui(ctx));
+        assert!(
+            app.worker.is_some(),
+            "owned worker remains until its completion ACK"
+        );
+        assert!(
+            !output
+                .viewport_output
+                .values()
+                .any(|viewport| viewport.commands.contains(&egui::ViewportCommand::Close))
+        );
+        assert!(
+            app.app_update_panel.is_none(),
+            "shutdown does not construct lazy settings UI"
+        );
+        release.0.store(true, Ordering::Release);
+        wait_finished(&mut app);
+        assert!(app.worker.is_none());
     }
     #[test]
     fn close_wait_blocks_new_download_even_when_recovery_is_ready() {

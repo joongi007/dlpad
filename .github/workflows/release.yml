@@ -117,7 +117,7 @@ jobs:
           PACKAGE_VERSION: ${{ needs.version.outputs.version }}
         run: |
           python3 - <<'PY'
-          import os, pathlib, sys, tempfile, time
+          import json, os, pathlib, sys, tempfile, time
           sys.path.insert(0, 'scripts')
           import sign_app_update
           secret = os.environ.pop('UPDATE_PRIVATE_KEY', '')
@@ -131,9 +131,12 @@ jobs:
                   stream.write(secret)
               del secret
               now = int(time.time())
-              sign_app_update.sign(pathlib.Path('preview-release') / ('dlpad-'+version+'-windows-x86_64-installer.zip'),
+              public = sign_app_update.sign(pathlib.Path('preview-release') / ('dlpad-'+version+'-windows-x86_64-installer.zip'),
                   version, int(os.environ['GITHUB_RUN_ID']), 'preview', os.environ['UPDATE_KEY_ID'],
                   key, pathlib.Path('preview-metadata'), now, now+14*86400)
+              expected = json.loads(pathlib.Path('crates/engine/src/app_update/release-public-key.json').read_text())
+              if public != expected:
+                  raise SystemExit('Signing key does not match the compiled updater trust root')
           PY
       - name: Preserve public metadata only
         id: metadata

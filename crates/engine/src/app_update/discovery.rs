@@ -8,6 +8,8 @@ use std::{
 };
 const MAX_BODY: usize = 256 * 1024;
 const MAX_RELEASES: usize = 20;
+const MAX_NOTES_BYTES: usize = 16 * 1024;
+const MAX_ASSETS: usize = 64;
 const BUDGET: Duration = Duration::from_secs(20);
 pub const RELEASES_URL: &str = "https://github.com/joongi007/dlpad/releases";
 const API: &str = "https://api.github.com/repos/joongi007/dlpad/releases";
@@ -34,6 +36,9 @@ pub struct ReleaseObservation {
     url: String,
     newer: bool,
     channel: Channel,
+    notes: String,
+    notes_truncated: bool,
+    signed_metadata_available: bool,
 }
 impl ReleaseObservation {
     pub fn version(&self) -> &str {
@@ -48,6 +53,17 @@ impl ReleaseObservation {
     pub fn channel(&self) -> Channel {
         self.channel
     }
+    /// Untrusted plain release text, never parsed as markup or an execution policy.
+    pub fn notes(&self) -> &str {
+        &self.notes
+    }
+    pub fn notes_truncated(&self) -> bool {
+        self.notes_truncated
+    }
+    /// Exact public assets were observed. This does not verify a signature or grant authority.
+    pub fn signed_metadata_available(&self) -> bool {
+        self.signed_metadata_available
+    }
 }
 #[derive(Deserialize)]
 struct Release {
@@ -57,6 +73,34 @@ struct Release {
     prerelease: bool,
     html_url: String,
     published_at: Option<String>,
+    body: Option<String>,
+    #[serde(default)]
+    assets: Vec<Asset>,
+}
+#[derive(Deserialize)]
+struct Asset {
+    name: String,
+    browser_download_url: String,
+    size: u64,
+    state: String,
+}
+fn signed_assets(assets: &[Asset], release_version: &str) -> bool {
+    let base = format!("https://github.com/joongi007/dlpad/releases/download/v{release_version}");
+    [
+        ("update-windows-x86_64.json", 1, 64 * 1024),
+        ("update-windows-x86_64.json.sig", 128, 129),
+    ]
+    .into_iter()
+    .all(|(name, minimum, maximum)| {
+        let mut matched = assets.iter().filter(|asset| asset.name == name);
+        let Some(asset) = matched.next() else {
+            return false;
+        };
+        matched.next().is_none()
+            && asset.state == "uploaded"
+            && (minimum..=maximum).contains(&asset.size)
+            && asset.browser_download_url == format!("{base}/{name}")
+    })
 }
 fn version(value: &str) -> Option<[u32; 3]> {
     if value.len() > 32 {
@@ -107,11 +151,27 @@ fn observe(
     {
         return Err(DiscoveryError::InvalidResponse);
     }
+    if release.assets.len() > MAX_ASSETS {
+        return Err(DiscoveryError::Limit);
+    }
+    let signed_metadata_available = signed_assets(&release.assets, value);
+    let mut notes = release.body.unwrap_or_default();
+    let notes_truncated = notes.len() > MAX_NOTES_BYTES;
+    if notes_truncated {
+        let mut end = MAX_NOTES_BYTES;
+        while !notes.is_char_boundary(end) {
+            end -= 1;
+        }
+        notes.truncate(end);
+    }
     Ok(ReleaseObservation {
         version: value.to_owned(),
         url: expected,
         newer: number > installed,
         channel,
+        notes,
+        notes_truncated,
+        signed_metadata_available,
     })
 }
 fn parse(
@@ -303,6 +363,120 @@ mod tests {
             parse(&vec![b' '; MAX_BODY + 1], Channel::Stable, "0.1.0").unwrap_err(),
             DiscoveryError::Limit
         );
+    }
+    fn observe_fixture(value: serde_json::Value) -> Result<ReleaseObservation, DiscoveryError> {
+        parse(
+            &serde_json::to_vec(&value).unwrap(),
+            Channel::Stable,
+            "0.1.0",
+        )
+    }
+    fn asset(name: &str, size: u64) -> serde_json::Value {
+        json!({"name":name,"size":size,"state":"uploaded","browser_download_url":format!("https://github.com/joongi007/dlpad/releases/download/v0.2.0/{name}")})
+    }
+    fn signed_release() -> serde_json::Value {
+        let mut value = release("0.2.0", false);
+        value["assets"] = json!([
+            asset("update-windows-x86_64.json", 1024),
+            asset("update-windows-x86_64.json.sig", 129),
+        ]);
+        value
+    }
+    #[test]
+    fn notes_are_plain_bounded_text_with_utf8_safe_truncation() {
+        let mut value = release("0.2.0", false);
+        let notes = format!("{}한글🙂", "x".repeat(MAX_NOTES_BYTES - 1));
+        value["body"] = json!(notes);
+        let observed = observe_fixture(value).unwrap();
+        assert_eq!(observed.notes(), "x".repeat(MAX_NOTES_BYTES - 1));
+        assert!(observed.notes_truncated());
+        let mut value = release("0.2.0", false);
+        value["body"] = json!("<script>fixture</script> [link](https://invalid.test) 한글");
+        let observed = observe_fixture(value).unwrap();
+        assert_eq!(
+            observed.notes(),
+            "<script>fixture</script> [link](https://invalid.test) 한글"
+        );
+        assert!(!observed.notes_truncated());
+        assert!(
+            observe_fixture(release("0.2.0", false))
+                .unwrap()
+                .notes()
+                .is_empty()
+        );
+    }
+    #[test]
+    fn only_the_exact_uploaded_metadata_and_signature_pair_is_observed() {
+        assert!(
+            observe_fixture(signed_release())
+                .unwrap()
+                .signed_metadata_available()
+        );
+        assert!(
+            !observe_fixture(release("0.2.0", false))
+                .unwrap()
+                .signed_metadata_available()
+        );
+        let mut value = signed_release();
+        value["assets"][1]["size"] = json!(128);
+        assert!(observe_fixture(value).unwrap().signed_metadata_available());
+        let mut value = signed_release();
+        value["assets"].as_array_mut().unwrap().pop();
+        assert!(!observe_fixture(value).unwrap().signed_metadata_available());
+    }
+    #[test]
+    fn aliases_duplicate_foreign_version_url_and_invalid_size_do_not_advertise_support() {
+        for (field, bad) in [
+            ("name", json!("UPDATE-windows-x86_64.json")),
+            ("state", json!("starter")),
+            ("size", json!(0)),
+            ("size", json!(64 * 1024 + 1)),
+            (
+                "browser_download_url",
+                json!("https://attacker.invalid/update-windows-x86_64.json"),
+            ),
+            (
+                "browser_download_url",
+                json!(
+                    "https://github.com/joongi007/dlpad/releases/download/v0.3.0/update-windows-x86_64.json"
+                ),
+            ),
+        ] {
+            let mut value = signed_release();
+            value["assets"][0][field] = bad;
+            assert!(
+                !observe_fixture(value).unwrap().signed_metadata_available(),
+                "{field}"
+            );
+        }
+        let mut value = signed_release();
+        value["assets"][1]["size"] = json!(130);
+        assert!(!observe_fixture(value).unwrap().signed_metadata_available());
+        let mut value = signed_release();
+        value["assets"]
+            .as_array_mut()
+            .unwrap()
+            .push(asset("update-windows-x86_64.json", 100));
+        assert!(!observe_fixture(value).unwrap().signed_metadata_available());
+    }
+    #[test]
+    fn asset_count_is_bounded_and_preview_carries_only_selected_release_notes() {
+        let mut value = release("0.2.0", false);
+        value["assets"] = json!(vec![asset("unrelated", 1); MAX_ASSETS + 1]);
+        assert_eq!(observe_fixture(value).unwrap_err(), DiscoveryError::Limit);
+        let mut old = release("0.2.0", true);
+        old["body"] = json!("old notes");
+        let mut new = release("0.3.0", true);
+        new["body"] = json!("new notes");
+        let observed = parse(
+            &serde_json::to_vec(&json!([old, new])).unwrap(),
+            Channel::Preview,
+            "0.1.0",
+        )
+        .unwrap();
+        assert_eq!(observed.notes(), "new notes");
+        assert_eq!(observed.version(), "0.3.0");
+        assert!(!observed.signed_metadata_available());
     }
     #[test]
     fn stop_and_expired_deadline_prevent_network() {

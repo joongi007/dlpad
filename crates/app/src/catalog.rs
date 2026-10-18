@@ -826,6 +826,14 @@ pub const APP_UPDATE_CANCELLED: &str = "버전 확인을 중단했습니다.";
 pub const APP_UPDATE_AVAILABLE: &str = "새 버전이 있습니다";
 pub const APP_UPDATE_CURRENT: &str = "현재 버전보다 새로운 공개 버전이 없습니다.";
 pub const APP_UPDATE_NONE: &str = "아직 공개된 버전이 없습니다.";
+pub const APP_UPDATE_NONE_STABLE: &str =
+    "아직 공개된 안정 버전이 없습니다. 미리보기 채널에서도 확인할 수 있습니다.";
+pub const APP_UPDATE_NOTES: &str = "변경내역";
+pub const APP_UPDATE_NOTES_EMPTY: &str = "이 릴리스에는 변경내역이 없습니다.";
+pub const APP_UPDATE_NOTES_TRUNCATED: &str =
+    "변경내역의 일부만 표시합니다. 전체 내용은 릴리스에서 확인하세요.";
+pub const APP_UPDATE_SIGNED_METADATA_MISSING: &str =
+    "이 버전은 앱 내 업데이트를 지원하지 않습니다. 릴리스에서 설치해 주세요.";
 pub const APP_UPDATE_NONE_PREVIEW: &str = "최근 공개 릴리스에 미리보기 버전이 없습니다.";
 pub const APP_UPDATE_OFFLINE: &str =
     "버전을 확인하지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요.";
@@ -836,9 +844,71 @@ pub const APP_UPDATE_INVALID: &str =
 pub const APP_UPDATE_WORKER_FAILED: &str =
     "버전 확인을 시작하지 못했습니다. 앱을 다시 열고 시도하세요.";
 pub const APP_UPDATE_RELEASE_OPEN: &str = "릴리스에서 설치";
+pub const APP_UPDATE_RELEASE_VIEW: &str = "릴리스 보기";
 pub const APP_UPDATE_ALL_RELEASES: &str = "모든 릴리스 보기";
 pub const APP_UPDATE_MANUAL_ONLY: &str =
     "앱 내 자동 설치는 아직 제공하지 않습니다. 새 버전은 릴리스에서 설치하세요.";
 pub const APP_UPDATE_CACHED: &str = "이전 확인 결과";
 pub const APP_UPDATE_INITIAL: &str = "확인을 누르면 GitHub의 공개 릴리스에서 새 버전을 조회합니다.";
 pub const APP_UPDATE_VERSION_HELP: &str = "앱 버전과 개발 검수 번호(v37 등)는 다릅니다. 다운로드 도구 업데이트는 도구 설정에서 관리합니다.";
+
+pub const APP_UPDATE_PREPARE: &str = "다운로드 및 준비";
+
+pub const APP_UPDATE_RESTART: &str = "다시 시작하여 적용";
+
+pub const APP_UPDATE_PREPARED: &str = "새 버전이 준비되었습니다. 다시 시작하면 적용합니다.";
+
+pub const APP_UPDATE_PREPARING: &str = "새 버전을 준비하고 있습니다…";
+
+pub const APP_UPDATE_VERIFYING: &str = "업데이트 서명을 확인하고 있습니다…";
+
+pub const APP_UPDATE_DOWNLOADING: &str = "업데이트를 다운로드하고 있습니다…";
+
+pub const APP_UPDATE_STAGING: &str = "다운로드한 패키지를 검사하고 있습니다…";
+
+pub const APP_UPDATE_STOP: &str = "준비 중단";
+
+pub const APP_UPDATE_STOPPING: &str = "준비를 중단하고 있습니다…";
+
+pub const APP_UPDATE_RESTARTING: &str = "재시작 승인을 기다리고 있습니다…";
+
+pub const APP_UPDATE_STARTUP_WAIT: &str = "시작 복구를 마친 후 업데이트할 수 있습니다.";
+
+pub const APP_UPDATE_TASK_WAIT: &str = "진행 중인 작업을 마친 후 업데이트할 수 있습니다.";
+
+pub const APP_UPDATE_SUPPORT_MANUAL: &str =
+    "이 실행 방식에서는 자동 업데이트를 지원하지 않습니다. 릴리스에서 설치해 주세요.";
+
+pub const APP_UPDATE_TRUST_UNAVAILABLE: &str =
+    "업데이트 서명키가 설정되지 않았습니다. 릴리스에서 설치해 주세요.";
+
+pub const APP_UPDATE_UPDATE_CANCELLED: &str =
+    "업데이트 준비를 중단했습니다. 현재 앱은 그대로 유지됩니다.";
+
+pub const APP_UPDATE_VERIFY_FAILED: &str =
+    "업데이트 검증에 실패했습니다. 현재 앱은 그대로 유지됩니다.";
+
+pub const APP_UPDATE_DISK_FAILED: &str =
+    "업데이트를 저장하지 못했습니다. 여유 공간과 접근 권한을 확인하세요.";
+
+pub const APP_UPDATE_PREPARE_FAILED: &str =
+    "새 버전을 준비하지 못했습니다. 현재 앱은 그대로 유지됩니다.";
+
+pub const APP_UPDATE_EXPIRED: &str = "업데이트 정보가 만료되었습니다. 새 버전을 다시 확인하세요.";
+
+pub const APP_UPDATE_RESTART_REFUSED: &str =
+    "현재 상태에서는 다시 시작할 수 없습니다. 준비된 버전은 유지됩니다.";
+
+pub const APP_UPDATE_PROTOCOL_FAILED: &str =
+    "업데이트 연결이 끊겼습니다. 앱을 다시 실행한 후 확인하세요.";
+
+pub const APP_UPDATE_PROFILE_FAILED: &str =
+    "앱 데이터 호환성을 확인하지 못해 업데이트를 적용하지 않았습니다.";
+
+pub const APP_UPDATE_UPDATE_WORKER_FAILED: &str =
+    "업데이트 작업을 완료하지 못했습니다. 현재 앱은 그대로 유지됩니다.";
+
+pub const APP_UPDATE_RECOVERED: &str =
+    "새 버전을 실행하지 못해 이전 버전으로 돌아왔습니다. 업데이트를 다시 확인해 주세요.";
+
+pub const APP_UPDATE_RECOVERY_CONFIRM: &str = "확인";

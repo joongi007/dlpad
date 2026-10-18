@@ -21,3 +21,5 @@
 - [0011: 목록 전체 기록의 bounded 검색](0011-bounded-list-search.md), 구현·검증 중 제안
 
 - [0012: 서명된 앱 업데이트 후보와 설치 권한 분리](0012-signed-app-update-candidates.md), 구현·검증 중 제안
+
+- [0013: Windows 순차 UI 실행과 업데이트 선택](0013-windows-update-bootstrap.md), Windows epoch1 구조 채택·실제 전환/복귀 검증

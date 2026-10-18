@@ -45,3 +45,8 @@ P0·CI 안정화와 사용자 지정 updater 순서 이후, 선택 설치 모델
 
 
 2026-10-18 진행: 소개페이지 headless10시나리오와 hosted build통과, Windows CI의 원notice/원artifact수집통과(source32607f7). 후속 main CI의 설치형·포터블 ZIP 단계와 optional signed metadata workflow를 추가했다. native read-only 버전조회/서명검증/HTTP/owned저장은 RootWindows 전체strictlint·주1728+child1PASS·release build·privateGUI조회/배율/종료 검수를 통과했다. 실제hosted후속ZIP·공개페이지/릴리스·운영trustroot·in-place교체/rollback은 남는다. UI의수동설치안내와 development/unsigned플래그를 유지한다.
+
+
+## Windows updater 구현 현황 (2026-10-18)
+
+소개 페이지와 v0.1.0 공개 이후, 0.1.1 소스에 서명된 앱 다운로드·준비·idle 재시작·이전 버전 보존/복귀를 구현하고 실제 Windows 전환·cold start·실패 복구 및 private GUI를 통합 검증 중이다. [현재 인수](work-items/S11-update-activation-20261018.md). 이번 버전에는 별도 대형 기능을 섞지 않는다. 첫 지원 버전의 1회 수동 설치, 운영 metadata 공개 공급, 최종 설치형/포터블 확인을 구분한다. Authenticode·다른 OS·고정 부모 교체·키 교체·보존 namespace 정리 UX는 후속 범위다.

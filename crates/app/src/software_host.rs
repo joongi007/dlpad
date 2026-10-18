@@ -760,6 +760,8 @@ impl Host {
             frame.phase(3)?;
             frame.finish(reused)?;
         }
+        #[cfg(windows)]
+        crate::app_update_entry::frame_presented(self.candidate.update_frame_ready());
         self.candidate.metrics_frame_presented();
         self.metrics_deadline = self.candidate.metrics_freshness_deadline(Instant::now());
         Ok(())

@@ -15,6 +15,11 @@ mod accessible_tools;
 #[cfg(test)]
 mod accesskit_value_tests;
 mod app_icon;
+#[allow(
+    dead_code,
+    reason = "Updater bootstrap belongs to the CPU product host"
+)]
+mod app_update_client;
 #[allow(dead_code)]
 mod catalog;
 mod diagnostic_path_picker;

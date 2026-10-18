@@ -2,7 +2,7 @@
 
 ## 프로세스 구성
 
-UI와 작업 supervisor는 **하나의 사용자 앱 프로세스**에 있다. Linux에서는 외부 도구 실행마다 같은 앱 바이너리의 짧은 headless guardian을 실행한다. guardian이 yt-dlp/FFmpeg와 자손을 소유하고 앱 연결 단절 시 정리한다. Windows는 native GNU에서 Job Object/process 및 파일 identity·복귀 IPC를 검증했고 격리 GUI의 합성 작업 숨김·복귀도 검증했다. 실제 IME·MSVC 실증은 남았다. macOS adapter의 실제 OS 실증은 아직 남았다. UI 창을 닫아도 백그라운드를 선택하면 supervisor가 살아 있다. 상시 데몬, localhost HTTP 서버, UI와 별도 중복 엔진은 두지 않는다.
+UI와 다운로드 작업 supervisor는 하나의 UI 프로세스에 있다. Windows CPU 앱 0.1.1부터 앱 업데이트용 고정 부모가 그 UI 자식 하나를 별도 소유 Job에서 감독한다. 부모는 업데이트 전송·서명·실행 선택만 담당하며 다운로드 엔진을 중복 실행하지 않는다. [업데이트 결정](adr/0013-windows-update-bootstrap.md). Linux에서는 외부 도구 실행마다 같은 앱 바이너리의 짧은 headless guardian을 실행한다. guardian이 yt-dlp/FFmpeg와 자손을 소유하고 앱 연결 단절 시 정리한다. Windows는 native GNU에서 Job Object/process 및 파일 identity·복귀 IPC를 검증했고 격리 GUI의 합성 작업 숨김·복귀도 검증했다. 실제 IME·MSVC 실증은 남았다. macOS adapter의 실제 OS 실증은 아직 남았다. UI 창을 닫아도 백그라운드를 선택하면 supervisor가 살아 있다. 상시 데몬, localhost HTTP 서버, UI와 별도 중복 엔진은 두지 않는다.
 
 ```mermaid
 flowchart LR
@@ -114,3 +114,12 @@ core/media_selection은 길이가 알려진 단일 구간과 독립 playhead의 
 추가 crate/Cargo.lock 변경은 없다. 미리보기 최초 요청 때 worker thread 하나가 생기며 idle은 blocking recv다. per-operation stdout8MiB, decoded batch2,073,600B, title512B와 시간 제한을 적용한다. FFmpeg max_alloc32MiB는 단일 allocation 제한으로 전체 RSS 보증이 아니다. 원격 전체 수신 byte hard cap은 없다. Windows source/tool 원 readonly pin과 최대256 ancestor cap을 보유하고 외부 원본을 삭제하지 않는다. 수명/비용 및 다른 OS의 동등성을 실제 검증 전 완료로 보고하지 않는다.
 
 Windows activation connect idle은 완료/stop event를 함께 기다려20ms polling을 제거한다. stop 우선과 원 Pending의 CancelIoEx/GetOverlappedResult drain을 유지한다. server당 event handle1의 비용을 추가하며 GUI thread에서 이벤트 대기를 실행하지 않는다. [실측/회귀](work-items/S00-windows-restore-idle-event-wait.md).
+
+
+## Windows 앱 업데이트 수명
+
+고정 부모 → 하나의 UI 자식 → 다운로드 도구라는 소유 계층이다. 같은 부모에서 UI를 순차 교체하므로 버전마다 부모 체인이 늘어나지 않는다. UI는 버전/채널/세대만 전달하고 실행 경로·신뢰키·생성 capability는 전달하지 않는다. UI 사전 검사 → 부모 Commit → UI/DB 시작 → 실제 frame/시작 복구 완료 → 영속 선택 확정 순서다. 현재 UI의 CloseWait와 소유 Job0을 확인하기 전에는 후보를 실행하지 않는다. 실패한 후보의 소유 Job0 뒤 이전 선택 또는 원 baseline을 한 번 실행하고 전역 복귀 배너를 표시한다.
+
+epoch1은 기존 SQLite/옵션의 역방향 읽기 호환성을 고정한다. 후보는 읽기 전용 immutable 조회로 실제 테이블/컬럼·migration·pending WAL/journal을 검사하며 사전 검사 자체는 파일을 생성하거나 복구하지 않는다. 실행 후 사용자 변경을 과거 DB 백업으로 덮어쓰지 않는다. 원 bootstrap은 기존 시작 복구 경로를 유지한다.
+
+최신 진행률1·worker1·결과1, 부모/client 각각100ms poll이며 idle network나 주기 UI repaint는 없다. 기본 제품 의존성 추가0; `app-update-fixture` feature와 합성 서명키는 기본 OFF인 별도 시험 bin에만 포함된다. 최대256MiB package와64KiB stream buffer를 유지한다. 보존 중인 작업 namespace32·선택 namespace32·journal slot512의 상한은 자동 청소 권한이 아니며 소진 시 보수적으로 거절한다. launcher 자체 보안 패치·키/프로토콜/epoch 변경은 수동 설치 또는 후속 검증된 launcher 교체가 필요하다.
