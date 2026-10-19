@@ -1,6 +1,6 @@
 # S11: Windows 정식 등록 통합과 배포
 
-- 상태: in-progress
+- 상태: completed
 - 분류: feature
 - 우선순위: P1
 - 요구사항: R08, R10, R11
@@ -66,3 +66,9 @@ Rust native/current-user, 관리자권한·WebView·shell문자열없음. 기존
 최종 보완(2026-10-19): `python3 scripts/check_docs.py` 1242문서/원notice133hash일치, `python3 scripts/test_build_site.py` 8PASS, 기존headless `scripts/test_site_browser.cjs` 10scenario PASS를확인했다. 사용자desktop표시/전역입력0이며 시험loopback서버와browser는정상종료했다. 문서·사이트는v0.1.4로갱신했고main반영/공개Pages재대조를이어간다.
 
 승인된시험잔여4개와legacy검수설치는정확원소유범위에서제거했고각원Job0·원key/lnk/support/bundle부재및profile/media/tools/journal/source보존을Root가원receipt/정확leaf읽기로대조했다. v12~14의neutralCWD제거는과거실패제품성공으로재분류하지않는다. 본체가이미없는v15는별도원cap도구로정리했으며제품cold부분복구기능을추가했다고주장하지않는다. tool의registrylink/sharedelete/원pin백업및SID문자열오버로드문제는삭제전검토/실패로발견해수정했고원source/log를보존했다. 보존증거/임시실행복사본은삭제하지않았다. Root종합은ignored publication-v0.1.4/cleanup-review.json이다.
+
+## 최종 통합 완료
+
+문서·사이트 main 커밋 `37448f4617f0372c40f58c9cee30ed6b938d5eb0`과 Pages 실행 `39259410116`의 성공을 확인했다. 인증 없는 공개 HTML bytes는 로컬 원 index와 SHA256 `5b544c4f34f40854213ccf9c567ea9cb27d25aa0a21182ef3c7035bfeb89fc56`로 일치하며 공개 release.json의 설치형/포터블은 정확한 v0.1.4 파일을 가리킨다. 로컬 headless10scenario와 공개HTTP검증을 구분한다. 초기사이트검증의 signed 조건은코드서명표시를메타데이터서명으로오인한도구오류였고, WindowsAuthenticode=false/업데이트메타데이터Ed25519검증=true를분리해바로잡았다.
+
+실제구현·검증·공개7파일·소개페이지·시험등록정리는완료했다. 원v0.1.2/v0.1.3/v0.1.4 Git태그를유지하며v0.1.3은검수실패미공개draft로보존한다. 문서최종상태커밋은불변제품소스태그와별개다. 원root .git/index.lock재구성·삭제나force push는수행하지않았다. 기존에명시한cold부분복구/임시복사본정리/물리OS·다른OS인수는후속범위로유지하며완료로확대하지않는다.
