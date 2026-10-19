@@ -2,9 +2,23 @@
 
 ## 현재 공개 상태 — 2026-10-19
 
-사용자의 공개 승인에 따라 [Windows v0.1.2 preview](https://github.com/joongi007/dlpad/releases/tag/v0.1.2)를 제공합니다. [v0.1.2 태그 릴리스 실행](https://github.com/joongi007/dlpad/actions/runs/39138176097)은 정확한 source `9ed25f1297b59bfc922e0659279a56a227614302`의 전체 CI와 같은 실행 원본 설치형·포터블 ZIP 패키징을 연결합니다. 공개 업데이트 메타데이터의 Ed25519 서명 검증과 Windows Authenticode 코드 서명은 별개이며, 이번 preview의 실행 파일에는 Authenticode 서명이 없습니다. 설정 → 앱 업데이트 → 조회 채널의 **미리보기 버전**에서 사용자 선택으로 새 서명 버전을 다운로드하고 재시작합니다. v0.1.0 사용자는 v0.1.2를 한 번 수동 설치해야 합니다. 실제 검수와 제한은 [업데이트 인수](work-items/S11-update-activation-20261018.md)를 확인하세요.
+사용자의 공개 승인에 따라 [Windows v0.1.4 preview](https://github.com/joongi007/dlpad/releases/tag/v0.1.4)를 제공합니다. [v0.1.4 태그 릴리스 실행](https://github.com/joongi007/dlpad/actions/runs/39157614958)은 정확한 source `e8d1007a792c17319e5498cfc6182d174745a4ab`의 Windows 전체 CI와 같은 실행 원본 설치형·포터블 ZIP을 연결합니다. 같은 소스의 Windows 로컬 전체 검증은 원 stdout 집계 **1,856 PASS/0 FAIL/44 ignored**이며 fmt·strict Clippy·등록 12회귀·release 빌드도 통과했습니다. 원 ZIP·공개 메타데이터와 실제 설치·등록·제거 검수는 [통합 인수](work-items/S11-windows-shell-release-20261019.md)에서 별도 기록합니다.
+
+설치형은 현재 사용자 HKCU 앱 목록·시작 메뉴와 전용 제거기를 등록합니다. 기존 v0.1.2는 새 설치기에서 기존 위치를 재검증하고 **Windows 등록**을 명시 선택해야 합니다. UI만 교체하는 앱 업데이트는 OS 등록을 소급 추가하지 않습니다. 포터블은 자동 등록하지 않습니다. 앱 목록의 DisplayVersion은 검증된 baseline 설치 버전이며 UI 업데이트 후 표시 동기화는 후속입니다. 제거 후에도 영상·프로필·다운로드 도구·외부 설치 기록은 보존하고 고유 임시 제거기는 자동 삭제하지 않습니다. [Windows 등록 계약·인수](adr/0014-windows-shell-registration.md).
+
+공개 업데이트 메타데이터의 Ed25519 서명 검증과 Windows Authenticode 코드 서명은 별개이며 이번 preview에는 Authenticode 서명이 없습니다. 설정 → 앱 업데이트 → 조회 채널의 **미리보기 버전**에서 새 서명 버전을 확인하고 다운로드·재시작합니다. v0.1.0 사용자는 v0.1.4를 한 번 수동 설치해야 합니다.
 
 고정 부모 실행 파일의 보안 패치·프로토콜/호환성 epoch·신뢰 키 교체는 현재 UI 업데이트 범위 밖이며 수동 설치가 필요합니다. 운영 비공개키는 GitHub에 공급하지 않고, 로컬 서명 후 공개 메타데이터만 게시합니다. 공개키는 `crates/engine/src/app_update/release-public-key.json`이며 내려받은 공개키 파일을 앱의 새 신뢰 기준으로 채택하지 않습니다.
+
+### v0.1.3 미공개 후보와 제거 교정
+
+v0.1.3 source `0828c42f015b7cd0be78f0829178cbcb8c1da357`의 [태그 CI39152377040](https://github.com/joongi007/dlpad/actions/runs/39152377040)는 통과했지만 실제 원 ZIP 제거 QA에서 본체 삭제 후 shell support 작업 폴더 잠금으로 등록 정리가 실패했다. v0.1.3은 공개하지 않고 원 태그·CI 산출물·실패 증거를 보존했다. 기존 태그를 이동하거나 같은 버전의 배포물을 교체하지 않는다.
+
+v0.1.4는 임시 제거 자식의 CreateProcess 작업 폴더를 검증된 private copy의 부모로 지정해 support 경로의 상속 잠금을 피한다. 강제 종료·공유 권한 완화·전역 임시 폴더 청소를 추가하지 않는다. 같은 실제 제거 trigger 재검증과 v0.1.4 공개 인수는 [통합 기록](work-items/S11-windows-shell-release-20261019.md)에 별도 기록한다.
+
+### 이전 v0.1.2 공개 인수
+
+사용자의 공개 승인에 따라 [Windows v0.1.2 preview](https://github.com/joongi007/dlpad/releases/tag/v0.1.2)를 제공합니다. [v0.1.2 태그 릴리스 실행](https://github.com/joongi007/dlpad/actions/runs/39138176097)은 정확한 source `9ed25f1297b59bfc922e0659279a56a227614302`의 전체 CI와 같은 실행 원본 설치형·포터블 ZIP 패키징을 연결합니다. 공개 업데이트 메타데이터의 Ed25519 서명 검증과 Windows Authenticode 코드 서명은 별개이며, 이번 preview의 실행 파일에는 Authenticode 서명이 없습니다. 설정 → 앱 업데이트 → 조회 채널의 **미리보기 버전**에서 사용자 선택으로 새 서명 버전을 다운로드하고 재시작합니다. v0.1.0 사용자는 v0.1.2를 한 번 수동 설치해야 합니다. 실제 검수와 제한은 [업데이트 인수](work-items/S11-update-activation-20261018.md)를 확인하세요.
 
 ### 이전 v0.1.0 공개 인수
 

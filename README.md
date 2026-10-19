@@ -12,12 +12,13 @@ URL 입력부터 영상 다운로드, 구간 저장, 파일 확인까지 지원�
 - yt-dlp·FFmpeg·Deno의 앱 관리 설치와 버전 관리
 - Light/Dark/System 테마, 트레이·백그라운드 작업, 중단·재개와 시작 복구
 - 실패 단계·도구 버전과 민감정보를 정제한 로컬 진단 보고서
+- 현재 사용자 Windows 앱 목록·시작 메뉴 등록과 확인 후 앱 제거
 
 사이트별 동작과 이어받기 지원은 설치한 도구 및 원본에 따라 달라집니다. 최초 릴리스는 Windows 우선이며 Linux/macOS는 후속입니다.
 
 ## 현재 상태와 실행
 
-현재 **Windows 64비트 미리보기 v0.1.2**를 [GitHub Releases](https://github.com/joongi007/dlpad/releases/tag/v0.1.2)에서 받을 수 있습니다. 설치형·포터블 ZIP과 Ed25519로 서명한 앱 업데이트 메타데이터를 제공합니다. Windows Authenticode 코드 서명이 없는 개발 preview입니다. **v0.1.0 사용자는 v0.1.2를 한 번 수동 설치**해야 합니다. 개발 검수 번호와 Cargo 버전은 별개입니다. [소스 checkout 범위](docs/SOURCE-CHECKOUT.md), [현재 P0](docs/validation/P0-current-20261016.md).
+현재 **Windows 64비트 미리보기 v0.1.4**를 [GitHub Releases](https://github.com/joongi007/dlpad/releases/tag/v0.1.4)에서 받을 수 있습니다. 설치형·포터블 ZIP과 Ed25519로 서명한 앱 업데이트 메타데이터를 제공합니다. Windows Authenticode 코드 서명이 없는 개발 preview입니다. **v0.1.0 사용자는 v0.1.4를 한 번 수동 설치**해야 합니다. 개발 검수 번호와 Cargo 버전은 별개입니다. [소스 checkout 범위](docs/SOURCE-CHECKOUT.md), [현재 P0](docs/validation/P0-current-20261016.md).
 
 Windows x64의 Rust MSVC toolchain과 C++ 빌드 도구가 준비된 환경에서 앱을 빌드합니다. 정확한 Rust 버전은 `rust-toolchain.toml`로 고정합니다.
 
@@ -26,6 +27,14 @@ cargo build -p dlpad --bin dlpad-cpu --features cpu --release --locked
 ```
 
 실행 파일은 `target/release/dlpad-cpu.exe`입니다. 다운로드·미디어 처리용 외부 도구는 앱의 설정에서 관리하거나 기존 설치를 선택합니다. [개발 안내](CONTRIBUTING.md).
+
+## Windows 설치와 제거
+
+새 설치형은 앱 설치 후 현재 사용자 Windows 앱 목록과 시작 메뉴에 등록합니다. 관리자 권한은 필요하지 않으며 포터블은 자동 등록하지 않습니다.
+
+기존 v0.1.2 설치를 등록하려면 **v0.1.4 설치기에서 기존 설치 위치를 선택하고 재검증한 뒤 Windows 등록**을 누르세요. 앱 업데이트로 UI 버전만 바꾸면 앱 목록·시작 메뉴 등록은 추가되지 않습니다. Windows 목록의 버전은 원래 설치한 baseline 버전이며 활성 UI 버전과 다를 수 있습니다.
+
+제거는 **Windows 설정 → 앱 → 설치된 앱** 또는 **제어판 → 프로그램 제거**에서 해당 dlpad를 선택하고 확인하세요. 설치가 여러 개면 이름의 짧은 식별자로 구분합니다. 영상·설정·다운로드 도구와 외부 설치 기록은 보존하며 실행 중인 앱을 강제 종료하지 않습니다. 임시 제거 프로그램은 이번 버전에서 자동 정리하지 않습니다. [등록·제거 계약과 제한](docs/adr/0014-windows-shell-registration.md).
 
 ## 소개 페이지와 다운로드
 
@@ -41,7 +50,7 @@ python3 scripts/build_site.py --output /tmp/dlpad-site-preview
 
 ## 검증과 CI
 
-PR·push에서 문서·Python 정책 검사와 Windows Rust 포맷·린트·테스트·release 빌드를 실행합니다. 개발 실행 파일과 로그를 artifact로 보관합니다. [v0.1.0 전체 검증·패키징](https://github.com/joongi007/dlpad/actions/runs/39101008422), [CI/CD 범위](docs/CICD.md). 공개 설치형·포터블 ZIP은 같은 CI의 원본 실행 파일을 재사용하며 재빌드하지 않습니다. Windows Authenticode 코드 서명과 Linux/macOS 업데이트는 후속입니다. Windows 업데이트 전환·복귀는 별도 합성 회귀 시험으로 검사하며, [v0.1.2 릴리스 실행](https://github.com/joongi007/dlpad/actions/runs/39138176097)의 전체 CI·동일 실행 패키징과 구분합니다.
+PR·push에서 문서·Python 정책 검사와 Windows Rust 포맷·린트·테스트·release 빌드를 실행합니다. 개발 실행 파일과 로그를 artifact로 보관합니다. [v0.1.4 전체 검증·패키징](https://github.com/joongi007/dlpad/actions/runs/39157614958), [CI/CD 범위](docs/CICD.md). 공개 설치형·포터블 ZIP은 같은 CI의 원본 실행 파일을 재사용하며 재빌드하지 않습니다. Windows Authenticode 코드 서명과 Linux/macOS 업데이트는 후속입니다. Windows 업데이트 전환·복귀는 별도 합성 회귀 시험으로 검사하며, [v0.1.4 릴리스 실행](https://github.com/joongi007/dlpad/actions/runs/39157614958)의 전체 CI·동일 실행 패키징과 구분합니다.
 
 ```sh
 python3 scripts/check_docs.py --source-only
@@ -52,7 +61,7 @@ cargo test --workspace --features dlpad/cpu --locked
 cargo build --workspace --features dlpad/cpu --release --locked
 ```
 
-원본 개발 폴더의 로컬 증거까지 확인할 때는 `python3 scripts/check_docs.py`를 사용합니다. 소스 checkout은 과거 실행 증거를 포함하거나 재현 성공을 보장하지 않습니다. v0.1.2의 실제 Windows 로컬 전체 검증은 원 stdout 집계 1,838 PASS/0 FAIL/44 ignored이며 별도 signed 전환·실패 복귀 7회귀와 설치·공개 업데이트 전환/다음 실행 검수도 통과했습니다. 미검증 OS·물리 입력·성능 인수 범위는 작업 문서에 구분했습니다.
+원본 개발 폴더의 로컬 증거까지 확인할 때는 `python3 scripts/check_docs.py`를 사용합니다. 소스 checkout은 과거 실행 증거를 포함하거나 재현 성공을 보장하지 않습니다. v0.1.4 source `e8d1007a792c17319e5498cfc6182d174745a4ab`의 Windows 로컬 전체 검증은 원 stdout 집계 1,856 PASS/0 FAIL/44 ignored입니다. Windows 등록·제거와 signed 전환·실패 복귀 검수는 [통합 기록](docs/work-items/S11-windows-shell-release-20261019.md)에서 CI와 실제 격리 설치 시험을 구분합니다. 미검증 OS·물리 입력·성능 인수 범위는 작업 문서에 구분했습니다.
 
 ## 문서 읽는 순서
 

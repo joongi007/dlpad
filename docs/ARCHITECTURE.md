@@ -2,7 +2,7 @@
 
 ## 프로세스 구성
 
-UI와 다운로드 작업 supervisor는 하나의 UI 프로세스에 있다. Windows CPU 앱 0.1.1부터 앱 업데이트용 고정 부모가 그 UI 자식 하나를 별도 소유 Job에서 감독한다. 부모는 업데이트 전송·서명·실행 선택만 담당하며 다운로드 엔진을 중복 실행하지 않는다. [업데이트 결정](adr/0013-windows-update-bootstrap.md). Linux에서는 외부 도구 실행마다 같은 앱 바이너리의 짧은 headless guardian을 실행한다. guardian이 yt-dlp/FFmpeg와 자손을 소유하고 앱 연결 단절 시 정리한다. Windows는 native GNU에서 Job Object/process 및 파일 identity·복귀 IPC를 검증했고 격리 GUI의 합성 작업 숨김·복귀도 검증했다. 실제 IME·MSVC 실증은 남았다. macOS adapter의 실제 OS 실증은 아직 남았다. UI 창을 닫아도 백그라운드를 선택하면 supervisor가 살아 있다. 상시 데몬, localhost HTTP 서버, UI와 별도 중복 엔진은 두지 않는다.
+UI와 다운로드 작업 supervisor는 하나의 UI 프로세스에 있다. Windows CPU 앱 0.1.1부터 앱 업데이트용 고정 부모가 그 UI 자식 하나를 별도 소유 Job에서 감독한다. 부모는 업데이트 전송·서명·실행 선택만 담당하며 다운로드 엔진을 중복 실행하지 않는다. [업데이트 결정](adr/0013-windows-update-bootstrap.md). Linux에서는 외부 도구 실행마다 같은 앱 바이너리의 짧은 headless guardian을 실행한다. guardian이 yt-dlp/FFmpeg와 자손을 소유하고 앱 연결 단절 시 정리한다. Windows는 native GNU에서 Job Object/process 및 파일 identity·복귀 IPC를 검증했고 격리 GUI의 합성 작업 숨김·복귀도 검증했다. Windows MSVC의 fmt·strict Clippy·workspace tests·release 빌드는 [v0.1.4 태그 CI](https://github.com/joongi007/dlpad/actions/runs/39157614958)에서 통과했다. 실제 IME·물리 입력 인수는 별도다. macOS adapter의 실제 OS 실증은 아직 남았다. UI 창을 닫아도 백그라운드를 선택하면 supervisor가 살아 있다. 상시 데몬, localhost HTTP 서버, UI와 별도 중복 엔진은 두지 않는다.
 
 ```mermaid
 flowchart LR
@@ -123,3 +123,16 @@ Windows activation connect idle은 완료/stop event를 함께 기다려20ms pol
 epoch1은 기존 SQLite/옵션의 역방향 읽기 호환성을 고정한다. 후보는 읽기 전용 immutable 조회로 실제 테이블/컬럼·migration·pending WAL/journal을 검사하며 사전 검사 자체는 파일을 생성하거나 복구하지 않는다. 실행 후 사용자 변경을 과거 DB 백업으로 덮어쓰지 않는다. 원 bootstrap은 기존 시작 복구 경로를 유지한다.
 
 최신 진행률1·worker1·결과1, 부모/client 각각100ms poll이며 idle network나 주기 UI repaint는 없다. 기본 제품 의존성 추가0; `app-update-fixture` feature와 합성 서명키는 기본 OFF인 별도 시험 bin에만 포함된다. 최대256MiB package와64KiB stream buffer를 유지한다. 보존 중인 작업 namespace32·선택 namespace32·journal slot512의 상한은 자동 청소 권한이 아니며 소진 시 보수적으로 거절한다. launcher 자체 보안 패치·키/프로토콜/epoch 변경은 수동 설치 또는 후속 검증된 launcher 교체가 필요하다.
+
+
+## Windows 앱 목록·시작 메뉴·제거
+
+v0.1.4 설치형은 기존 bundle 검증과 별개로 현재 사용자 HKCU Uninstall 항목·Programs 바로가기와 LocalAppData의 설치별 private shell support를 등록한다. 설치 ID는 원 bundle native ID·canonical 경로·현재 SID를 결합하며 외부 등록이나 다른 설치의 항목을 덮어쓰지 않는다. 기존 ZIP 7개/manifest 5개 계약과 baseline 부모 실행 경로는 유지한다. [등록·제거 계약과 제한](adr/0014-windows-shell-registration.md).
+
+owner 자료는 current-user DPAPI로 인증하고 원 파일 ID·ACL·SHA를 재검증한다. 바로가기에 전달할 DOS/UNC 표기만 원 파일·부모 native ID와 대조해 변환한다. 긴 경로는 PIDL 설정과 직렬화 후 재로드의 원 대상 ID 검증을 사용한다. Shell 직렬화 사전 검사는 support 파일 생성 전에 수행한다. 완료된 owner·helper·shortcut이 인증되고 HKCU만 없는 경우 exact 새 key를 만들 수 있지만 기존 부분 key·불완전 owner·변조·외부 항목은 보존하고 거절한다.
+
+설치별 current-user 전용 mutex는 동일 worker의 inspection·확인 대기·제거·실패 재시도 동안 유지하며 원 파일·root·key capability가 모두 닫힌 뒤 해제한다. mutex 자체가 삭제 권한을 만들지는 않는다. DELETE 획득 전에 모든 원 pending HANDLE·파일명·ID를 보존해 잠금 해제 후 같은 실패 capability로 재시도한다. bundle 부재를 확인하기 전 shell 등록을 먼저 제거하지 않으며 실행 중인 앱을 임의 PID로 종료하지 않는다.
+
+Windows 제거 진입은 별도 private 임시 복사본에 원 helper HANDLE·현재 SID·해시·nonce·원 부모 종료 ACK를 연결한다. 임시 자식의 작업 폴더는 검증된 private copy 부모로 지정해 원 support 경로를 CWD로 계속 잠그지 않는다. 새 bin·shell 문자열·breakaway·상주 서비스는 없다. 앱·바로가기·앱 목록 등록만 제거하며 원 미디어·프로필·다운로드 도구와 외부 설치 journal은 보존한다. 같은 설치 위치의 재설치는 기존 journal을 지우지 않고 새 빈 journal namespace를 선택한다. 임시 실행 파일 자기 삭제와 cold 부분 제거 복구는 이번 지원 범위가 아니다.
+
+support helper와 임시 제거기 복사본은 각각 최대64MiB이며 파일 복사는64KiB stream, owner·shortcut은64KiB 상한을 사용한다. 새 crate나 상주 worker 비용은 없고 Windows Registry/COM/Shell binding만 활성화한다. 앱 목록의 DisplayVersion은 원 baseline 설치 버전이다. 기존 v0.1.2는 새 설치기에서 별도 Windows 등록을 선택해야 하며 앱 updater의 UI 선택 전환은 OS 등록과 표시 버전을 갱신하지 않는다.

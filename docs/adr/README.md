@@ -24,4 +24,4 @@
 
 - [0013: Windows 순차 UI 실행과 업데이트 선택](0013-windows-update-bootstrap.md), Windows epoch1 구조 채택·실제 전환/복귀 검증
 
-- [0014: 현재 사용자 Windows 앱 등록과 제거 진입](0014-windows-shell-registration.md), 구현·Windows 인수 중 제안
+- [0014: 현재 사용자 Windows 앱 등록과 제거 진입](0014-windows-shell-registration.md), Windows current-user 구현·명시한 실제 인수 범위 채택

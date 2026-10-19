@@ -4,6 +4,12 @@
 
 각 단계는 UI→application→저장/도구→실패 복구까지 연결하는 수직 기능이다. 단계별 완료 게이트는 유지한다. S00의 Linux 측정과 독립 P0 기반 구현을 진행했으나 어느 출시 단계도 완료로 선언하지 않았다. 상세 상태는 [현재 구현 상태](validation/P0-status.md)에 있다. S08/S09와 외부 분석 확장은 아직 미착수다. 선행 기능을 갖춘 UI·설치의 국소 개선은 개별 작업 계약으로 진행했으며, 이를 전체 P0 또는 후속 단계 완료로 집계하지 않는다.
 
+## 현재 공개 범위 — v0.1.4 (2026-10-19)
+
+[Windows v0.1.4 preview](https://github.com/joongi007/dlpad/releases/tag/v0.1.4)를 공개했다. source `e8d1007a792c17319e5498cfc6182d174745a4ab`의 Windows 로컬 전체 검증은 1,856 PASS/0 FAIL/44 ignored이며 [태그 CI](https://github.com/joongi007/dlpad/actions/runs/39157614958)를 거쳐 Windows 설치형·포터블과 서명된 앱 업데이트 메타데이터를 제공한다. v0.1.2부터 제공한 사용자 선택 앱 업데이트에 더해 현재 사용자 Windows 앱 목록·시작 메뉴 등록과 전용 제거기를 추가했다. 기존 v0.1.2의 OS 등록은 새 설치기의 명시 **Windows 등록**이 필요하며 앱 UI 업데이트만으로 추가되지 않는다. [등록·제거·동일 경로 재설치 인수](work-items/S11-windows-shell-release-20261019.md).
+
+Windows 목록의 버전은 baseline 설치 버전이고 임시 제거 프로그램의 자기 삭제는 지원하지 않는다. 이 범위는 전체 P0/모든 OS 출시 게이트 완료를 뜻하지 않는다. Authenticode·최소 OS/물리 입력 인수·다른 OS·고정 부모와 키 교체·보존 namespace 정리 UX·표시 버전 동기화는 후속이다. 아래 날짜별 진행 기록은 당시 상태를 보존한다.
+
 | 단계 | 사용자 결과 | 완료 게이트 / 의존 |
 |---|---|---|
 | S00 | 네이티브 화면·테마·입력 | Windows renderer/IME/접근성/크기 측정·CI. ADR-0001 채택; 다른 OS는 후속 |

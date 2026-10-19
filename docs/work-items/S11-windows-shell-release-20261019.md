@@ -48,3 +48,21 @@ Rust native/current-user, 관리자권한·WebView·shell문자열없음. 기존
 실제 CI 설치기의 private desktop 설치·Windows 등록·앱 실행과 부모/UI 자연 종료0까지 확인하고 원본 PNG를 직접 검토했다. v12/v13 observer는 DOS 경로와 extended 경로의 문자열 동등성 가정을 잘못 적용하여 제거 전에 중단했다. 같은 원 native identity를 검증하도록 observer만 수정 중이며 제품/태그는 그대로다. 제거·취소·동일 경로 재설치 인수와 공개 다운로드 검증 전에는 배포 완료로 보고하지 않는다. 실패한 시험의 원 로그와 소유 설치는 보존했다.
 
 배포 차단: v15 실제 제거에서 본체 제거 후 shell 정리가 실패하여 v0.1.3 draft는 공개하지 않는다. 태그와 실패 증거를 보존한다. 제거 자식의 support 작업 폴더 상속을 native 대조로 재현했고 v0.1.4 최소 수정과 같은 trigger 회귀를 [별도 P0 작업](S07-uninstaller-inherited-cwd-20261019.md)으로 추적한다. v0.1.3 공개7asset/성공제거는 완료되지 않았다.
+
+추가 실제 인수 담당: updater_audit agent는 ignored legacy-012-qa/ 전용 helper만 준비한다. 범위는 기존 공개0.1.2 원 CI 설치를 보존한 새1.4 설치기의 readonly 확인→명시 Windows등록→기존앱실행이며, 새CI1.4원비트검증을 선행한다. 원 source/helper·다른 QA 파일 동시수정은 금지한다. exact원기존CPU/hash/manifest/journal/profile/media/tools 보존 및 등록버튼의 실제 상태/결과가 인수조건이고, 준비 완료를 실제 인수 완료로 쓰지 않는다.
+
+## v0.1.4 실제 완료 근거
+
+[공개 v0.1.4](https://github.com/joongi007/dlpad/releases/tag/v0.1.4)의 소스는 `e8d1007a792c17319e5498cfc6182d174745a4ab`, [태그 CI](https://github.com/joongi007/dlpad/actions/runs/39157614958)와 [main CI](https://github.com/joongi007/dlpad/actions/runs/39157611977)는 모두 성공이다. `python3 .local-tools/windows-shell-20261019/run-native-cwd-fix.py`에서 fmt·strict workspace/all-target clippy·등록12회귀·workspace1,856 PASS/0 FAIL/44 ignored·release build가 모두0이다. hosted 원 stdout도같은1,856/0/44이며 원7개 updater 회귀의 자연 Job0/로그 hash도대조했다.
+
+원 CI ZIP으로 private 실제 설치→등록→앱실행→취소→제거→같은 위치 재설치→재제거를 확인했다. 다섯 단계 원 parent/UI/Job은자연0이며 source/privateDesktop/inputDesktop불변을확인했다. 두 외부 journal의 원5기록씩 SHA를최종제거후다시읽어대조했다. Root가 원 로그와 주요 PNG4개를직접검수했다. 기존 공개0.1.2에 새 설치기로 명시 등록해 원bundle/journal nativeID/bytes 보존, 기존CPU실행·자연Job0, 실제화면3개도확인했다. 합성 profile/media/tools만사용했고 실제사용자 Documents/영상은사용하지않았다.
+
+설치 ZIP SHA256 `7c21482631e666486fe0a190d358e3413f158855441b471aee416f5969502576`, installer SHA256 `bbed56461a9cda0d12928077e491fb81c2805170462bee029fa6de6580940273`이다. 검수한 같은원본을 공개했고7개asset을인증없이내려받아각bytes/SHA를대조했다. 로컬DPAPI개인키는전송하지않고compiled공개키로검증한공개metadata/signature만공급했다. Root원인수는 ignored publication-v0.1.4/acceptance.json 및 legacy-acceptance.json, 공개전달검사는 public-download-review.json에기록했다.
+
+제한: Windows API/COM/private HWND 검수이며 물리설정/제어판·새제거기200%·스크린리더·UNC·다른OS검증은아니다. cold부분제거복구·baseline버전동기화·임시제거복사본자동정리는후속이다. 실제공개1.4앱GUI업데이트전환을별도실행했다고주장하지않으며동일프로토콜signed합성7회귀/공개metadata원bytes검증과구분한다. 기존0.1.2사용자의OS등록은새설치기에서명시해야한다.
+
+현재 배포·원파일 공개검증은 완료했고 소개 페이지/최종 문서 main 반영과 시험 잔여 정리를 마친 뒤 작업 상태를 완료로 갱신한다. 원v0.1.3태그·draft7asset은보존하고검수실패표시를추가했다. draft API가생략한tag_name을임시untagged표기로바꾸는동작을확인해원tag연계를복원했으며Git태그object는불변이다. v0.1.4공개는tag_name/source를명시했고공개API로다시확인했다.
+
+최종 보완(2026-10-19): `python3 scripts/check_docs.py` 1242문서/원notice133hash일치, `python3 scripts/test_build_site.py` 8PASS, 기존headless `scripts/test_site_browser.cjs` 10scenario PASS를확인했다. 사용자desktop표시/전역입력0이며 시험loopback서버와browser는정상종료했다. 문서·사이트는v0.1.4로갱신했고main반영/공개Pages재대조를이어간다.
+
+승인된시험잔여4개와legacy검수설치는정확원소유범위에서제거했고각원Job0·원key/lnk/support/bundle부재및profile/media/tools/journal/source보존을Root가원receipt/정확leaf읽기로대조했다. v12~14의neutralCWD제거는과거실패제품성공으로재분류하지않는다. 본체가이미없는v15는별도원cap도구로정리했으며제품cold부분복구기능을추가했다고주장하지않는다. tool의registrylink/sharedelete/원pin백업및SID문자열오버로드문제는삭제전검토/실패로발견해수정했고원source/log를보존했다. 보존증거/임시실행복사본은삭제하지않았다. Root종합은ignored publication-v0.1.4/cleanup-review.json이다.
