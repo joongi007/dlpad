@@ -42,7 +42,9 @@
 body {
   margin:0;
   background:var(--bg);
-  color:var(--ink)
+  color:var(--ink);
+  word-break:keep-all;
+  overflow-wrap:anywhere
 }
 a {
   color:inherit;
@@ -412,6 +414,40 @@ h3 {
 .secondary:active {
   background:var(--surface)
 }
+.guide {
+  display:grid;
+  grid-template-columns:1fr 1.4fr;
+  gap:70px;
+  padding-block:80px;
+  border-bottom:1px solid var(--line)
+}
+.guide p {
+  color:var(--muted);
+  font-size:15px;
+  max-width:65ch;
+  margin:18px 0 0
+}
+.guide ol {
+  margin:0;
+  padding-left:24px
+}
+.guide li {
+  padding-left:10px
+}
+.guide li+li {
+  margin-top:30px
+}
+.guide li::marker {
+  color:var(--accent);
+  font-weight:600
+}
+.guide h3 {
+  font-size:19px;
+  margin-bottom:8px
+}
+.guide li p {
+  margin-top:0
+}
 .faq {
   display:grid;
   grid-template-columns:1fr 1.4fr;
@@ -519,7 +555,7 @@ footer p {
   .site-note {
     margin-left:65px
   }
-  .faq {
+  .faq,.guide {
     grid-template-columns:1fr;
     gap:35px
   }
@@ -627,7 +663,7 @@ footer p {
   }
   .feature-list p {
     font-size:15px;
-    word-break:normal
+    word-break:keep-all
   }
   .site-note {
     margin-left:44px;
@@ -646,6 +682,10 @@ footer p {
   .faq {
     padding-block:52px;
     gap:24px
+  }
+  .guide {
+    padding-block:48px;
+    gap:28px
   }
   .faq h2 {
     font-size:25px

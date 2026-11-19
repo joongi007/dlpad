@@ -7,7 +7,7 @@ const assert = require('node:assert/strict');
 const [sitePath, outputPath, playwrightPath, executablePath] = process.argv.slice(2);
 if (!executablePath) throw Error('Usage: node test_site_browser.cjs SITE OUTPUT PLAYWRIGHT_CORE CHROMIUM');
 const { chromium } = require(path.resolve(playwrightPath));
-const types = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png' };
+const types = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.xml': 'application/xml' };
 fs.mkdirSync(outputPath, { recursive: false });
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://127.0.0.1');
@@ -26,12 +26,21 @@ const server = http.createServer((req, res) => {
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
     const base = `http://127.0.0.1:${server.address().port}/dlpad/`;
     browser = await chromium.launch({ executablePath, headless: true });
-    for (const [name, width, height, colorScheme] of [['desktop-light', 1440, 1000, 'light'], ['tablet-light', 768, 1024, 'light'], ['mobile-light', 360, 800, 'light'], ['desktop-dark', 1440, 1000, 'dark'], ['mobile-dark', 360, 800, 'dark'], ['zoom-200', 720, 500, 'light']]) {
+    for (const [name, width, height, colorScheme] of [['desktop-light', 1440, 1000, 'light'], ['tablet-light', 768, 1024, 'light'], ['mobile-light', 360, 800, 'light'], ['small-mobile-light', 320, 800, 'light'], ['desktop-dark', 1440, 1000, 'dark'], ['mobile-dark', 360, 800, 'dark'], ['zoom-200', 720, 500, 'light']]) {
       const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: name === 'zoom-200' ? 2 : 1, colorScheme, reducedMotion: 'reduce' });
       const page = await context.newPage();
       const errors = []; page.on('pageerror', e => errors.push(e.message));
       await page.goto(base); await page.waitForFunction(() => document.getElementById('release-state').textContent.includes('첫 공개'));
       assert.equal(await page.locator('html').getAttribute('data-theme'), colorScheme);
+      assert.equal(await page.locator('html').getAttribute('lang'), 'ko');
+      assert.match(await page.title(), /dlpad.*yt-dlp GUI/);
+      assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'), 'https://joongi007.github.io/dlpad/');
+      assert.deepEqual(await page.evaluate(async () => {
+        const icon = new Image();
+        icon.src = document.querySelector('link[rel="icon"]').href;
+        await icon.decode();
+        return [icon.naturalWidth, icon.naturalHeight];
+      }), [192, 192]);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${name}: horizontal overflow`);
       assert.equal(await page.locator('img').evaluateAll(imgs => imgs.every(img => img.complete && img.naturalWidth > 0)), true);
       await page.keyboard.press('Tab'); await page.keyboard.press('Enter');

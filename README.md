@@ -1,8 +1,8 @@
 # dlpad
 
-A lightweight, Rust-native desktop GUI for yt-dlp.
+명령어 없이 사용하는 한국어 yt-dlp GUI, dlpad.
 
-URL 입력부터 영상 다운로드, 구간 저장, 파일 확인까지 지원하는 Windows 데스크톱 앱입니다. WebView·Electron 없이 Rust 네이티브 UI로 실행합니다.
+유튜브·치지직 VOD의 영상 주소 입력부터 다운로드, 구간 저장, 파일 확인까지 지원하는 Windows 데스크톱 앱입니다. 현재 앱 화면과 사용자 안내는 한국어로 제공하며 언어 전환 기능은 아직 지원하지 않습니다. WebView·Electron 없이 Rust 네이티브 UI로 실행합니다.
 
 ## 주요 기능
 

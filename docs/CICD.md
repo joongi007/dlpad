@@ -81,7 +81,7 @@ S04/S07에서 cargo audit/deny 또는 동등 검사, license inventory, SBOM, �
 
 ## 소개 사이트 (2026-10-18)
 
-`site/`는 Rust 제품 UI와 별개의 정적 소개 페이지다. `scripts/build_site.py`는 명시한7개 파일만 새 출력 폴더에 생성하며 source/evidence/cache를 통째로 배포하지 않는다. 공개 GitHub Releases에서 installer·portable asset 쌍과 정확한 저장소/파일명/크기를 검사하고 stable을 우선한다. stable이 없으면 공개 preview라고 명시하며 draft는 다운로드로 노출하지 않는다. 방문자의 브라우저는 자체 `release.json`만 읽으며 GitHub API·외부 폰트·분석 서버에 요청하지 않는다.
+`site/`는 Rust 제품 UI와 별개의 정적 소개 페이지다. `scripts/build_site.py`는 명시한9개 파일만 새 출력 폴더에 생성하며 source/evidence/cache를 통째로 배포하지 않는다. 공개 GitHub Releases에서 installer·portable asset 쌍과 정확한 저장소/파일명/크기를 검사하고 stable을 우선한다. stable이 없으면 공개 preview라고 명시하며 draft는 다운로드로 노출하지 않는다. 방문자의 브라우저는 자체 `release.json`만 읽으며 GitHub API·외부 폰트·분석 서버에 요청하지 않는다.
 
 `.github/workflows/pages.yml`은 PR/main에서 사이트를 빌드하고 artifact로 검수할 수 있게 한다. `DLPAD_PAGES_ENABLED=true` 저장소 변수를 명시적으로 켠 뒤 main 자동 배포와 공개 Release 이벤트의 다운로드 갱신이 동작한다. GitHub Pages source는 Actions와 github-pages environment로 설정한다. 사용자의 공개 승인 후 저장소 변수와 workflow Pages를 활성화했고 실제 소개 페이지·preview Release 게시와 main 배포의 다운로드 갱신을 검증했다. 후속 태그는 draft 검수 후 게시한다. 최초 published 이벤트의 tag 배포 거절을 main 갱신 relay로 교정했고, 실제 수동 relay와 그 토큰이 요청한 main 배포를 검증했다. 후속 새 태그의 published 자동 연결은 다음 릴리스에서 확인한다. GitHub 공식 [Pages workflow](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)를 기준으로 Actions SHA를 공식 refs API에서 확인했다.
 
@@ -130,3 +130,12 @@ v0.1.0의 실제 published run39102954680은 사이트 build 성공 뒤 github-p
 공유 hosted runner의 무인증 REST 한도로 Pages run39142717714가 HTTP403으로 실패했다. 사이트 workflow는 기존 `contents: read`의 일시적 `github.token`으로 github.com의 현재 저장소 공개/미공개 release 목록을 조회하고 runner 임시 JSON을 기존 bounded builder에 전달한다. builder는 draft를 제외하며 정확한 공개 ZIP URL과 크기를 검증한다. token·원 API JSON은 사이트 allowlist 또는 artifact에 포함하지 않는다. 기존 사용자 GCM/운영 서명키·새 secrets는 사용하지 않는다. [실제 교정과 검증](work-items/S11-pages-authenticated-discovery-20261019.md).
 
 인증 교정 후 main d70b56f의 [실제 Pages build/deploy39143294764](https://github.com/joongi007/dlpad/actions/runs/39143294764)가 성공했고 공개 최신 FAQ·v0.1.2 ZIP 링크를 확인했다. 공식 서명 공급을 이용한 실제A0.1.1→B0.1.2 UI전환/동일프로필cold선택도 Root가 원프로세스/정확hash/PNG로 독립 인수했다. 부모 자체의 업데이트·독립DPAPI해독을 의미하지 않는다.
+
+
+## 한국어 소개 페이지의 검색 정보
+
+소개와 첫 사용 안내는 한국어로 제공한다. 현재 앱은 한국어 단일 UI catalog를 사용하며 언어 전환 기능을 제공하지 않는다. 제목·주 제목·설명에 dlpad와 yt-dlp GUI의 실제 용도를 자연스럽게 적고 canonical URL은 `https://joongi007.github.io/dlpad/`로 통일한다. Open Graph도 동일한 URL과 실제 앱 화면을 가리킨다.
+
+빌드 allowlist는 기존 파일에 192×192 PNG favicon과 단일 URL sitemap.xml을 추가해 release.json 포함9개다. PNG는 기존 SVG 로고를 headless Chromium으로 렌더한 파일이며 런타임 폰트·이미지 서비스나 새 제품 의존성이 없다. sitemap은 Search Console에 전체 URL `https://joongi007.github.io/dlpad/sitemap.xml`로 제출할 수 있다. 존재하지 않는 번역 페이지나 허위 평점은 추가하지 않는다.
+
+Google의 검색 favicon과 사이트 이름은 hostname 단위이며 /dlpad/ 같은 하위 경로에 독립적으로 지정할 수 없다. 프로젝트의 PNG 연결은 브라우저 아이콘을 제공하지만 검색 favicon 표시를 보장하지 않는다. 호스트 루트 사이트나 전용 도메인을 정하는 것은 별도 작업이다. 이 저장소에서 /dlpad/robots.txt를 추가해 호스트 robots 정책처럼 설명하지 않는다. Google 계정의 URL 검사·색인 요청·사이트맵 제출은 운영자가 수행하며 실제 검색 순위·재색인은 배포 검사와 구분한다. [Google favicon 지침](https://developers.google.com/search/docs/appearance/favicon-in-search), [작업 기록](work-items/S11-korean-site-search-20261120.md).

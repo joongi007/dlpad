@@ -43,7 +43,7 @@
       const data = JSON.parse(body);
       if (data.schema !== 1) throw new Error('schema');
       if (data.release === null) {
-        status.textContent = '첫 공개 릴리스를 준비하고 있습니다. 공개되면 여기에서 받을 수 있습니다.';
+        status.textContent = '첫 공개 버전을 준비하고 있습니다. 공개되면 여기에서 받을 수 있습니다.';
         return;
       }
       const r = data.release;
@@ -59,7 +59,7 @@
         link.textContent = `${label} ↓`;
       }
     } catch {
-      status.textContent = '릴리스 정보를 불러오지 못했습니다. GitHub에서 공개 버전을 확인하세요.';
+      status.textContent = '버전 정보를 불러오지 못했습니다. GitHub에서 공개 버전을 확인하세요.';
       for (const kind of ['installer', 'portable']) document.getElementById(`${kind}-link`).href = fallback;
     } finally { clearTimeout(timer); }
   }

@@ -7,7 +7,7 @@ import shutil
 import urllib.request
 from pathlib import Path
 
-FILES = ("index.html", "styles.css", "app.js", ".nojekyll", "assets/logo.svg", "assets/app-download.png")
+FILES = ("index.html", "styles.css", "app.js", ".nojekyll", "assets/logo.svg", "assets/app-download.png", "assets/favicon.png", "sitemap.xml")
 REPO = "https://github.com/joongi007/dlpad"
 LIMIT = 1024 * 1024
 
