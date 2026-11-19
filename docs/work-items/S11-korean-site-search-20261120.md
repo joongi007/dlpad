@@ -1,6 +1,6 @@
 # S11: 한국어 소개·사용 안내와 검색 정보 정리
 
-- 상태: in-progress
+- 상태: done
 - 분류: improvement
 - 우선순위: P1
 - 요구사항: R10/R11 (문서·소개 페이지 운영), 사용자 한국어 안내·검색 최적화 요청
@@ -23,7 +23,7 @@ Google은 favicon을 hostname별 하나만 지원하며 /dlpad/ 하위 경로만
 
 ## 검증과 handoff
 
-작업 중. 초기 Git 상태에 기존 수정이 있으므로 변경 파일만 별도 정상 게시 worktree에서 통합한다. 앱의 catalog.rs/installer_catalog.rs는 한국어 단일 문자열 catalog이며 별도 UI 언어 선택을 확인하지 못했다.
+초기 Git 상태에 기존 수정이 있으므로 변경 파일만 별도 정상 게시 worktree에서 통합한다. 앱의 catalog.rs/installer_catalog.rs는 한국어 단일 문자열 catalog이며 별도 UI 언어 선택을 확인하지 못했다.
 
 
 ### 로컬 구현·검증
@@ -43,4 +43,13 @@ Google은 favicon을 hostname별 하나만 지원하며 /dlpad/ 하위 경로만
 
 재수집에는 며칠에서 몇 주가 걸릴 수 있고 표시 자체가 보장되지는 않는다. Search Console의 URL 검사/색인 요청과 https://joongi007.github.io/dlpad/sitemap.xml 제출은 운영자가 수행한다. [Google favicon 기준](https://developers.google.com/search/docs/appearance/favicon-in-search), [제목 지침](https://developers.google.com/search/docs/appearance/title-link).
 
-공개 게시 검증은 진행 중이다.
+### 공개 게시 완료
+
+- 소스 커밋 `2f4647b91bb1f00aa0541ecd13dc816950fdbe1f`를 main에 fast-forward push했다. 기존 수정·Git 태그·앱 배포물은 유지했다.
+- [Pages 실행](https://github.com/joongi007/dlpad/actions/runs/44570722823): 위 소스의 build/deploy completed / success.
+- 공개 HTML·CSS·JS·192×192 PNG·sitemap.xml의 HTTP200 및 로컬 원본 SHA256 일치를 확인했다. 공개 release.json은 schema1 / version0.1.4를 유지한다.
+- 공개 HTML SHA256 `acc0ddcd712d338d797c1257638a7e8e43d163d991e7962c85061d402735d411`, PNG `265c52cf7a87860f123ee6ad4d37f4a544c64f73dacba6abc5d79c9ed6b3ae0d`, sitemap `c30de5354b4c91400e595d2a13f559b6e343fd70310eedff1f15f8beaaeb9d98`.
+- 최종 UI 보완 후 동일한11 browser scenarios를 재실행해 통과했다. 확대 항목은720×500 viewport/DPR2 검수이며 물리 OS 배율·브라우저200% 줌을 직접 검증한 것으로 표현하지 않는다.
+- [소개 페이지](https://joongi007.github.io/dlpad/), [사이트맵](https://joongi007.github.io/dlpad/sitemap.xml), [PNG 아이콘](https://joongi007.github.io/dlpad/assets/favicon.png).
+
+Google 검색 결과의 반영 시각·순위·아이콘 노출이나 Google 계정의 색인 요청은 완료로 주장하지 않는다. 사이트 소유자가 별도로 수행할 운영 단계다. 호스트 루트/도메인 작업은 위 별도 결정으로 남긴다.
